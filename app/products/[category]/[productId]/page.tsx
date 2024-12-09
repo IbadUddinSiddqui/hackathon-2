@@ -1,40 +1,46 @@
 "use client";
-import React, { useEffect, useState } from 'react';
-import { products } from '@/app/product';
+import React, { useEffect, useState } from "react";
+import { products } from "@/app/product"; // Assuming you have a mock data file
 import { Badge } from "@/components/ui/badge";
-import { Button } from '@/components/ui/button';
-import ProductGallery from '@/app/components/ProductImages/ProductGallery';
-import Header from '@/app/components/Header/Header';
-import ColorPicker from '@/app/components/ColorPicker/ColorPicker';
-import Size from '@/app/components/Size/Size';
-import Counter from '@/app/components/Counter/Counter';
-import CourseTabs from '@/app/components/Ratings/Ratings';
-import MayAlsoLike from '@/app/components/MayAlsoLike/MayAlsoLike';
-import Footer from '@/app/components/Footer/Footer';
+import { Button } from "@/components/ui/button";
+import ProductGallery from "@/app/components/ProductImages/ProductGallery";
+import Header from "@/app/components/Header/Header";
+import ColorPicker from "@/app/components/ColorPicker/ColorPicker";
+import Size from "@/app/components/Size/Size";
+import Counter from "@/app/components/Counter/Counter";
+import CourseTabs from "@/app/components/Ratings/Ratings";
+import MayAlsoLike from "@/app/components/MayAlsoLike/MayAlsoLike";
+import Footer from "@/app/components/Footer/Footer";
+import { useParams } from "next/navigation";
 
-interface Params {
-  category: string;
-  productId: string;
-}
+const ProductDetailPage = () => {
+  const params = useParams();
 
-const ProductDetailPage = ({ params }: { params: Params }) => {
   const [category, setCategory] = useState<string | null>(null);
   const [productId, setProductId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (params.category && params.productId) {
-      setCategory(params.category);
-      setProductId(params.productId);
-    }
+    Promise.resolve(params).then((resolvedParams) => {
+      const category = Array.isArray(resolvedParams?.category)
+        ? resolvedParams.category[0]
+        : resolvedParams.category;
+  
+      const productId = Array.isArray(resolvedParams?.productId)
+        ? resolvedParams.productId[0]
+        : resolvedParams.productId;
+  
+      setCategory(category || null);
+      setProductId(productId || null);
+    });
   }, [params]);
+  
 
   if (!category || !productId) {
     return <div>Loading...</div>;
   }
 
-  // Accessing category products
   const categoryProducts = products[category] || [];
-  const product = categoryProducts.find(p => p.id === parseInt(productId)); // Find the product by ID
+  const product = categoryProducts.find((p) => p.id === parseInt(productId));
 
   if (!product) {
     return <div>Product not found!</div>;
@@ -44,7 +50,6 @@ const ProductDetailPage = ({ params }: { params: Params }) => {
     <>
       <Header />
       <div className="p-6 grid grid-cols-1 md:grid-cols-2 justify-between">
-        {/* Pass images to ProductGallery */}
         <div>
           <ProductGallery images={product.images} />
         </div>
@@ -67,7 +72,12 @@ const ProductDetailPage = ({ params }: { params: Params }) => {
           <div className="flex gap-2 items-center">
             <p className="text-4xl font-bold mb-4">{product.price}</p>
             <p className="text-4xl font-bold mb-4 text-gray-600 line-through">$400</p>
-            <Badge variant="destructive" className="bg-red-200 rounded-full mb-4 text-red-600 py-0 px-1 h-7">-40%</Badge>
+            <Badge
+              variant="destructive"
+              className="bg-red-200 rounded-full mb-4 text-red-600 py-0 px-1 h-7"
+            >
+              -40%
+            </Badge>
           </div>
           <p className="text-lg mb-4">{product.description}</p>
           <div>
@@ -80,12 +90,12 @@ const ProductDetailPage = ({ params }: { params: Params }) => {
           </div>
           <div className="flex justify-around mt-2 border-t border-gray-500 max-w-screen">
             <Counter />
-            <Button className="bg-black w-44 md:w-72 text-white rounded-full mt-1">Add To Cart</Button>
+            <Button className="bg-black w-44 md:w-72 text-white rounded-full mt-1">
+              Add To Cart
+            </Button>
           </div>
         </div>
       </div>
-
-      {/* Ratings Section */}
       <CourseTabs />
       <MayAlsoLike />
       <Footer />
