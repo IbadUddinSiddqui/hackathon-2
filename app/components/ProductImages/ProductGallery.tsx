@@ -47,10 +47,7 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({ images }) => {
 
       {/* Main Slider */}
       <Swiper
-        style={{
-          '--swiper-navigation-color': '#000',
-          '--swiper-pagination-color': '#000',
-        }}
+    
         loop={true}
         spaceBetween={10}
         thumbs={{ swiper: thumbsSwiper }} // Use the typed swiper state

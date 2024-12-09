@@ -183,3 +183,7 @@ body {
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
+.swiper-container {
+  --swiper-navigation-color: #000;
+  --swiper-pagination-color: #000;
+}
