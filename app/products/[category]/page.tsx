@@ -116,7 +116,7 @@ const productImages = [
   '/arrival6.svg',
   '/arrival7.svg',
 ];
-// @ts-ignore
+
 interface CategoryPageProps {
   params: {
     category: string; // The category name coming from the dynamic URL
