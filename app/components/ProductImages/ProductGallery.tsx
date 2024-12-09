@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 // Import Swiper React components
 import { Swiper, SwiperSlide } from 'swiper/react';
+// Import the Swiper class type
+import { Swiper as SwiperClass } from 'swiper';
 
 // Import Swiper styles
 import 'swiper/css';
@@ -16,13 +18,14 @@ interface ProductGalleryProps {
 }
 
 const ProductGallery: React.FC<ProductGalleryProps> = ({ images }) => {
-  const [thumbsSwiper, setThumbsSwiper] = useState(null);
+  // Correctly type the thumbsSwiper state
+  const [thumbsSwiper, setThumbsSwiper] = useState<SwiperClass | null>(null);
 
   return (
     <div className="flex items-center justify-between gap-2 p-6 max-w-4xl mx-auto">
       {/* Thumbnails Slider */}
       <Swiper
-        onSwiper={setThumbsSwiper}
+        onSwiper={(swiper) => setThumbsSwiper(swiper)} // Pass the swiper instance to the state
         direction="vertical"
         spaceBetween={10}
         slidesPerView={4}
@@ -50,7 +53,7 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({ images }) => {
         }}
         loop={true}
         spaceBetween={10}
-        thumbs={{ swiper: thumbsSwiper }}
+        thumbs={{ swiper: thumbsSwiper }} // Use the typed swiper state
         modules={[Thumbs]}
         className="w-96 h-96 rounded-lg"
       >
