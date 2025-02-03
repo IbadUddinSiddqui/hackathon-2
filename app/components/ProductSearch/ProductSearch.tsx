@@ -42,8 +42,8 @@ export default function HeaderSearch() {
       });
       setResults(searchResults.hits || []);
       setIsOpen(true); // Open dropdown with results
-    } catch (err) {
-      setError('Failed to load products');
+    } catch  {
+      setError('Failed to load products due to');
     } finally {
       setLoading(false);
     }
@@ -155,7 +155,7 @@ export default function HeaderSearch() {
           {/* Empty State */}
           {!loading && query && results.length === 0 && (
             <div className="p-4 text-gray-500">
-              No products found for "{query}"
+              No products found for {query}
             </div>
           )}
         </div>
