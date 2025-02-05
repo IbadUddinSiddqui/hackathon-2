@@ -35,6 +35,7 @@ function Hero() {
         className="w-full  h-[400px] md:h-[663px] bg-[url('/hero.svg')] background"
         aria-label="Background"
       >
+      
         <Image
           src="/vector.svg"
           width={100}

@@ -4,6 +4,7 @@ import "./globals.css";
 import { Provider } from "@/components/ui/provider"
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
+import { SessionProvider } from "next-auth/react";
 
 // Load custom fonts
 const geistSans = localFont({
@@ -37,9 +38,11 @@ export default function RootLayout({
       {/* ChakraProvider wrapped around the body with custom theme */}
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
       <Provider>
+          <SessionProvider>
         <Header/>
           {children}
           <Footer/>
+      </SessionProvider>
       </Provider>
         </body>
     </html>

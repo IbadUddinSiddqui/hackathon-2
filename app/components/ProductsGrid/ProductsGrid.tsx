@@ -25,6 +25,7 @@ const ProductsGrid = ({ category }: MayAlsoLikeProps) => {
     const fetchProducts = async () => {
       try {
         const data = await getSanityProducts(category);
+        console.log(data,"data abhi wala")
         setProductData(data);
       } catch (error) {
         console.error('Error fetching products:', error);
