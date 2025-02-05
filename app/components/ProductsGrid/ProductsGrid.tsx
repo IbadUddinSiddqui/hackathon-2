@@ -45,7 +45,7 @@ const ProductsGrid = ({ category }: MayAlsoLikeProps) => {
 
       {/* Grid for larger screens */}
       <div className="hidden xl:grid xl:grid-cols-4 gap-8">
-        {prodcutData.slice(0, showAll ? prodcutData.length : 4).map((product) => (
+        {prodcutData.slice(0, showAll ? 8 : 4).map((product) => (
           <div key={product.name} className='flex flex-col items-center justify-center'>
             <div className="bg-[#F0EEED] shadow-lg h-56 w-72 rounded-md p-6 transform transition-transform hover:scale-105 hover:shadow-xl flex flex-col items-center hover:pointer">
               <Link href={`/products/${category}/${product._id}`}>
@@ -71,7 +71,7 @@ const ProductsGrid = ({ category }: MayAlsoLikeProps) => {
 
       {/* Grid for medium screens */}
       <div className="hidden lg:grid lg:grid-cols-3 gap-8 xl:hidden">
-        {prodcutData.slice(0, showAll ? prodcutData.length : 3).map((product) => (
+        {prodcutData.slice(0, showAll ? 6 : 3).map((product) => (
           <div key={product.name} className='flex flex-col items-center justify-center'>
             <div className="bg-[#F0EEED] shadow-lg h-56 w-72 rounded-md p-6 transform transition-transform hover:scale-105 hover:shadow-xl flex flex-col items-center">
               <Image
@@ -96,7 +96,7 @@ const ProductsGrid = ({ category }: MayAlsoLikeProps) => {
 
       {/* Grid for smaller screens (mobile/tablet) */}
       <div className="lg:hidden grid grid-cols-2 gap-8">
-        {prodcutData.slice(0, showAll ? prodcutData.length : 2).map((product) => (
+        {prodcutData.slice(0, showAll ? 4 : 2).map((product) => (
           <div key={product.name} className='flex flex-col items-center justify-center'>
             <div className="bg-[#F0EEED] shadow-lg h-48 w-36 rounded-md p-6 transform transition-transform hover:scale-105 hover:shadow-xl flex flex-col justify-center items-center">
               <Image
