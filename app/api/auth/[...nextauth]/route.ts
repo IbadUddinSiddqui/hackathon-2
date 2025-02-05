@@ -54,7 +54,7 @@ const authConfig = {
       }
       return token;
     },
-    async signOut( ) {
+    async signOut() {
         // Add any custom logout logic here
         return true;
       },
