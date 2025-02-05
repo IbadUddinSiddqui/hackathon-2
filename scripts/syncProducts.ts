@@ -1,6 +1,7 @@
 import { adminClient } from "@/lib/typesense";
 import { createClient } from '@sanity/client';
-
+import { HTTPError } from "typesense/lib/Typesense/Errors";
+ 
 interface SanityProduct {
   _id: string;
   name: string;
@@ -50,7 +51,7 @@ async function syncProducts() {
     try {
       await adminClient.collections('products').retrieve();
     } catch (error) {
-      if (error.httpStatus === 404) {
+      if ((error as HTTPError).httpStatus === 404) {
         collectionExists = false;
       } else {
         throw error;
