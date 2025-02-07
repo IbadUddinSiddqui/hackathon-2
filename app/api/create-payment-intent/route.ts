@@ -11,7 +11,11 @@ export async function POST() {
       amount: 1000, // $10.00
       currency: 'usd',
       payment_method_types: ['card'],
+      metadata: {
+        order_id: 'abc123'  // A short order ID or reference (must be <500 characters)
+      }
     });
+    
 
     return NextResponse.json({ 
       clientSecret: paymentIntent.client_secret 
@@ -20,6 +24,9 @@ export async function POST() {
     return NextResponse.json(
       { error: err.message },
       { status: 500 }
+
     );
+
+    
   }
 }
