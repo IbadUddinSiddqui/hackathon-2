@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       cancel_url: `${origin}/cart`,
       metadata: {
         // Store additional information if needed
-        cartItems: JSON.stringify(items),
+        cartItems: JSON.stringify(items[1]),
       },
     });
 

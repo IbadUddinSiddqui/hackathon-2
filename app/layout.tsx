@@ -22,7 +22,7 @@ const geistMono = localFont({
 // Metadata for the page
 export const metadata: Metadata = {
   title: "Bazaar Nest",
-  description: "Ecommerce website built with Next.js and Chakra UI",
+  description: "Ecommerce website ",
 };
 
 // RootLayout Component
