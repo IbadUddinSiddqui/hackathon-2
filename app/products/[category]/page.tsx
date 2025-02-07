@@ -5,6 +5,8 @@ import Image from 'next/image';
 import { AppSidebar } from '@/app/components/Sidebar/Sidebar';
 import { client } from '@/sanity/lib/client';
 import { urlFor } from '@/sanity/lib/image';
+import Header from '@/app/components/Header/Header';
+import Footer from '@/app/components/Footer/Footer';
 type Product = {
   _id: string;
   name: string;
@@ -84,7 +86,7 @@ const CategoryPage = ({ params }: CategoryPageProps) => {
 
   return (
     <>
-      
+      <Header></Header>
       <div className="grid grid-cols-5 items-start w-full min-h-screen">
         <div className="col-span-1 min-w-[200px] p-6">
           <AppSidebar />
@@ -161,6 +163,8 @@ const CategoryPage = ({ params }: CategoryPageProps) => {
           </div>
         </div>
       </div>
+
+      <Footer></Footer>
     </>
   );
 };

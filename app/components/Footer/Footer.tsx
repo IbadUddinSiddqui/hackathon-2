@@ -31,7 +31,7 @@ function Footer() {
 
       <div className='grid grid-cols-2 md:grid-cols-5 lg:grid-cols-5 gap-4 p-4 '>
       <div className='flex flex-col col-span-2 md:col-span-1 items-center md:items-left text-center md:text-left text-black'>
-          <div className=''><img src='/logo.svg' alt='logo '  /></div>
+          <div className=''><Image width={150} height={50} src='/logo-full-black.svg' alt='logo '  /></div>
           <p className='mt-2 text-base text-gray-500'>We have clothes that suits your style and which youre proud to wear. From women to men.</p>
           <div className='flex mt-4 gap-2'>
             <Link href='/' className='my-2'><TiSocialTwitter /></Link>

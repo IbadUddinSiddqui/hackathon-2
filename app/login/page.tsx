@@ -4,6 +4,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
+import Header from "../components/Header/Header";
+import Footer from "../components/Footer/Footer";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -28,6 +30,8 @@ export default function LoginPage() {
   };
 
   return (
+    <>
+    <Header/>
     <div className="max-w-md mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Login</h1>
       {error && <div className="text-red-500 mb-4">{error}</div>}
@@ -66,5 +70,7 @@ export default function LoginPage() {
         </a>
       </div>
     </div>
+ <Footer/>
+    </>
   );
 }

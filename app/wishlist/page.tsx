@@ -5,12 +5,16 @@ import { useCartStore } from '@/lib/stores/cartStore';
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { urlFor } from '@/sanity/lib/image';
+import Header from '../components/Header/Header';
+import Footer from '../components/Footer/Footer';
 
 export default function WishlistPage() {
   const { items, removeFromWishlist, clearWishlist } = useWishlistStore();
   const { addItem } = useCartStore();
 
   return (
+    <>
+    <Header></Header>
     <div className="container mx-auto px-4 py-12">
       <div className="text-center mb-10">
         <h1 className="text-5xl font-extrabold mb-4">Your Wishlist</h1>
@@ -70,5 +74,7 @@ export default function WishlistPage() {
         )}
       </div>
     </div>
+    <Footer/>
+    </>
   );
 }

@@ -2,11 +2,13 @@
 import React from 'react';
 import { useCartStore } from '@/lib/stores/cartStore';
 import Image from 'next/image';
-
+import getStripe  from '@/lib/get-stripe';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
+import Header from '../components/Header/Header';
+import Footer from '../components/Footer/Footer';
 
 const CartPage = () => {
   const { items, updateQuantity, removeItem } = useCartStore();
@@ -17,9 +19,46 @@ const CartPage = () => {
   const deliveryFee = 5; // Example delivery fee
   const total = subtotal - discount + deliveryFee;
 
+  const handleCheckout = async () => {
+    const stripe = await getStripe();
+    
+    try {
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          items: items.map(item => ({
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            imageUrl: item.imageUrl,
+          })),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create checkout session');
+      }
+
+      const session = await response.json();
+      
+      const result = await stripe.redirectToCheckout({
+        sessionId: session.id,
+      });
+
+      if (result.error) {
+        console.error(result.error.message);
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+    }
+  };
+
   return (
     <>
-      
+      <Header></Header>
       <div className="flex justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="w-full max-w-screen-xl grid grid-cols-1 md:grid-cols-3 gap-6 p-4">
           {/* Cart Section */}
@@ -157,15 +196,19 @@ const CartPage = () => {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-center p-4">
-                <Button className="w-full md:w-auto dark:bg-gray-700 dark:text-gray-100">
-                  Proceed to Checkout
-                </Button>
-              </CardFooter>
+        <Button 
+          onClick={handleCheckout}
+          className="w-full md:w-auto dark:bg-gray-700 dark:text-gray-100"
+          disabled={items.length === 0}
+        >
+          Proceed to Checkout
+        </Button>
+      </CardFooter>
             </Card>
           </section>
         </div>
       </div>
-      
+      <Footer></Footer>
     </>
   );
 };

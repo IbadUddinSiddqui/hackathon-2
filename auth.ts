@@ -10,12 +10,13 @@ export const {handlers,signIn,signOut,auth} = NextAuth({
             type:"credentials",
             credentials:{
                 email:{label:"Email",type:"email"},
-                password:{label:"Password",type:"password"}
+                password:{label:"Password",type:"password"},
+                
             },
             async authorize(credentials){
                 try{
                     const user = await client.fetch(
-                        `*[_type == "user" && email == $email][0]`,
+                        `*[_type == "user" && email == $email && role == $role ][0]`,
                         {email:credentials.email}
                     );
 
@@ -28,7 +29,8 @@ export const {handlers,signIn,signOut,auth} = NextAuth({
                     return isValid ? {
                         id:user._id,
                         email:user.email,
-                        name:user.name
+                        name:user.name,
+                        role:user.role
                     }:null;
                 }catch(error){
                     console.error("Authorization error:",error);

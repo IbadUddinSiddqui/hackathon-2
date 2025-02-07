@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Typesense from 'typesense';
 import Link from 'next/link';
 import { FaSearch } from 'react-icons/fa';
+import Image from 'next/image';
 
 // 1. Configure Typesense Client
 const client = new Typesense.Client({
@@ -133,7 +134,9 @@ export default function HeaderSearch() {
                 className="block p-4 hover:bg-gray-100/50 transition-colors"
               >
                 <div className="flex items-center gap-4">
-                  <img
+                  <Image
+                  width={80}
+                  height={64}
                     src={document.images[0]}
                     alt={document.name}
                     className="w-16 h-16 object-cover rounded"

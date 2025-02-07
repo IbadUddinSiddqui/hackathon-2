@@ -1,3 +1,4 @@
+@import '../css/style.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -40,6 +41,10 @@ body {
   cursor: pointer;
   transition: transform 0.2s ease-in-out;
 }
+.clip-path-circle {
+  clip-path: circle(100%);
+}
+
 
 .thumbsSwiper img:hover {
   transform: scale(1.1); /* Zoom effect on hover */
@@ -187,3 +192,4 @@ body {
   --swiper-navigation-color: #000;
   --swiper-pagination-color: #000;
 }
+

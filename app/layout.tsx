@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Provider } from "@/components/ui/provider"
-import Header from "./components/Header/Header";
-import Footer from "./components/Footer/Footer";
 import { SessionProvider } from "next-auth/react";
 
 // Load custom fonts
@@ -23,7 +21,7 @@ const geistMono = localFont({
 
 // Metadata for the page
 export const metadata: Metadata = {
-  title: "Ibad's Ecommerce",
+  title: "Bazaar Nest",
   description: "Ecommerce website built with Next.js and Chakra UI",
 };
 
@@ -39,9 +37,8 @@ export default function RootLayout({
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
       <Provider>
           <SessionProvider>
-        <Header/>
+        
           {children}
-          <Footer/>
       </SessionProvider>
       </Provider>
         </body>

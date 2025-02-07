@@ -12,6 +12,7 @@ import 'swiper/css/thumbs';
 
 // Import required modules
 import { FreeMode, Thumbs } from 'swiper/modules';
+import Image from 'next/image';
 
 interface ProductGalleryProps {
   images: string[];
@@ -36,10 +37,12 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({ images }) => {
       >
         {images.map((image, index) => (
           <SwiperSlide key={index}>
-            <img
+            <Image
+            width={100}
+            height={100}
               src={image}
               alt={`Thumbnail ${index + 1}`}
-              className="w-full h-full object-cover cursor-pointer transition-transform hover:scale-110 rounded-md"
+              className="w-full   h-full object-cover cursor-pointer transition-transform hover:scale-110 rounded-md"
             />
           </SwiperSlide>
         ))}
@@ -56,7 +59,9 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({ images }) => {
       >
         {images.map((image, index) => (
           <SwiperSlide key={index}>
-            <img
+            <Image
+            width={400}
+            height={400}
               src={image}
               alt={`Product Image ${index + 1}`}
               className="w-full h-full object-cover rounded-lg"

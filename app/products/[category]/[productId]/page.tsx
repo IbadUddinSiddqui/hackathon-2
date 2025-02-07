@@ -11,6 +11,8 @@ import AddToCartButton from "@/app/components/AddToCartButton/AddToCartButton";
 import ProductsGrid from "@/app/components/ProductsGrid/ProductsGrid";
 import { useWishlistStore } from '@/lib/stores/wishlistStore';
 import { Button } from "@/components/ui/button";
+import Header from "@/app/components/Header/Header";
+import Footer from "@/app/components/Footer/Footer";
 
 // Add proper type definitions
 type Product = {
@@ -92,7 +94,7 @@ const ProductDetailPage = ({ params }: { params: Promise<{ productId: string }> 
 
   return (
     <>
-      
+      <Header></Header>
       {product && <div className="p-6 grid grid-cols-1 md:grid-cols-2 justify-between">
         <div>
           <ProductGallery images={product.images} />
@@ -151,7 +153,7 @@ const ProductDetailPage = ({ params }: { params: Promise<{ productId: string }> 
         <h2 className="text-5xl font-extrabold mb-4">YOU MAY ALSO LIKE</h2>
       </div>
       <ProductsGrid category={product?.category_slug} />
-      
+      <Footer/>
     </>
   );
 };
