@@ -22,6 +22,8 @@ export async function middleware(req: NextRequest) {
       console.log("⚠️ Not Admin Role, Redirecting...");
       return NextResponse.redirect(new URL("/denied", req.url));
     }
+    
+    return NextResponse.next();
   }
 
   return NextResponse.next();
