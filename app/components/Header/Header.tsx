@@ -66,7 +66,7 @@ const Header = () => {
 
           {/* Navigation Links */}
           <nav className="hidden lg:flex space-x-8 ml-12">
-            {["Shop", "On Sale", "New Arrivals", "Brands"].map((item) => (
+            {["Products", "Dashboard", "Login"].map((item) => (
               <Link
                 href={`#${item.toLowerCase().replace(" ", "")}`}
                 key={item}
@@ -216,7 +216,7 @@ const Header = () => {
 
                 {/* Navigation Links */}
                 <nav className="space-y-4">
-                  {["Shop", "On Sale", "New Arrivals", "Brands"].map((item) => (
+                  {["Products", "Dashboard", "Login"].map((item) => (
                     <Link
                       href={`#${item.toLowerCase().replace(" ", "")}`}
                       key={item}
