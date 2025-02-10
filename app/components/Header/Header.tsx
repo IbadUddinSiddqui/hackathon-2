@@ -66,17 +66,25 @@ const Header = () => {
 
           {/* Navigation Links */}
           <nav className="hidden lg:flex space-x-8 ml-12">
-            {["Products", "Dashboard", "Login"].map((item) => (
+           
+             
               <Link
-                href={`#${item.toLowerCase().replace(" ", "")}`}
-                key={item}
+                href={`/dashboard`}
+                
                 className="relative group text-lg font-medium text-gray-700 hover:text-black transition-colors"
               >
-                {item}
+                Dashboard
                 <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
               </Link>
-            ))}
-          </nav>
+              <Link
+                href={`/login`}
+                
+                className="relative group text-lg font-medium text-gray-700 hover:text-black transition-colors"
+              >
+                Login
+                <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+            </nav>
 
           {/* Search Bar */}
           <div className="flex-grow mx-8 max-w-[600px] hidden md:block">
@@ -216,7 +224,7 @@ const Header = () => {
 
                 {/* Navigation Links */}
                 <nav className="space-y-4">
-                  {["Products", "Dashboard", "Login"].map((item) => (
+                  {["Accessories Section", "Footwear", "Categories"].map((item) => (
                     <Link
                       href={`/${item.toLowerCase().replace(" ", "")}`}
                       key={item}
