@@ -2,7 +2,6 @@ import ECommerce from "../components/Dashboard/E-commerce";
 import DefaultLayout from "../components/Layouts/DefaultLayout";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { getToken } from "next-auth/jwt";
 export default async function Home() {
   // Get the session
   const session = await auth();
