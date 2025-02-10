@@ -5,11 +5,17 @@ import Link from "next/link";
 import { PiShoppingCartSimpleBold } from "react-icons/pi";
 import { RiAccountCircleLine } from "react-icons/ri";
 import { IoMenu } from "react-icons/io5";
-import { FaHeart, FaSearch } from "react-icons/fa";
+import { FaHeart } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import ProductSearch from "../ProductSearch/ProductSearch";
+import { useCartStore } from "@/lib/stores/cartStore";
+import { useWishlistStore } from "@/lib/stores/wishlistStore";
 
 const Header = () => {
+  const { items } = useCartStore();
+  const wishlist = useWishlistStore()
+  const cartItemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const wishItemCount = wishlist.items.length;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -20,7 +26,7 @@ const Header = () => {
         initial={{ y: -50 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.5 }}
-        className="bg-gradient-to-r from-black to-gray-900 h-12 flex justify-center items-center"
+        className="bg-gradient-to-r from-black to-gray-900 h-8 flex justify-center items-center"
       >
         <p className="text-white text-center text-sm sm:text-base font-medium">
           🎉 Sign Up and get 20% off on your first order.{" "}
@@ -31,8 +37,8 @@ const Header = () => {
       </motion.div>
 
       {/* Main Header */}
-      <header className="bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
-        <div className="container mx-auto flex justify-between items-center h-20 px-4 lg:px-8">
+      <header className="bg-white/95 backdrop-blur-sm border-b  border-gray-200 shadow-sm">
+        <div className="container mx-auto flex justify-between items-center h-16 px-4 lg:px-8">
           {/* Hamburger Menu */}
           <button
             onClick={toggleMenu}
@@ -78,42 +84,95 @@ const Header = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center space-x-6">
-            <button
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors relative"
-              aria-label="Search"
-            >
-              <FaSearch size={20} className="text-gray-700" />
-            </button>
+          <div className=" lg:flex hidden  items-center space-x-6">
+           
             
             <Link
               href="/wishlist"
               className="p-2 rounded-lg hover:bg-gray-100 transition-colors relative"
               aria-label="Wishlist"
             >
-              <FaHeart size={22} className="text-gray-700" />
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1.5">
-                3
-              </span>
+            <motion.div
+    whileHover={{ scale: 1.1, rotate: -10 }}
+    whileTap={{ scale: 0.9 }}
+    className="relative"
+  >
+    <motion.div
+      whileHover={{ 
+        filter: 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.6))'
+      }}
+      transition={{ duration: 0.3 }}
+    >
+      <FaHeart className="w-6 h-6 text-red-400 hover:text-red-700" />
+    </motion.div>
+
+    {/* Animated Cart Count Badge */}
+    {wishItemCount > 0 && (
+      <motion.span
+        key={wishItemCount}
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 flex items-center justify-center"
+      >
+        <motion.span
+          key={wishItemCount}
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 10 }}
+        >
+          {wishItemCount}
+        </motion.span>
+      </motion.span>
+    )}
+  </motion.div>
             </Link>
             
-            <Link
-              href="/cart"
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors relative"
-              aria-label="Cart"
-            >
-              <PiShoppingCartSimpleBold size={24} className="text-gray-700" />
-              <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full px-1.5">
-                2
-              </span>
-            </Link>
-            
-            <button
+            <Link href="/cart" className="relative">
+  <motion.div
+    whileHover={{ scale: 1.1, rotate: -10 }}
+    whileTap={{ scale: 0.9 }}
+    className="relative"
+  >
+    <motion.div
+      whileHover={{ 
+        filter: 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.6))'
+      }}
+      transition={{ duration: 0.3 }}
+    >
+      <PiShoppingCartSimpleBold className="w-6 h-6 text-black-2 hover:text-yellow-700" />
+    </motion.div>
+
+    {/* Animated Cart Count Badge */}
+    {cartItemCount > 0 && (
+      <motion.span
+        key={cartItemCount}
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 flex items-center justify-center"
+      >
+        <motion.span
+          key={cartItemCount}
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 10 }}
+        >
+          {cartItemCount}
+        </motion.span>
+      </motion.span>
+    )}
+  </motion.div>
+</Link>
+            <Link href='/dashboard'>
+            <div
               className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
               aria-label="Account"
             >
-              <RiAccountCircleLine size={24} className="text-gray-700" />
-            </button>
+              <RiAccountCircleLine size={24} className="text-blue-700 hover:text-blue-900" />
+            </div></Link>
           </div>
         </div>
 
@@ -124,12 +183,12 @@ const Header = () => {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="fixed inset-0 bg-white z-50 flex flex-col items-center p-6"
+              className="fixed inset-0 dark:bg-black bg-white z-99 w-[100vw] h-[100vh]  flex flex-col items-center p-6"
             >
               {/* Close Button */}
               <button
                 onClick={toggleMenu}
-                className="absolute top-6 right-6 p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                className="absolute top-6 right-6 p-2 rounded-full bg-white hover:bg-gray-200 transition-colors"
                 aria-label="Close menu"
               >
                 <svg
@@ -149,7 +208,7 @@ const Header = () => {
               </button>
 
               {/* Menu Content */}
-              <div className="w-full max-w-sm mt-20">
+              <div className="w-full  max-w-sm mt-20">
                 {/* Search Bar */}
                 <div className="relative mb-8">
                   <ProductSearch />
@@ -161,13 +220,103 @@ const Header = () => {
                     <Link
                       href={`#${item.toLowerCase().replace(" ", "")}`}
                       key={item}
-                      className="block px-6 py-3 text-lg font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-all"
+                      className="block px-6 py-3 text-lg font-medium dark:text-white text-black-2  hover:bg-gray-100 rounded-lg transition-all"
                       onClick={toggleMenu}
                     >
                       {item}
                     </Link>
                   ))}
                 </nav>
+                <div className="flex items-center space-x-6">
+           
+            
+            <Link
+              href="/wishlist"
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors relative"
+              aria-label="Wishlist"
+            >
+            <motion.div
+    whileHover={{ scale: 1.1, rotate: -10 }}
+    whileTap={{ scale: 0.9 }}
+    className="relative"
+  >
+    <motion.div
+      whileHover={{ 
+        filter: 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.6))'
+      }}
+      transition={{ duration: 0.3 }}
+    >
+      <FaHeart className="w-6 h-6 text-red-400 hover:text-red-700" />
+    </motion.div>
+
+    {/* Animated Cart Count Badge */}
+    {wishItemCount > 0 && (
+      <motion.span
+        key={wishItemCount}
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 flex items-center justify-center"
+      >
+        <motion.span
+          key={wishItemCount}
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 10 }}
+        >
+          {wishItemCount}
+        </motion.span>
+      </motion.span>
+    )}
+  </motion.div>
+            </Link>
+            
+            <Link href="/cart" className="relative">
+  <motion.div
+    whileHover={{ scale: 1.1, rotate: -10 }}
+    whileTap={{ scale: 0.9 }}
+    className="relative"
+  >
+    <motion.div
+      whileHover={{ 
+        filter: 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.6))'
+      }}
+      transition={{ duration: 0.3 }}
+    >
+      <PiShoppingCartSimpleBold className="w-6 h-6 text-black-2 hover:text-yellow-700" />
+    </motion.div>
+
+    {/* Animated Cart Count Badge */}
+    {cartItemCount > 0 && (
+      <motion.span
+        key={cartItemCount}
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 flex items-center justify-center"
+      >
+        <motion.span
+          key={cartItemCount}
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 10 }}
+        >
+          {cartItemCount}
+        </motion.span>
+      </motion.span>
+    )}
+  </motion.div>
+</Link>
+            <Link href='/dashboard'>
+            <div
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              aria-label="Account"
+            >
+              <RiAccountCircleLine size={24} className="text-blue-700 hover:text-blue-900" />
+            </div></Link>
+          </div>
               </div>
             </motion.div>
           )}
@@ -175,16 +324,7 @@ const Header = () => {
       </header>
 
       {/* Mobile Search Bar */}
-      <div className="md:hidden p-4 border-t border-gray-200 bg-white">
-        <div className="relative">
-          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-          <input
-            type="text"
-            placeholder="Search for products..."
-            className="w-full pl-10 pr-4 py-2 rounded-full bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
-      </div>
+      
     </div>
   );
 };

@@ -7,16 +7,11 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 export default function FashionHero() {
-  const [activeCategory, setActiveCategory] = useState(0);
   const [timeLeft, setTimeLeft] = useState({ days: 2, hours: 5, minutes: 30 });
   const { scrollYProgress } = useScroll();
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.2]);
 
-  const categories = [
-    { name: "Women's Wear", color: "bg-pink-500" },
-    { name: "Men's Style", color: "bg-blue-500" },
-    { name: "Kids Collection", color: "bg-green-500" },
-  ];
+  
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -64,7 +59,7 @@ export default function FashionHero() {
             <motion.h1
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              className="text-5xl md:text-6xl font-bold text-gray-900"
+              className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white"
             >
               Elevate Your<br />
               <span className="text-pink-500">Everyday Style</span>
@@ -73,7 +68,7 @@ export default function FashionHero() {
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-xl text-gray-600 max-w-xl"
+              className="text-xl text-gray-600 max-w-xl dark:text-white"
             >
               Discover premium quality apparel crafted for comfort and designed for confidence.
             </motion.p>
@@ -84,7 +79,7 @@ export default function FashionHero() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
-              {categories.map((category, index) => (
+              {/* {categories.map((category, index) => (
                 <button
                   key={category.name}
                   onClick={() => setActiveCategory(index)}
@@ -96,7 +91,7 @@ export default function FashionHero() {
                 >
                   {category.name}
                 </button>
-              ))}
+              ))} */}
             </motion.div>
 
             {/* CTAs */}

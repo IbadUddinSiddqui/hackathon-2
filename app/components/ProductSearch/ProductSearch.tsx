@@ -102,7 +102,7 @@ export default function HeaderSearch() {
           className="w-full max-w-md p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
          <button
-                     className="p-2 hover:text-yellow-700 transition-colors"
+                     className="p-2 text-black-2  transition-colors"
                      aria-label="Search"
                      onClick={handleSearchClick}
                    >

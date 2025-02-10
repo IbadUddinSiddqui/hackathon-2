@@ -12,7 +12,7 @@ function Footer() {
     <>
     <div className='w-full min-w-full mt-44 '>
         <div className='flex justify-center  min-w-screen max-w-screen'>
-        <div className=' w-[80%] h-80 lg:h-48 bg-black items-center justify-center lg:justify-between flex flex-col md:flex-row  top-16 right-4 rounded-lg relative   z-50'>
+        <div className=' w-[80%] h-80 lg:h-48 bg-black-2 items-center justify-center lg:justify-between flex flex-col md:flex-row  top-16 right-4 rounded-lg relative   z-50'>
             <div className='w-[100%] md:w-[60%] lg:w-[50%]'>
                 <p className='text-white mt-3 font-extrabold text-4xl  text-center'>STAY UPTO DATE ABOUT OUR LATEST OFFERS</p>
             </div>

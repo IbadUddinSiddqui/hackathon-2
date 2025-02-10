@@ -1,131 +1,231 @@
 "use client";
+
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { getSanityProducts } from '@/lib/sanity/product';
 import { SanityProduct } from '@/lib/sanity/product';
 import { urlFor } from '@/sanity/lib/image';
-import Link from 'next/link';
 
 interface MayAlsoLikeProps {
-  category: string|undefined;
-} 
-const ProductsGrid = ({ category }: MayAlsoLikeProps) => {
-  // State to manage the visibility of the products
-  const [showAll, setShowAll] = useState(false);
-  const [prodcutData,setProductData] = useState<SanityProduct[]>([])
+  category: string | undefined;
+}
 
-  // Function to toggle the visibility of products
-  const toggleProducts = () => {
-    setShowAll(!showAll);
-  };
+const ProductsGrid = ({ category }: MayAlsoLikeProps) => {
+  const [showAll, setShowAll] = useState(false);
+  const [productData, setProductData] = useState<SanityProduct[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   // Fetch products from Sanity
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const data = await getSanityProducts(category);
-        console.log(data,"data abhi wala")
         setProductData(data);
+        setError(null);
       } catch (error) {
         console.error('Error fetching products:', error);
+        setError('Failed to load products. Please try again later.');
       }
     };
 
     fetchProducts();
-  }, [category]); // Empty dependency array ensures this runs only once
-  // Product data for demonstration 
-  
+  }, [category]);
 
-  
+  // Toggle visibility of products
+  const toggleProducts = () => setShowAll(!showAll);
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.2,
+      },
+    },
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      transition: { 
+        type: 'spring', 
+        stiffness: 300, 
+        damping: 20 
+      } 
+    },
+  };
+
+  // ProductCard component with responsive design
+  const ProductCard = ({ product, category }: { product: SanityProduct; category: string | undefined }) => (
+    <motion.div
+      className="flex justify-center p-2 sm:p-3 md:p-6 w-full "
+      variants={cardVariants}
+    >
+      <motion.div
+        className="relative w-[48rem] h-[300px] perspective-1000 group"
+        whileHover="hover"
+        initial="rest"
+      >
+        <motion.div
+          className="absolute inset-0 w-full h-full preserve-3d transition-transform duration-500 ease-in-out"
+          variants={{
+            rest: { rotateY: 0 },
+            hover: { rotateY: 180 }
+          }}
+        >
+          {/* Front Side */}
+          <div className="absolute inset-0 w-full h-full bg-white shadow-md rounded-xl p-4 backface-hidden flex flex-col items-center border border-gray-100">
+            <Link 
+              href={`/products/${category}/${product._id}`}
+              className="w-full h-40 relative mb-4 hover:scale-105 transition-transform"
+            >
+              <Image
+                src={urlFor(product.images[0]).url()}
+                alt={product.name}
+                fill
+                className="object-contain"
+                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+                priority
+              />
+            </Link>
+            <h3 className="text-sm sm:text-base font-semibold text-gray-800 text-center truncate w-full">
+              {product.name}
+            </h3>
+            <p className="text-green-600 font-bold mt-2 text-sm sm:text-base">
+              ${product.price}
+            </p>
+          </div>
+
+          {/* Back Side */}
+          <div className="absolute inset-0 w-full h-full bg-white shadow-md rounded-xl p-4 backface-hidden rotate-y-180 flex flex-col items-center justify-center border border-green-100">
+            <div className="overflow-y-auto max-h-[180px] custom-scrollbar text-center">
+              <p className="text-xs sm:text-sm text-gray-600 leading-relaxed px-2">
+                {product.description || 'No description available'}
+              </p>
+            </div>
+            <Link 
+              href={`/products/${category}/${product._id}`}
+              className="mt-4 w-full max-w-[160px]"
+            >
+              <Button
+                className="w-full bg-green-500 hover:bg-green-600 text-white text-xs sm:text-sm py-2 transition-all"
+              >
+                View Details
+              </Button>
+            </Link>
+          </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
+  );
+
+  if (error) {
+    return <div className="text-center text-red-500 p-8">{error}</div>;
+  }
 
   return (
-    <div className="container mx-auto px-4 py-12 mt-12">
-      
+    <>
+    <div className="container mt-24 md:hidden lg:hidden mx-auto px-2 sm:px-4 py-8">
+      <motion.div
+        className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-4"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <AnimatePresence>
+          {productData.slice(0, showAll ? productData.length : 3).map((product) => (
+            <ProductCard 
+              key={product._id} 
+              product={product} 
+              category={category} 
+              
+            />
+          ))}
+        </AnimatePresence>
+      </motion.div>
 
-      {/* Grid for larger screens */}
-      <div className="hidden xl:grid xl:grid-cols-4 gap-8">
-        {prodcutData.slice(0, showAll ? 8 : 4).map((product) => (
-          <div key={product.name} className='flex flex-col items-center justify-center'>
-            <div className="bg-[#F0EEED] shadow-lg h-56 w-72 rounded-md p-6 transform transition-transform hover:scale-105 hover:shadow-xl flex flex-col items-center hover:pointer">
-              <Link href={`/products/${category}/${product._id}`}>
-              <Image
-                src={urlFor(product.images[0]).url()}
-                alt={`Image of ${product.name}`}
-                width={150}
-                height={150}
-                className="object-contain overflow-hidden"
-              /></Link>
-            </div>
-            <div className="flex flex-col items-left m-4 w-[80%]">
-              <h3 className="text-xl font-semibold mb-2 text-black">{product.name}</h3>
-              <div className='flex justify-between'>
-                <Image width="104" height="19" src="/star-rating.svg" alt="star rating" />
-                <p className="text-gray-500">{product.ratings}</p>
-              </div>
-              <p className="text-gray-500">Price: {product.price}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Grid for medium screens */}
-      <div className="hidden lg:grid lg:grid-cols-3 gap-8 xl:hidden">
-        {prodcutData.slice(0, showAll ? 6 : 3).map((product) => (
-          <div key={product.name} className='flex flex-col items-center justify-center'>
-            <div className="bg-[#F0EEED] shadow-lg h-56 w-72 rounded-md p-6 transform transition-transform hover:scale-105 hover:shadow-xl flex flex-col items-center">
-              <Image
-                src={urlFor(product.images[0]).url()}
-                alt={`Image of ${product.name}`}
-                width={150}
-                height={150}
-                className="object-contain"
-              />
-            </div>
-            <div className="flex flex-col items-left m-4 w-[80%]">
-              <h3 className="text-xl font-semibold mb-2 text-black">{product.name}</h3>
-              <div className='flex justify-between'>
-                <Image width="104" height="19" src="/star-rating.svg" alt="star rating" />
-                <p className="text-gray-500">{product.ratings}</p>
-              </div>
-              <p className="text-gray-500">Price: {product.price}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Grid for smaller screens (mobile/tablet) */}
-      <div className="lg:hidden grid grid-cols-2 gap-8">
-        {prodcutData.slice(0, showAll ? 4 : 2).map((product) => (
-          <div key={product.name} className='flex flex-col items-center justify-center'>
-            <div className="bg-[#F0EEED] shadow-lg h-48 w-36 rounded-md p-6 transform transition-transform hover:scale-105 hover:shadow-xl flex flex-col justify-center items-center">
-              <Image
-                src={urlFor(product.images[0]).url()}
-                alt={`Image of ${product.name}`}
-                width={150}
-                height={150}
-                className="object-contain"
-              />
-            </div>
-            <div className="flex flex-col items-left m-4 w-[80%]">
-              <h3 className="text-xl font-semibold mb-2 text-black">{product.name}</h3>
-              <div className='flex justify-between max-w-screen'>
-                <Image width="104" height="19" src="/star-rating.svg" alt="star rating" />
-                <p className="text-gray-500">{product.ratings}</p>
-              </div>
-              <p className="text-gray-500">Price: {product.price}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Button to show more products */}
-      <div className="mt-8 text-center">
-        <Button variant="outline" onClick={toggleProducts}>
-          {showAll ? 'View Fewer Products' : 'View All Products'}
-        </Button>
-      </div>
+      {/* View More / View Less Button */}
+      {productData.length > 5 && (
+        <div className="mt-8 text-center">
+          <Button
+            onClick={toggleProducts}
+            className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 text-sm sm:text-base"
+          >
+            {showAll ? 'View Less' : 'View More'}
+          </Button>
+        </div>
+      )}
     </div>
+    <div className="container mt-24 hidden md:block lg:hidden  mx-auto px-2 sm:px-4 py-8">
+      <motion.div
+        className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-4"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <AnimatePresence>
+          {productData.slice(0, showAll ? productData.length : 4).map((product) => (
+            <ProductCard 
+              key={product._id} 
+              product={product} 
+              category={category} 
+              
+            />
+          ))}
+        </AnimatePresence>
+      </motion.div>
+
+      {/* View More / View Less Button */}
+      {productData.length > 5 && (
+        <div className="mt-8 text-center">
+          <Button
+            onClick={toggleProducts}
+            className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 text-sm sm:text-base"
+          >
+            {showAll ? 'View Less' : 'View More'}
+          </Button>
+        </div>
+      )}
+    </div>
+    <div className="container hidden  mt-12 md:hidden lg:block  mx-auto px-2 sm:px-4 py-8">
+      <motion.div
+        className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-4"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <AnimatePresence>
+          {productData.slice(0, showAll ? productData.length : 5).map((product) => (
+            <ProductCard 
+              key={product._id} 
+              product={product} 
+              category={category} 
+              
+            />
+          ))}
+        </AnimatePresence>
+      </motion.div>
+
+      {/* View More / View Less Button */}
+      {productData.length > 5 && (
+        <div className="mt-8 text-center">
+          <Button
+            onClick={toggleProducts}
+            className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 text-sm sm:text-base"
+          >
+            {showAll ? 'View Less' : 'View More'}
+          </Button>
+        </div>
+      )}
+    </div>
+    </>
   );
 };
 

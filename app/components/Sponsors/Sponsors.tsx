@@ -3,7 +3,7 @@ import Image  from 'next/image';
 const SponsorSection = () => {
   return (
 
-      <div className="min-w-full  overflow-hidden bg-black h-24 flex items-center justify-center">
+      <div className="min-w-full  overflow-hidden bg-black-2 h-24 flex items-center justify-center">
         <div className="flex animate-scroll gap-4 md:gap-6">
           <Image className="m-4" src="/brand.svg" width="194" height="32" alt="logo1"  />
           <Image className="m-4" src="/brand1.svg" width="157" height="34" alt="logo2"  />
