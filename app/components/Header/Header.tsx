@@ -218,7 +218,7 @@ const Header = () => {
                 <nav className="space-y-4">
                   {["Products", "Dashboard", "Login"].map((item) => (
                     <Link
-                      href={`#${item.toLowerCase().replace(" ", "")}`}
+                      href={`/${item.toLowerCase().replace(" ", "")}`}
                       key={item}
                       className="block px-6 py-3 text-lg font-medium dark:text-white text-black-2  hover:bg-gray-100 rounded-lg transition-all"
                       onClick={toggleMenu}
