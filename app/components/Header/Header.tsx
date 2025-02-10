@@ -223,17 +223,23 @@ const Header = () => {
                 </div>
 
                 {/* Navigation Links */}
-                <nav className="space-y-4">
-                  {["Accessories Section", "Footwear", "Categories"].map((item) => (
-                    <Link
-                      href={`/${item.toLowerCase().replace(" ", "")}`}
-                      key={item}
-                      className="block px-6 py-3 text-lg font-medium dark:text-white text-black-2  hover:bg-gray-100 rounded-lg transition-all"
-                      onClick={toggleMenu}
-                    >
-                      {item}
-                    </Link>
-                  ))}
+                <nav className="space-y-4 flex flex-col">
+                <Link
+                href={`/dashboard`}
+                
+                className="relative group text-lg font-medium text-gray-700 hover:text-black transition-colors"
+              >
+                Dashboard
+                <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+              <Link
+                href={`/login`}
+                
+                className="relative group text-lg font-medium text-gray-700 hover:text-black transition-colors"
+              >
+                Login
+                <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
+              </Link>
                 </nav>
                 <div className="flex items-center space-x-6">
            
