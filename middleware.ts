@@ -5,8 +5,10 @@ export async function middleware(req: NextRequest) {
   console.log("🔍 Middleware Running on:", req.nextUrl.pathname); // Debug log
 
   if (req.nextUrl.pathname.startsWith("/adminpanel")) {
+    
     console.log("🛡️ Protecting Admin Route");
 
+     
     const token = await getToken({ req, secret: process.env.AUTH_SECRET });
 
     console.log("🔑 Token:", token); // Log the token in production
@@ -16,7 +18,7 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(new URL("/denied", req.url));
     }
 
-    if (token.role !== "admin") {
+    if (token.email !== "ibaduddinsiddiqui418@gmail.com") {
       console.log("⚠️ Not Admin Role, Redirecting...");
       return NextResponse.redirect(new URL("/denied", req.url));
     }
