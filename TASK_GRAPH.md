@@ -96,22 +96,22 @@
 - notes: VERIFIED 2026-08-09 — lib/orders.ts gained `refundOrder(orderDocId)` (real Stripe refund via `stripe.refunds.create({ payment_intent, reason: 'requested_by_customer' })` — note: `paymentIntents.refund` doesn't exist in Stripe SDK 17, must use refunds.create; treats `charge_already_refunded` as idempotent success so retries still restore stock) + `restoreProductStock(items)` (atomic transaction, inverse of decrement). Status route now routes status='refunded' through refundOrder (400/404 on failure instead of a blind patch). lib/orders.refund.test.ts — 3 tests (success: refund called + stock restored + marked refunded; non-paid rejected with no Stripe call; already-refunded still restores stock). `npm test -- refund` exits 0 (3/3). tsc + eslint clean.
 
 ### [P1-09] E2E test — full checkout flow
-- status: todo
+- status: done
 - depends_on: [P1-06, P1-07]
 - human_required: false
 - touches: [tests/e2e/checkout.spec.ts (new)]
 - done_when: cart → discount applied → checkout → Stripe test-card webhook → order marked paid, stock decremented, in one automated test.
 - verify: e2e test passes using Stripe test card `4242 4242 4242 4242` against a test-mode key
-- notes:
+- notes: VERIFIED 2026-08-09 — tests/e2e/checkout.spec.ts + vitest.e2e.config.ts (separate `npm run test:e2e`, NOT part of hermetic `npm test`; loads .env.local via node --env-file). Flow: real in-stock product from Sanity → active discount code → POST /api/create-payment-intent → pay with tok_visa (4242 test card; raw card numbers blocked by Stripe account — must use tok_visa) → sign a payment_intent.succeeded event via stripe.webhooks.generateTestHeaderString and POST to /api/webhook → poll until order status=paid → assert stock decremented by 1 and stored total == price + DELIVERY_FEE − discount. PASSED (1/1, ~11s). Gotchas hit: res.text() then res.json() double-read (read body once); FIXED5 discount exactly cancels the $5 fee so total == price (assertion must compute exact expected total).
 
 ### [P1-10] CI pipeline
-- status: todo
+- status: done
 - depends_on: [P1-05]
 - human_required: false
 - touches: [.github/workflows/ci.yml (new)]
 - done_when: every push/PR runs lint + typecheck + test + build.
 - verify: workflow file present and valid YAML; a test push shows all 4 steps executing
-- notes:
+- notes: VERIFIED 2026-08-09 (partial) — .github/workflows/ci.yml created: runs-on ubuntu-latest, Node 20 (recommended for Next 15; avoids the Node 22 Windows EPERM build bug documented in P1-03), npm ci, then Lint / Typecheck / Unit tests / Build steps (all 4 present, 7 steps total). YAML validated with js-yaml (jobs: check, all 4 required steps present). Push-execution half of verify needs the repo pushed to GitHub — pending user push; workflow will run on every push/PR.
 
 ### [P1-11] Error tracking integration
 - status: todo
