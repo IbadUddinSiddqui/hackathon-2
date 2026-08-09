@@ -128,6 +128,16 @@ export default defineType({
       type: 'string',
     }),
     defineField({
+      name: 'safepay_tracker_token',
+      title: 'Safepay Tracker Token',
+      type: 'string',
+    }),
+    defineField({
+      name: 'safepay_reference',
+      title: 'Safepay Reference',
+      type: 'string',
+    }),
+    defineField({
       name: 'created_at',
       title: 'Created At',
       type: 'datetime',
