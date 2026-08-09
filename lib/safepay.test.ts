@@ -168,9 +168,16 @@ describe('createSafepayCheckout', () => {
       webhookUrl: 'https://example.com/api/payments/safepay/webhook',
     });
 
-    expect(result.redirectUrl).toContain('token=t_456');
+    // VERIFIED URL shape (reverse-engineered from the live checkout SPA):
+    // `beacon` + lowercase `env` + snake_case ids.
+    expect(result.redirectUrl).toContain('beacon=t_456');
+    expect(result.redirectUrl).toContain('env=sandbox');
     expect(result.redirectUrl).toContain('order_id=order-2');
-    expect(result.redirectUrl).toContain('signature=');
+    expect(result.redirectUrl).toContain('redirect_url=');
+    expect(result.redirectUrl).toContain('cancel_url=');
+    expect(result.redirectUrl).not.toContain('signature=');
+    expect(result.redirectUrl).not.toContain('token=');
+    expect(result.redirectUrl).not.toContain('tracker=');
   });
 
   it('throws when the init response is an error status', async () => {
@@ -193,14 +200,25 @@ describe('createSafepayCheckout', () => {
 });
 
 describe('buildCheckoutUrl', () => {
-  it('produces a deterministic, signed URL for a token on the LIVE checkout host', () => {
-    const url = buildCheckoutUrl('t_abc', 'order-x');
+  it('produces a URL matching the LIVE checkout page contract', () => {
+    const url = buildCheckoutUrl({
+      token: 't_abc',
+      orderId: 'order-x',
+      successUrl: 'https://example.com/success',
+      cancelUrl: 'https://example.com/cart',
+      source: 'web',
+    });
     expect(url).toContain('sandbox.api.getsafepay.com/checkout/pay');
-    expect(url).toContain('token=t_abc');
-    expect(url).toContain('order_id=order-x');
+    expect(url).toContain('beacon=t_abc');
     expect(url).toContain('env=sandbox');
-    const sig = url.split('signature=')[1];
-    expect(sig).toMatch(/^[0-9a-f]{64}$/);
+    expect(url).toContain('order_id=order-x');
+    expect(url).toContain('redirect_url=https%3A%2F%2Fexample.com%2Fsuccess');
+    expect(url).toContain('cancel_url=https%3A%2F%2Fexample.com%2Fcart');
+    expect(url).toContain('source=web');
+    // no HMAC signature is required by the new checkout page
+    expect(url).not.toContain('signature=');
+    expect(url).not.toContain('token=');
+    expect(url).not.toContain('tracker=');
   });
 });
 

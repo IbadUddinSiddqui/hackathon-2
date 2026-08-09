@@ -24,10 +24,23 @@ export const SAFEPAY_API_BASE =
     ? 'https://api.getsafepay.com'
     : 'https://sandbox.api.getsafepay.com';
 
-// VERIFIED 2026-08-09 against the live sandbox: the docs' `sandbox.getsafepay.com`
-// is a DEAD domain (DNS NXDOMAIN). The hosted checkout page is served from the
-// same API host at /checkout/pay — confirmed returning the real "Safepay
-// Checkout" page (title + payment scripts) with a sandbox token.
+// VERIFIED 2026-08-09 against the live sandbox:
+//  1. The docs' `sandbox.getsafepay.com` is a DEAD domain (DNS NXDOMAIN). The
+//     hosted checkout page is served from the API host at /checkout/pay.
+//  2. The page's OWN validator (reverse-engineered from its JS bundle) reads:
+//       environment: e.env         lowercase: local|development|sandbox|production
+//       tracker:     e.beacon      the tracker token (e.g. track_...)
+//       orderId:     e.order_id
+//       successUrl:  e.redirect_url
+//       cancelUrl:   e.cancel_url
+//       source:      e.source
+//     Wrong param names produce hard errors: `token` → "Your session does not
+//     validate...", `environment` → "Required environment is missing". No HMAC
+//     signature is required on the URL — the page fetches the tracker
+//     server-side (`/order/payments/v2/capabilities?tracker=...`, verified
+//     returning live capabilities). `order_id` is POSTed to
+//     `/order/metadata/v1/add`, attaching it to the tracker so it shows up in
+//     the webhook.
 export const SAFEPAY_CHECKOUT_BASE = SAFEPAY_API_BASE;
 
 export const SAFEPAY_CURRENCY = process.env.SAFEPAY_CURRENCY || 'PKR';
@@ -101,7 +114,18 @@ export async function createSafepayCheckout(
     data?.data?.redirect_url || data?.redirect_url || data?.tracker?.url;
 
   if (redirectUrl) return { redirectUrl, token };
-  if (token) return { redirectUrl: buildCheckoutUrl(token, input.orderId), token };
+  if (token) {
+    return {
+      redirectUrl: buildCheckoutUrl({
+        token,
+        orderId: input.orderId,
+        successUrl: input.redirectUrl,
+        cancelUrl: input.cancelUrl,
+        source: 'web',
+      }),
+      token,
+    };
+  }
 
   // Unexpected shape — surface the real response so the recon log shows it.
   console.warn('[Safepay] unexpected init response:', text.slice(0, 1000));
@@ -110,16 +134,28 @@ export async function createSafepayCheckout(
 
 /**
  * Build the hosted checkout URL from a tracker token when the init response
- * only returns the token (the classic Safepay flow). The signature is the
- * HMAC-SHA256 of the tracker token keyed with the API key.
+ * only returns the token. VERIFIED against the live SPA bundle: the page
+ * requires the `tracker` param (its presence = a payment session) and an
+ * UPPERCASE `environment`. `orderId` is POSTed by the page to
+ * `/order/metadata/v1/add`, attaching our order_id to the tracker so it shows
+ * up in the webhook; `successUrl`/`cancelUrl` are the return destinations.
+ * No HMAC signature is required on this URL.
  */
-export function buildCheckoutUrl(token: string, orderId: string): string {
-  const signature = createHmac('sha256', process.env.SAFEPAY_API_KEY || '')
-    .update(token)
-    .digest('hex');
-  return `${SAFEPAY_CHECKOUT_BASE}/checkout/pay?token=${encodeURIComponent(
-    token
-  )}&order_id=${encodeURIComponent(orderId)}&env=${SAFEPAY_ENV}&signature=${signature}`;
+export function buildCheckoutUrl(input: {
+  token: string;
+  orderId: string;
+  successUrl?: string;
+  cancelUrl?: string;
+  source?: string;
+}): string {
+  const params = new URLSearchParams();
+  params.set('beacon', input.token);
+  params.set('env', SAFEPAY_ENV); // lowercase: sandbox | production
+  if (input.orderId) params.set('order_id', input.orderId);
+  if (input.successUrl) params.set('redirect_url', input.successUrl);
+  if (input.cancelUrl) params.set('cancel_url', input.cancelUrl);
+  if (input.source) params.set('source', input.source);
+  return `${SAFEPAY_CHECKOUT_BASE}/checkout/pay?${params.toString()}`;
 }
 
 /**
