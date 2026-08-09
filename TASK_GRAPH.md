@@ -261,13 +261,13 @@
 - notes:
 
 ### [P1-SP-04] Commit the 57 uncommitted files
-- status: todo
+- status: done
 - depends_on: []
 - human_required: false
 - touches: [entire working tree]
 - done_when: `git status` is clean; all Phase-1 work (auth, admin, demo-route deletions, Safepay integration) is committed with clear per-change messages.
 - verify: `git status` clean, `git log` shows the new commits
-- notes: do this one first, independent of everything else — it's pure risk sitting there for no reason.
+- notes: VERIFIED 2026-08-10 — `git status --short` = 0 lines (clean), 10 new commits in `git log`. Committed in 10 logical groups with per-change messages (all `[P1-SP-04]` except the gitignore chore): (1) .gitignore — dev-server/ngrok logs excluded (log files were busy being written by the running dev server + ngrok, so they're ignored rather than deleted — `git status` shows none of them); (2) auth consolidation (auth.ts, next-auth.d.ts, [...nextauth]/route, promote/register/upload, legacy signin/signup API pages deleted); (3) demo routes removed (chart, Charts, forms, tables, ui); (4) admin panel (orders + discounts pages, lib/admin.ts); (5) discount-code system (lib/discounts.ts, lib/discount-code-admin.ts, routes, schema, tests); (6) sanity server-client + schema wiring + scripts; (7) order refund/idempotency tests; (8) docs (PROJECT_BRIEF/DETAILS, DEPLOYMENT, knowledge, GRAPH_LOOP_STRATEGY); (9) misc UI/config (header, sidebar, cart, typesense, deps, webhook route); (10) TASK_GRAPH.md + task-graph-update.md applied.
 
 ### [P1-SP-05] Disable legacy Stripe payment routes
 - status: todo
