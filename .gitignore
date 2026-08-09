@@ -38,3 +38,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local dev/ngrok logs
+dev-server*.log
+dev-server*.err.log
+ngrok*.log
+ngrok*.err.log
