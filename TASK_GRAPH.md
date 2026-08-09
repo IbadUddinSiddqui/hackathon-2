@@ -87,13 +87,13 @@
 - notes:
 
 ### [P1-08] Refund execution + stock restore
-- status: todo
+- status: done
 - depends_on: [P1-07]
 - human_required: false
 - touches: [lib/orders.ts, app/api/orders/[orderId]/status/route.ts]
 - done_when: setting an order's status to `refunded` triggers an actual Stripe refund call and restores the decremented stock; covered by a new test.
 - verify: `npm test -- refund` passes
-- notes:
+- notes: VERIFIED 2026-08-09 — lib/orders.ts gained `refundOrder(orderDocId)` (real Stripe refund via `stripe.refunds.create({ payment_intent, reason: 'requested_by_customer' })` — note: `paymentIntents.refund` doesn't exist in Stripe SDK 17, must use refunds.create; treats `charge_already_refunded` as idempotent success so retries still restore stock) + `restoreProductStock(items)` (atomic transaction, inverse of decrement). Status route now routes status='refunded' through refundOrder (400/404 on failure instead of a blind patch). lib/orders.refund.test.ts — 3 tests (success: refund called + stock restored + marked refunded; non-paid rejected with no Stripe call; already-refunded still restores stock). `npm test -- refund` exits 0 (3/3). tsc + eslint clean.
 
 ### [P1-09] E2E test — full checkout flow
 - status: todo
