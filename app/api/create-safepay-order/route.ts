@@ -77,7 +77,11 @@ export async function POST(request: Request) {
       paymentMethod: 'safepay',
     });
 
-    const { origin } = new URL(request.url);
+    // PUBLIC_BASE_URL lets us hand Safepay a reachable server-to-server URL
+    // during local dev (e.g. the ngrok tunnel). Without it, `origin` is
+    // http://localhost:3000 and Safepay's servers can never POST the webhook
+    // back to us. In production this is the real domain.
+    const baseUrl = process.env.PUBLIC_BASE_URL || new URL(request.url).origin;
 
     const checkout = await createSafepayCheckout({
       orderId,
@@ -85,9 +89,9 @@ export async function POST(request: Request) {
       // (rupees). amount=21999 appeared in their dashboard as "PKR 21,999.00"
       // — NOT "PKR 219.99". So pass the rupee total (2dp), never paisa.
       amount: Math.round(total * 100) / 100,
-      redirectUrl: `${origin}/checkout/success?method=safepay&order_id=${orderId}`,
-      cancelUrl: `${origin}/cart`,
-      webhookUrl: `${origin}/api/payments/safepay/webhook`,
+      redirectUrl: `${baseUrl}/checkout/success?method=safepay&order_id=${orderId}`,
+      cancelUrl: `${baseUrl}/cart`,
+      webhookUrl: `${baseUrl}/api/payments/safepay/webhook`,
     });
 
     // Persist the Safepay tracker token on the order so the webhook can still
