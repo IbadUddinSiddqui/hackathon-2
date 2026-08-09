@@ -78,13 +78,13 @@
 - notes: VERIFIED 2026-08-09 — lib/discounts.test.ts with 6 tests (percent rounding, fixed value, expired, over-maxUses, cap-at-subtotal, invalid code) mocking @/sanity/lib/server-client. `npm test -- discounts` exits 0, 6/6 passed.
 
 ### [P1-07] Unit tests — stock decrement + webhook idempotency
-- status: todo
+- status: done
 - depends_on: [P1-05]
 - human_required: false
 - touches: [lib/orders.ts, lib/orders.test.ts (new)]
 - done_when: tests cover stock clamped at 0, and `markOrderPaid` called twice (simulated duplicate webhook) only fulfills once.
 - verify: `npm test -- orders` passes
-- notes:
+- notes: VERIFIED 2026-08-10 — lib/orders.test.ts (committed with the P1-SP-04 batch) already covers both required cases: (1) `decrementProductStock` clamps stock at 0 — buying 5 with 3 in stock patches stock to 0 (never negative), and decrements normally (10→7) otherwise; (2) `markOrderPaid` duplicate-webhook idempotency — first delivery claims the order via optimistic `ifRevisionId` lock (returns true), second delivery fails the lock with 409 and returns false so stock only ever decrements once. lib/orders.refund.test.ts (3 tests) also lives under the same file pattern. `npm test -- orders` exits 0 — 2 files, 7/7 tests passed.
 
 ### [P1-08] Refund execution + stock restore
 - status: done
