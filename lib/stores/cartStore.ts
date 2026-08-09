@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { SanityProduct } from '../sanity/product';
@@ -12,9 +11,13 @@ export type CartItem = SanityProduct & {
 
 type CartState = {
   items: CartItem[];
+  discountCode: string | null;
+  discountAmount: number; // dollars, validated server-side
   addItem: (product: SanityProduct) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
+  setDiscount: (code: string, amount: number) => void;
+  clearDiscount: () => void;
   clearCart: () => void;
 };
 
@@ -22,6 +25,8 @@ export const useCartStore = create<CartState>()(
   persist(
     (set) => ({
       items: [],
+      discountCode: null,
+      discountAmount: 0,
       
       addItem: (product) => set((state) => {
         const existingItem = state.items.find(item => item._id === product._id);
@@ -40,7 +45,9 @@ export const useCartStore = create<CartState>()(
               item._id === product._id 
                 ? { ...item, quantity: newQuantity }
                 : item
-            )
+            ),
+            discountCode: null,
+            discountAmount: 0,
           };
         }
 
@@ -50,12 +57,18 @@ export const useCartStore = create<CartState>()(
             ...product,
             quantity: 1,
             imageUrl: urlFor(product.images[0]).url()
-          }]
+          }],
+          discountCode: null,
+          discountAmount: 0,
         };
       }),
 
+      // Changing the cart invalidates any previously previewed discount — the
+      // code stays applied but its amount is recomputed at checkout/payment.
       removeItem: (productId) => set((state) => ({
-        items: state.items.filter(item => item._id !== productId)
+        items: state.items.filter(item => item._id !== productId),
+        discountCode: null,
+        discountAmount: 0,
       })),
 
       updateQuantity: (productId, quantity) => set((state) => ({
@@ -66,15 +79,25 @@ export const useCartStore = create<CartState>()(
             return { ...item, quantity: clamped };
           }
           return item;
-        })
+        }),
+        discountCode: null,
+        discountAmount: 0,
       })),
 
-      clearCart: () => set({ items: [] }),
+      setDiscount: (code, amount) => set({ discountCode: code, discountAmount: amount }),
+
+      clearDiscount: () => set({ discountCode: null, discountAmount: 0 }),
+
+      clearCart: () => set({ items: [], discountCode: null, discountAmount: 0 }),
     }),
     {
       name: 'sanity-cart-storage',
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ items: state.items }),
+      partialize: (state) => ({
+        items: state.items,
+        discountCode: state.discountCode,
+        discountAmount: state.discountAmount,
+      }),
     }
   )
 );

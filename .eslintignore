@@ -1,2 +1,7 @@
 # Ignore the shadcn's components folder
 components/*
+# Express backend is a separate project with its own rules
+hackathon_3_backend_server
+# Build artifacts
+.next
+node_modules

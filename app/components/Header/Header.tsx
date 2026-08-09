@@ -30,7 +30,7 @@ const Header = () => {
       >
         <p className="text-white text-center text-sm sm:text-base font-medium">
           🎉 Sign Up and get 20% off on your first order.{" "}
-          <Link href="/signup" className="underline hover:text-yellow-400 transition-colors">
+          <Link href="/register" className="underline hover:text-yellow-400 transition-colors">
             Claim Offer
           </Link>
         </p>
