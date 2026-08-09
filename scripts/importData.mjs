@@ -6,7 +6,7 @@ const client = createClient({
   dataset: 'production',
   useCdn: false,
   apiVersion: '2025-01-13',
-  token: 'skwCgoxZFlLNZ4pJvHGxBL4HwxACC2BWjzLOdLShub9MUTiTjDJqf3MZVipfrn4bxvoG3v8kWSWponB4lrdSH08kYflsjXTAG3TI4aIGSxogwN5y3mcOojsD3LFZDf5CYEpYrrspXa3beHAiGY9obhivS48gAMi8w67AS7y6UoLzW0mEvPfp', // Add your Sanity API token here
+  token: process.env.SANITY_API_TOKEN || process.env.NEXT_PUBLIC_SANITY_TOKEN, // Add your Sanity API token here
 });
 
 async function deleteAllProducts() {
@@ -117,4 +117,34 @@ async function importProducts() {
   }
 }
 
+// Seed demo discount codes (idempotent — skips codes that already exist).
+async function seedDiscountCodes() {
+  const demoCodes = [
+    { code: 'WELCOME10', type: 'percent', value: 10 },
+    { code: 'FIXED5', type: 'fixed', value: 5 },
+  ];
+
+  for (const demo of demoCodes) {
+    const existing = await client.fetch(
+      `*[_type == "discountCode" && code == $code][0]{_id}`,
+      { code: demo.code }
+    );
+    if (existing) {
+      console.log(`Discount code ${demo.code} already exists, skipping.`);
+      continue;
+    }
+    await client.create({
+      _type: 'discountCode',
+      code: demo.code,
+      type: demo.type,
+      value: demo.value,
+      active: true,
+      maxUses: 1000,
+      usedCount: 0,
+    });
+    console.log(`Discount code ${demo.code} created.`);
+  }
+}
+
 importProducts();
+seedDiscountCodes();

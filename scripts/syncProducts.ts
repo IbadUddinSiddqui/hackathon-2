@@ -39,7 +39,7 @@ interface TypesenseProduct {
 const sanity = createClient({
   projectId: "xphvex0e",
   dataset: "production",
-  token:"skwCgoxZFlLNZ4pJvHGxBL4HwxACC2BWjzLOdLShub9MUTiTjDJqf3MZVipfrn4bxvoG3v8kWSWponB4lrdSH08kYflsjXTAG3TI4aIGSxogwN5y3mcOojsD3LFZDf5CYEpYrrspXa3beHAiGY9obhivS48gAMi8w67AS7y6UoLzW0mEvPfp",
+  token:process.env.SANITY_API_TOKEN || process.env.NEXT_PUBLIC_SANITY_TOKEN,
   apiVersion:  '2025-01-27',
   useCdn: false,
 });
