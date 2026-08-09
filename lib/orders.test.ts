@@ -12,7 +12,9 @@ vi.mock('@/sanity/lib/server-client', () => ({
   },
 }));
 
-const mockFetch = vi.mocked(serverClient.fetch);
+// Sanity's fetch is generic and loses its type under vi.mocked; loosen it so
+// test fixtures can be passed directly.
+const mockFetch = vi.mocked(serverClient.fetch) as unknown as ReturnType<typeof vi.fn>;
 
 beforeEach(() => {
   mockFetch.mockReset();
