@@ -5,12 +5,10 @@ import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/lib/stores/cartStore';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
-import { StripePayment, type CheckoutItem } from '../components/CheckOut/CheckOut';
-import { SafepayPayment } from '../components/CheckOut/SafepayPayment';
-import { DELIVERY_FEE } from '@/lib/constants';
+import { SafepayPayment, type CheckoutItem } from '../components/CheckOut/SafepayPayment';
+import { DELIVERY_FEE, CURRENCY_SYMBOL } from '@/lib/constants';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -97,26 +95,20 @@ function CodCheckoutForm({
 
 const CheckoutPage = () => {
   const { items, discountCode, discountAmount } = useCartStore();
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'safepay' | 'cod'>('card');
 
   // Safepay is behind a feature flag until it's live: set
   // NEXT_PUBLIC_SAFEPAY_ENABLED=true in .env.local to show the option.
-  const safepayEnabled =
-    process.env.NEXT_PUBLIC_SAFEPAY_ENABLED === 'true';
+  const safepayEnabled = process.env.NEXT_PUBLIC_SAFEPAY_ENABLED === 'true';
+
+  const [paymentMethod, setPaymentMethod] = useState<'safepay' | 'cod'>(
+    safepayEnabled ? 'safepay' : 'cod'
+  );
 
   // Calculate order summary values
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const discount = discountCode ? discountAmount : 0;
   const deliveryFee = DELIVERY_FEE;
   const total = subtotal - discount + deliveryFee;
-
-  // Stripe expects amounts in cents. Multiply dollars by 100.
-  const stripeAmount = Math.round(total * 100);
-
-  // Scroll the user down to the payment form when they click "Proceed to Payment".
-  const scrollToPayment = () => {
-    document.getElementById('payment-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  };
 
   const checkoutItems: CheckoutItem[] = items.map((item) => ({
     id: item._id,
@@ -144,7 +136,7 @@ const CheckoutPage = () => {
                 <div className="flex justify-between mb-4">
                   <span className="text-gray-600 dark:text-gray-400">Subtotal</span>
                   <span className="font-bold text-gray-900 dark:text-gray-100">
-                    ${subtotal.toFixed(2)}
+                    {CURRENCY_SYMBOL} {subtotal.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between mb-4">
@@ -152,20 +144,22 @@ const CheckoutPage = () => {
                     Discount{discountCode ? ` (${discountCode})` : ''}
                   </span>
                   <span className="font-bold text-red-500">
-                    {discount > 0 ? `-$${discount.toFixed(2)}` : '$0.00'}
+                    {discount > 0
+                      ? `-${CURRENCY_SYMBOL} ${discount.toFixed(2)}`
+                      : `${CURRENCY_SYMBOL} 0.00`}
                   </span>
                 </div>
                 <div className="flex justify-between mb-4">
                   <span className="text-gray-600 dark:text-gray-400">Delivery Fee</span>
                   <span className="font-bold text-gray-900 dark:text-gray-100">
-                    ${deliveryFee.toFixed(2)}
+                    {CURRENCY_SYMBOL} {deliveryFee.toFixed(2)}
                   </span>
                 </div>
                 <Separator className="my-4 dark:bg-gray-700" />
                 <div className="flex justify-between font-semibold">
                   <span className="text-gray-600 dark:text-gray-400">Total</span>
                   <span className="text-xl text-gray-900 dark:text-gray-100">
-                    ${total.toFixed(2)}
+                    {CURRENCY_SYMBOL} {total.toFixed(2)}
                   </span>
                 </div>
 
@@ -174,21 +168,6 @@ const CheckoutPage = () => {
                     Payment method
                   </p>
                   <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod('card')}
-                      aria-pressed={paymentMethod === 'card'}
-                      className={`rounded-lg border p-3 text-left text-sm transition ${
-                        paymentMethod === 'card'
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/10 ring-1 ring-blue-500'
-                          : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500'
-                      }`}
-                    >
-                      <span className="block font-semibold text-gray-900 dark:text-gray-100">Card</span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        Pay now with Stripe
-                      </span>
-                    </button>
                     {safepayEnabled && (
                       <button
                         type="button"
@@ -228,28 +207,11 @@ const CheckoutPage = () => {
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="p-4">
-                {paymentMethod === 'card' ? (
-                  <Button
-                    className="w-full"
-                    onClick={scrollToPayment}
-                    disabled={items.length === 0}
-                  >
-                    Proceed to Payment
-                  </Button>
-                ) : null}
-              </CardFooter>
             </Card>
 
-            {/* Payment / COD Form */}
+            {/* Payment Form (Safepay card or Cash on Delivery) */}
             <div id="payment-form" className="scroll-mt-8">
-              {paymentMethod === 'card' ? (
-                <StripePayment
-                  amount={stripeAmount}
-                  discountCode={discountCode || undefined}
-                  items={checkoutItems}
-                />
-              ) : paymentMethod === 'safepay' && safepayEnabled ? (
+              {paymentMethod === 'safepay' && safepayEnabled ? (
                 <SafepayPayment
                   items={checkoutItems}
                   discountCode={discountCode || undefined}

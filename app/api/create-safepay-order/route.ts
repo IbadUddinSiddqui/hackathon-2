@@ -73,16 +73,15 @@ export async function POST(request: Request) {
       customerEmail: customerEmailValue,
       discountCode: discountResult.code || undefined,
       discountAmount: discountResult.discountAmount,
+      paymentMethod: 'safepay',
     });
 
     const { origin } = new URL(request.url);
 
     const checkout = await createSafepayCheckout({
       orderId,
-      // NOTE: the store is currently USD-denominated (prices + DELIVERY_FEE in
-      // dollars). Safepay charges PKR by default. For the sandbox recon test
-      // this number is just a test amount; for production the store must be
-      // priced in PKR (or converted) so the charged amount is correct.
+      // Store prices + DELIVERY_FEE are in PKR; Safepay takes the amount in
+      // the lowest currency unit, so multiply by 100 (paisa).
       amount: Math.round(total * 100),
       redirectUrl: `${origin}/checkout/success?method=safepay&order_id=${orderId}`,
       cancelUrl: `${origin}/cart`,

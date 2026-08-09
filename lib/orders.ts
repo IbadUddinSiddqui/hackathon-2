@@ -1,11 +1,12 @@
 import { v4 as uuidv4 } from 'uuid';
 import Stripe from 'stripe';
 import { serverClient } from '@/sanity/lib/server-client';
+import { CURRENCY } from '@/lib/constants';
 
 export type OrderItemInput = {
   id: string; // Sanity product _id
   name: string;
-  price: number; // dollars
+  price: number; // rupees (PKR)
   quantity: number;
   size?: string[];
 };
@@ -68,7 +69,8 @@ export async function createPendingOrder(input: {
   customerEmail?: string;
   discountCode?: string;
   discountAmount?: number;
-  paymentMethod?: 'card' | 'cod';
+  paymentMethod?: 'card' | 'cod' | 'safepay';
+  currency?: string;
 }): Promise<{ orderId: string; docId: string }> {
   const orderId = uuidv4();
   const doc = await serverClient.create({
@@ -90,7 +92,7 @@ export async function createPendingOrder(input: {
     discount_code: input.discountCode || '',
     discount_amount: input.discountAmount || 0,
     total: input.total,
-    currency: 'usd',
+    currency: input.currency || CURRENCY,
     created_at: new Date().toISOString(),
   });
 

@@ -6,14 +6,14 @@ import Link from 'next/link';
 import { FaSearch } from 'react-icons/fa';
 import Image from 'next/image';
 
-// 1. Configure Typesense Client
+// 1. Configure Typesense Client (values come from env vars, see .env.local)
 const client = new Typesense.Client({
   nodes: [{
-    host: '015dvlkq3mbheg9zp-1.a1.typesense.net',
-    port: 443,
-    protocol: 'https'
+    host: process.env.NEXT_PUBLIC_TYPESENSE_HOST || '',
+    port: Number(process.env.NEXT_PUBLIC_TYPESENSE_PORT) || 443,
+    protocol: (process.env.NEXT_PUBLIC_TYPESENSE_PROTOCOL as 'http' | 'https') || 'https'
   }],
-  apiKey: 'CceWWxapX00O0AdPIk4y7ahVKxYEoPIG', // Search-only key
+  apiKey: process.env.NEXT_PUBLIC_TYPESENSE_SEARCH_KEY || '', // Search-only key
   connectionTimeoutSeconds: 10
 });
 
@@ -43,7 +43,7 @@ export default function HeaderSearch() {
       });
       setResults(searchResults.hits || []);
       setIsOpen(true); // Open dropdown with results
-    } catch  {
+    } catch {
       setError('Failed to load products due to');
     } finally {
       setLoading(false);
@@ -143,7 +143,7 @@ export default function HeaderSearch() {
                   />
                   <div>
                     <h3 className="font-semibold">{document.name}</h3>
-                    <p className="text-sm text-gray-600">${document.price.toFixed(2)}</p>
+                    <p className="text-sm text-gray-600">Rs {document.price.toFixed(2)}</p>
                     {document.qcom_availability && (
                       <span className="text-xs text-green-800 bg-green-100 px-2 py-1 rounded">
                         QCOM Available

@@ -99,7 +99,7 @@ const ProductsGrid = ({ category }: MayAlsoLikeProps) => {
               {product.name}
             </h3>
             <p className="text-green-600 font-bold mt-2 text-sm sm:text-base">
-              ${product.price}
+              Rs {product.price}
             </p>
           </div>
 

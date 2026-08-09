@@ -15,22 +15,22 @@ export default function Order() {
         <div className="grid gap-4">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Subtotal</span>
-            <span className="text-xl font-extrabold">$299.00</span>
+            <span className="text-xl font-extrabold">Rs 14,950</span>
           </div>
           
           <div className="flex justify-between">
             <span className="text-muted-foreground">Discount</span>
-            <span className=" text-red-500 text-xl font-extrabold  ">-$10.00</span> {/* Adjust as needed */}
+            <span className=" text-red-500 text-xl font-extrabold  ">-Rs 500</span> {/* Adjust as needed */}
           </div>
           
           <div className="flex justify-between">
             <span className="text-muted-foreground">Delivery Fee</span>
-            <span className="text-xl font-extrabold">${DELIVERY_FEE.toFixed(2)}</span>
+            <span className="text-xl font-extrabold">Rs {DELIVERY_FEE.toFixed(2)}</span>
           </div>
           
           <div className="flex justify-between font-semibold">
             <span className="text-muted-foreground">Total</span>
-            <span className="text-xl font-extrabold">$294.00</span>
+            <span className="text-xl font-extrabold">Rs 14,650</span>
           </div>
           
           <Separator className="my-4" />

@@ -264,7 +264,7 @@ const ProductCard = ({ product, category }: { product: Product; category: string
               {product.ratings?.toFixed(1) || 'N/A'}
             </span>
           </div>
-          <span className="font-medium text-green-700">${product.price?.toFixed(2)}</span>
+          <span className="font-medium text-green-700">Rs {product.price?.toFixed(2)}</span>
         </div>
       </div>
     </Link>

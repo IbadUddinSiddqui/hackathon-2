@@ -66,6 +66,9 @@ export async function POST(request: Request) {
       customerEmail: customerEmailValue,
       discountCode: discountResult.code || undefined,
       discountAmount: discountResult.discountAmount,
+      // Legacy Stripe flow: Stripe charges USD, so the stored order must be
+      // labeled USD to match (the PK storefront uses Safepay/COD in PKR).
+      currency: 'usd',
     });
 
     // Build line items from REAL Sanity prices (dollars → cents). The imageUrl

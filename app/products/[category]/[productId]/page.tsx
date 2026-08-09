@@ -180,7 +180,7 @@ const ProductDetailPage = ({ params }: { params: Promise<{ productId: string }> 
                 >
                   <div className="flex items-center gap-4">
                   <span className="text-4xl font-bold">
-  ${(product?.price ?? 0).toFixed(2)}
+  Rs {(product?.price ?? 0).toFixed(2)}
 </span>
                     <Badge variant="outline" className="text-lg py-1 px-3">
                       -40%

@@ -33,7 +33,7 @@ export default defineType({
       type: 'string',
       options: {
         list: [
-          { title: 'Card', value: 'card' },
+          { title: 'Card (Safepay)', value: 'safepay' },
           { title: 'Cash on Delivery', value: 'cod' },
         ],
         layout: 'radio',
@@ -115,7 +115,7 @@ export default defineType({
       name: 'currency',
       title: 'Currency',
       type: 'string',
-      initialValue: 'usd',
+      initialValue: 'pkr',
     }),
     defineField({
       name: 'stripe_session_id',

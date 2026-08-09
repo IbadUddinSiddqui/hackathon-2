@@ -46,7 +46,7 @@ export default function WishlistPage() {
             
             <div className="mt-4">
               <h3 className="text-lg font-semibold">{product.name}</h3>
-              <p className="text-gray-500 mt-2">${product.price.toFixed(2)}</p>
+              <p className="text-gray-500 mt-2">Rs {product.price.toFixed(2)}</p>
               
               <div className="flex gap-2 mt-4">
                 <Button

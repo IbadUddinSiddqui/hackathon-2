@@ -1,17 +1,18 @@
 "use client";
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/lib/stores/cartStore';
 import Image from 'next/image';
-import getStripe  from '@/lib/get-stripe';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
-import { DELIVERY_FEE } from '@/lib/constants';
+import { DELIVERY_FEE, CURRENCY_SYMBOL } from '@/lib/constants';
 
 const CartPage = () => {
+  const router = useRouter();
   const { items, updateQuantity, removeItem, discountCode, discountAmount, setDiscount, clearDiscount } = useCartStore();
   const [codeInput, setCodeInput] = useState('');
   const [applyingCode, setApplyingCode] = useState(false);
@@ -57,44 +58,10 @@ const CartPage = () => {
     setCodeError(null);
   };
 
-  const handleCheckout = async () => {
-    const stripe = await getStripe();
-    
-    try {
-      const response = await fetch('/api/create-checkout-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          items: items.map(item => ({
-            id: item._id,
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-            size: item.size,
-            imageUrl: item.imageUrl,
-          })),
-          discountCode: discountCode || undefined,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create checkout session');
-      }
-
-      const session = await response.json();
-      
-      const result = await stripe.redirectToCheckout({
-        sessionId: session.id,
-      });
-
-      if (result.error) {
-        console.error(result.error.message);
-      }
-    } catch (error) {
-      console.error('Checkout error:', error);
-    }
+  // Stripe is retired for this PK-only store; the checkout page now offers
+  // Safepay (card) and Cash on Delivery. Just navigate there.
+  const handleCheckout = () => {
+    router.push('/checkout');
   };
 
   return (
@@ -137,7 +104,7 @@ const CartPage = () => {
                             <div>
                               <dt className="inline">Price:</dt>
                               <dd className="inline">
-                                ${item.price.toLocaleString('en-US', { maximumFractionDigits: 2 })}
+                                {CURRENCY_SYMBOL} {item.price.toLocaleString('en-US', { maximumFractionDigits: 2 })}
                               </dd>
                             </div>
                             <div>
@@ -203,7 +170,7 @@ const CartPage = () => {
                   <div className="flex justify-between">
                     <span className="text-muted-foreground dark:text-gray-400">Subtotal</span>
                     <span className="text-xl font-extrabold dark:text-gray-100">
-                      ${subtotal.toLocaleString('en-US', { maximumFractionDigits: 2 })}
+                      {CURRENCY_SYMBOL} {subtotal.toLocaleString('en-US', { maximumFractionDigits: 2 })}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -211,19 +178,21 @@ const CartPage = () => {
                       Discount{discountCode ? ` (${discountCode})` : ''}
                     </span>
                     <span className="text-red-500 text-xl font-extrabold">
-                      {discount > 0 ? `-$${discount.toFixed(2)}` : '$0.00'}
+                      {discount > 0
+                        ? `-${CURRENCY_SYMBOL} ${discount.toFixed(2)}`
+                        : `${CURRENCY_SYMBOL} 0.00`}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground dark:text-gray-400">Delivery Fee</span>
                     <span className="text-xl font-extrabold dark:text-gray-100">
-                      ${deliveryFee.toFixed(2)}
+                      {CURRENCY_SYMBOL} {deliveryFee.toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between font-semibold">
                     <span className="text-muted-foreground dark:text-gray-400">Total</span>
                     <span className="text-xl font-extrabold dark:text-gray-100">
-                      ${total.toLocaleString('en-US', { maximumFractionDigits: 2 })}
+                      {CURRENCY_SYMBOL} {total.toLocaleString('en-US', { maximumFractionDigits: 2 })}
                     </span>
                   </div>
                   <Separator className="my-4 dark:bg-gray-700" />
@@ -264,7 +233,7 @@ const CartPage = () => {
                     )}
                     {discountCode && !codeError && (
                       <p className="text-xs text-green-600 dark:text-green-400">
-                        {discountCode} applied — save ${discount.toFixed(2)}
+                        {discountCode} applied — save {CURRENCY_SYMBOL} {discount.toFixed(2)}
                       </p>
                     )}
                   </div>
