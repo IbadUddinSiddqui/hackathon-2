@@ -52,8 +52,9 @@ function Footer() {
             <h4 className='font-semibold my-3'>HELP</h4>
             <Link href='/' className='my-2'>Customer Support</Link>
             <Link href='/' className='my-2'>Delivery Details</Link>
-            <Link href='/'className='my-2'>Terms & Conditions</Link>
-            <Link href='/' className='my-2'>Privacy Policy</Link>
+            <Link href='/returns' className='my-2'>Returns & Exchanges</Link>
+            <Link href='/terms' className='my-2'>Terms & Conditions</Link>
+            <Link href='/privacy' className='my-2'>Privacy Policy</Link>
         </div>
         <div className='flex flex-col  text-center md:text-left text-black '>
             <h4 className='font-semibold my-3'>FAQ</h4>

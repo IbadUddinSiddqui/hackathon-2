@@ -168,13 +168,13 @@
 - notes:
 
 ### [P1-17] Draft legal documents
-- status: todo
+- status: done
 - depends_on: []
 - human_required: false
 - touches: [app/privacy/page.tsx, app/terms/page.tsx, app/returns/page.tsx (new)]
 - done_when: draft privacy policy, terms & conditions, and return/exchange policy pages exist and are linked in the footer.
 - verify: pages render at their routes; footer links to all three
-- notes:
+- notes: VERIFIED 2026-08-09 — app/privacy/page.tsx, app/terms/page.tsx, app/returns/page.tsx created (drafts, server components, Header/Footer, marked 'draft for review' for P1-18). Footer HELP section now links /returns (Returns & Exchanges), /terms (Terms & Conditions), /privacy (Privacy Policy) — previously dead '/' links. All three routes return 200. tsc + eslint clean.
 
 ### [P1-18] Legal review sign-off
 - status: todo
