@@ -123,7 +123,12 @@ describe('createSafepayCheckout', () => {
       ok: true,
       status: 200,
       text: async () =>
-        JSON.stringify({ data: { token: 't_123', redirect_url: 'https://sandbox.getsafepay.com/pay?token=t_123' } }),
+        JSON.stringify({
+          data: {
+            token: 't_123',
+            redirect_url: 'https://sandbox.api.getsafepay.com/checkout/pay?token=t_123',
+          },
+        }),
     }) as unknown as typeof fetch;
 
     const result = await createSafepayCheckout({
@@ -134,7 +139,7 @@ describe('createSafepayCheckout', () => {
       webhookUrl: 'https://example.com/api/payments/safepay/webhook',
     });
 
-    expect(result.redirectUrl).toContain('sandbox.getsafepay.com');
+    expect(result.redirectUrl).toContain('sandbox.api.getsafepay.com/checkout/pay');
     expect(result.token).toBe('t_123');
 
     const [url, init] = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0];
@@ -188,8 +193,9 @@ describe('createSafepayCheckout', () => {
 });
 
 describe('buildCheckoutUrl', () => {
-  it('produces a deterministic, signed URL for a token', () => {
+  it('produces a deterministic, signed URL for a token on the LIVE checkout host', () => {
     const url = buildCheckoutUrl('t_abc', 'order-x');
+    expect(url).toContain('sandbox.api.getsafepay.com/checkout/pay');
     expect(url).toContain('token=t_abc');
     expect(url).toContain('order_id=order-x');
     expect(url).toContain('env=sandbox');

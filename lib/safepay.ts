@@ -24,10 +24,11 @@ export const SAFEPAY_API_BASE =
     ? 'https://api.getsafepay.com'
     : 'https://sandbox.api.getsafepay.com';
 
-export const SAFEPAY_CHECKOUT_BASE =
-  SAFEPAY_ENV === 'production'
-    ? 'https://www.getsafepay.com'
-    : 'https://sandbox.getsafepay.com';
+// VERIFIED 2026-08-09 against the live sandbox: the docs' `sandbox.getsafepay.com`
+// is a DEAD domain (DNS NXDOMAIN). The hosted checkout page is served from the
+// same API host at /checkout/pay — confirmed returning the real "Safepay
+// Checkout" page (title + payment scripts) with a sandbox token.
+export const SAFEPAY_CHECKOUT_BASE = SAFEPAY_API_BASE;
 
 export const SAFEPAY_CURRENCY = process.env.SAFEPAY_CURRENCY || 'PKR';
 
@@ -116,9 +117,9 @@ export function buildCheckoutUrl(token: string, orderId: string): string {
   const signature = createHmac('sha256', process.env.SAFEPAY_API_KEY || '')
     .update(token)
     .digest('hex');
-  return `${SAFEPAY_CHECKOUT_BASE}/pay?token=${encodeURIComponent(token)}&order_id=${encodeURIComponent(
-    orderId
-  )}&env=${SAFEPAY_ENV}&signature=${signature}`;
+  return `${SAFEPAY_CHECKOUT_BASE}/checkout/pay?token=${encodeURIComponent(
+    token
+  )}&order_id=${encodeURIComponent(orderId)}&env=${SAFEPAY_ENV}&signature=${signature}`;
 }
 
 /**
