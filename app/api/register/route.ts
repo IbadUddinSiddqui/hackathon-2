@@ -1,7 +1,7 @@
 // app/api/register/route.ts
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { client } from "@/sanity/lib/client";
+import { serverClient as client } from "@/sanity/lib/server-client";
 import { validateEmail, validatePassword, validateName } from "@/utils/validation";
 
 
@@ -50,12 +50,13 @@ if (!validateName(name)) {
     );
   }
 
-    // Create new user
+    // Create new user (role defaults to "user"; admins are promoted via /api/promote)
     const newUser = await sanityclient.create({
       _type: "user",
       name,
       email,
       password: hashedPassword,
+      role: "user",
     });
 
     return NextResponse.json(

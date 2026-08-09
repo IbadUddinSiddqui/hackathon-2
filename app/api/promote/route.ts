@@ -1,12 +1,13 @@
 // app/api/promote/route.ts
-import { client } from "@/sanity/lib/client";
+import { serverClient as client } from "@/sanity/lib/server-client";
 import { auth } from "@/auth";
+import { isAdmin } from "@/lib/admin";
 
 
 export async function POST(req: Request) {
   const session = await auth();
   
-  if (!session || !session.user || session.user.role !== 'admin') {
+  if (!isAdmin(session)) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

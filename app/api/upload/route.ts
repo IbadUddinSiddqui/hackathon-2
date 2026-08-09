@@ -1,7 +1,7 @@
 // app/api/upload/route.ts
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
-import { client } from "@/sanity/lib/client";
+import { serverClient as client } from "@/sanity/lib/server-client";
 
 const sanityclient = client;
 
