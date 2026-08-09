@@ -60,22 +60,22 @@
 - notes: VERIFIED 2026-08-09 — DELIVERY_FEE now imported from lib/constants.ts in app/cart/page.tsx, app/checkout/page.tsx, app/components/Order/Order.tsx (demo, previously hardcoded $5.00), and both API routes. REAL BUG FIXED in app/api/create-checkout-session/route.ts: stored order total was `subtotal - discount` (missing the fee) and the hosted Stripe page never charged delivery — now `total: subtotal - discount + DELIVERY_FEE` and the fee is charged via `shipping_options` (fixed_amount shipping_rate, display_name 'Delivery Fee'). Payment-intent flow already included the fee. grep verify PASS (DELIVERY_FEE in cart, checkout, Order, both API routes; no literal 5 fee anywhere), tsc + eslint clean.
 
 ### [P1-05] Add test runner + npm test script
-- status: todo
+- status: done
 - depends_on: []
 - human_required: false
 - touches: [package.json, vitest.config.ts (new)]
 - done_when: `npm test` exists and runs a trivial passing test successfully.
 - verify: `npm test` exits 0
-- notes:
+- notes: VERIFIED 2026-08-09 — vitest 4.1.10 installed as devDependency. vitest.config.ts created (node env, includes lib/**/*.test.ts + tests/**/*.test.ts, `@` alias → project root via fileURLToPath). `npm test` script = `vitest run`. tests/smoke.test.ts (2 tests incl. @ alias import of DELIVERY_FEE) — `npm test` exits 0 (2/2 passed).
 
 ### [P1-06] Unit tests — discount logic
-- status: todo
+- status: done
 - depends_on: [P1-05]
 - human_required: false
 - touches: [lib/discounts.ts, lib/discounts.test.ts (new)]
 - done_when: tests cover percent, fixed, expired, over-maxUses, and cap-at-subtotal cases.
 - verify: `npm test -- discounts` passes, all 5 cases present
-- notes:
+- notes: VERIFIED 2026-08-09 — lib/discounts.test.ts with 6 tests (percent rounding, fixed value, expired, over-maxUses, cap-at-subtotal, invalid code) mocking @/sanity/lib/server-client. `npm test -- discounts` exits 0, 6/6 passed.
 
 ### [P1-07] Unit tests — stock decrement + webhook idempotency
 - status: todo
