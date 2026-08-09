@@ -132,13 +132,13 @@
 - notes:
 
 ### [P1-13] Add Cash on Delivery checkout option
-- status: todo
+- status: done
 - depends_on: [P1-04]
 - human_required: false
 - touches: [app/checkout/page.tsx, app/api/create-payment-intent/route.ts (or new COD route), sanity/schemaTypes/order.ts]
 - done_when: a customer can complete checkout choosing COD, order is created with correct total (including delivery fee) and a `payment_method: "cod"` field, no Stripe call involved.
 - verify: new test — COD order creation produces correct stored total and status `pending`
-- notes:
+- notes: VERIFIED 2026-08-09 — new route app/api/create-cod-order/route.ts (server-side Sanity pricing + validated discount + DELIVERY_FEE, NO Stripe import) → createPendingOrder gained `paymentMethod: 'card' | 'cod'` → stores payment_method. Order schema gained payment_method field (radio card/cod, default card). Checkout page has a Card/COD selector (radio cards) + CodCheckoutForm (email → POST → redirect /checkout/success?method=cod). Success page is method-aware (Order Placed vs Payment Successful, Suspense-wrapped useSearchParams). tests/cod-order.test.ts — 3 tests (stored total incl. fee + status pending + payment_method cod; discount applied still incl. fee; empty cart rejected) all mock Sanity only (proves no Stripe). npm test 18/18, tsc + eslint clean, /checkout and /checkout/success?method=cod render 200.
 
 ### [P1-14] Business decision — SaaS vs custom-build model
 - status: todo

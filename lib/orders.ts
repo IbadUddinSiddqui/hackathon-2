@@ -68,12 +68,14 @@ export async function createPendingOrder(input: {
   customerEmail?: string;
   discountCode?: string;
   discountAmount?: number;
+  paymentMethod?: 'card' | 'cod';
 }): Promise<{ orderId: string; docId: string }> {
   const orderId = uuidv4();
   const doc = await serverClient.create({
     _type: 'order',
     order_id: orderId,
     status: 'pending',
+    payment_method: input.paymentMethod || 'card',
     customer_email: input.customerEmail || '',
     items: input.items.map((i) => ({
       _key: i.id,
