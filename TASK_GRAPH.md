@@ -2,7 +2,7 @@
 ### Read GRAPH_LOOP_STRATEGY.md first. This file is the state — it gets edited every iteration.
 
 **Field legend:**
-- `status`: todo | in_progress | blocked | done
+- `status`: todo | in_progress | blocked | deferred | done
 - `depends_on`: node IDs that must be `done` before this one is eligible
 - `human_required`: true = agent must never attempt this, only report it
 - `touches`: files/areas relevant to this node (read only these, not the whole repo)
@@ -139,6 +139,7 @@
 - done_when: a customer can complete checkout choosing COD, order is created with correct total (including delivery fee) and a `payment_method: "cod"` field, no Stripe call involved.
 - verify: new test — COD order creation produces correct stored total and status `pending`
 - notes: VERIFIED 2026-08-09 — new route app/api/create-cod-order/route.ts (server-side Sanity pricing + validated discount + DELIVERY_FEE, NO Stripe import) → createPendingOrder gained `paymentMethod: 'card' | 'cod'` → stores payment_method. Order schema gained payment_method field (radio card/cod, default card). Checkout page has a Card/COD selector (radio cards) + CodCheckoutForm (email → POST → redirect /checkout/success?method=cod). Success page is method-aware (Order Placed vs Payment Successful, Suspense-wrapped useSearchParams). tests/cod-order.test.ts — 3 tests (stored total incl. fee + status pending + payment_method cod; discount applied still incl. fee; empty cart rejected) all mock Sanity only (proves no Stripe). npm test 18/18, tsc + eslint clean, /checkout and /checkout/success?method=cod render 200.
+- notes: 2026-08-10 (task-graph-update.md) — status confirmed DONE: COD selector + route + schema, tested.
 
 ### [P1-14] Business decision — SaaS vs custom-build model
 - status: todo
@@ -158,6 +159,24 @@
 - verify: manual — sandbox keys received
 - notes: 2026-08-09 — USER SELECTED SAFEPAY (getsafepay.com). Research confirmed: legit, SBP/State-Bank-of-Pakistan licensed PSP (pilot license 2022, full commercial since), free sandbox with test cards, official Node SDK (@sfpy/node-sdk) + REST API, webhook HMAC-SHA256 signed. Known caveat: docs drift from reality + slow support — hence the recon-first plan. Sandbox account creation + webhook endpoint registration in the Safepay dashboard is the USER's pending action (grab SAFEPAY_API_KEY + SAFEPAY_WEBHOOK_SECRET).
 
+### [P1-15a] Apply for JazzCash merchant account — DEFERRED
+- status: deferred
+- depends_on: []
+- human_required: true
+- touches: [JazzCash merchant portal/application]
+- done_when: merchant application submitted and sandbox/live credentials received
+- verify: manual — credentials received
+- notes: 2026-08-10 (task-graph-update.md) — DEFERRED. Portal repeatedly errors/times out (checked from this network — try mobile data / a PK-based connection before concluding it's dead). A documented nationwide Easypaisa outage occurred June 2026, confirming this ecosystem has real infrastructure instability, not necessarily user error. Deprioritized in favor of the working Safepay+COD path. **Revisit trigger:** once P1-SP-01 (Safepay webhook) is resolved and the site is live in production.
+
+### [P1-15b] Apply for Easypaisa merchant account — DEFERRED
+- status: deferred
+- depends_on: []
+- human_required: true
+- touches: [Easypaisa merchant portal/application]
+- done_when: merchant application submitted and sandbox/live credentials received
+- verify: manual — credentials received
+- notes: 2026-08-10 (task-graph-update.md) — DEFERRED. Same as P1-15a — portal timing out, deprioritized, same revisit trigger.
+
 ### [P1-16] Scaffold local payment-gateway integration
 - status: in_progress
 - depends_on: [P1-15]
@@ -168,6 +187,33 @@
 - notes: 2026-08-09 — SAFEPAY SCAFFOLD BUILT (recon-first, per plan): lib/safepay.ts (createSafepayCheckout POST /order/v1/init — defensive parse of token/redirect_url/tracker shapes; buildCheckoutUrl with HMAC-SHA256 tracker signature; verifySafepaySignature — HMAC-SHA256 over `timestamp + '.' + rawBody` with base64-decoded secret, timing-safe, compares `sha256=<hex>`); app/api/create-safepay-order/route.ts (mirror of create-checkout-session: server-side Sanity pricing + validated discount + DELIVERY_FEE, persists pending order BEFORE redirect, returns Safepay redirectUrl); app/api/payments/safepay/webhook/route.ts (RECON MODE: with no SAFEPAY_WEBHOOK_SECRET logs full headers+raw body and returns 200; VERIFIED MODE once secret set — 401 on bad signature, fulfillment TODO until real payload confirmed); checkout UI Safepay option behind NEXT_PUBLIC_SAFEPAY_ENABLED flag; SAFEPAY_* vars documented in .env.example. REMAINING: user registers webhook URL in Safepay dashboard + runs a sandbox transaction → confirm real payload → then implement fulfillment (stock/email/mark-paid like Stripe webhook) → then test like P1-09.
 - 2026-08-09 UPDATE — STORE SWITCHED TO PKR + STRIPE REMOVED FROM CHECKOUT (user decision): DELIVERY_FEE=200 (Rs) + CURRENCY='PKR'/CURRENCY_SYMBOL='Rs' added to lib/constants.ts; createPendingOrder stores currency from input.currency || CURRENCY (orders default pkr; legacy Stripe routes pass 'usd' explicitly so their stored orders match what Stripe charged); order schema initialValue pkr + payment_method list now Card (Safepay)=safepay / COD=cod; checkout page now Safepay + COD ONLY (Stripe card option removed, StripePayment/CheckOut.tsx + lib/get-stripe.js deleted as dead code — zero references verified); all storefront price displays switched from $ to Rs (cart, checkout, wishlist, products pages, ProductsGrid, ProductSearch, Order demo, admin orders revenue, discount manager Fixed(Rs), formatTotal, email receipts); cart 'Proceed to Checkout' now navigates to /checkout instead of Stripe hosted checkout; tests updated (smoke DELIVERY_FEE=200); tsc + eslint clean, 30/30 tests pass, pages render 200. NOTE: product prices in Sanity still hold old USD numbers — user chose to reprice manually in Sanity Studio; Safepay amount = total*100 paisa.
 
+### [P1-16-jc] JazzCash payment integration — DEFERRED
+- status: deferred
+- depends_on: [P1-15a]
+- human_required: true
+- touches: [app/api/payments/jazzcash/**, app/checkout/page.tsx]
+- done_when: JazzCash integration built once merchant credentials exist (mirror the verified Safepay pattern)
+- verify: manual — sandbox transaction completes
+- notes: 2026-08-10 (task-graph-update.md) — DEFERRED along with P1-15a; blocked on the application anyway. No action needed until the application is revisited.
+
+### [P1-16-ep-wallet] Easypaisa wallet integration — DEFERRED
+- status: deferred
+- depends_on: [P1-15b]
+- human_required: true
+- touches: [app/api/payments/easypaisa/**, app/checkout/page.tsx]
+- done_when: Easypaisa wallet integration built once merchant credentials exist (mirror the verified Safepay pattern)
+- verify: manual — sandbox transaction completes
+- notes: 2026-08-10 (task-graph-update.md) — DEFERRED along with P1-15b; blocked on the application anyway. No action needed until the application is revisited.
+
+### [P1-16-ep-card] Easypaisa card integration — DEFERRED
+- status: deferred
+- depends_on: [P1-15b]
+- human_required: true
+- touches: [app/api/payments/easypaisa/**, app/checkout/page.tsx]
+- done_when: Easypaisa card integration built once merchant credentials exist (mirror the verified Safepay pattern)
+- verify: manual — sandbox transaction completes
+- notes: 2026-08-10 (task-graph-update.md) — DEFERRED along with P1-15b; blocked on the application anyway. No action needed until the application is revisited.
+
 ### [P1-17] Draft legal documents
 - status: done
 - depends_on: []
@@ -176,6 +222,7 @@
 - done_when: draft privacy policy, terms & conditions, and return/exchange policy pages exist and are linked in the footer.
 - verify: pages render at their routes; footer links to all three
 - notes: VERIFIED 2026-08-09 — app/privacy/page.tsx, app/terms/page.tsx, app/returns/page.tsx created (drafts, server components, Header/Footer, marked 'draft for review' for P1-18). Footer HELP section now links /returns (Returns & Exchanges), /terms (Terms & Conditions), /privacy (Privacy Policy) — previously dead '/' links. All three routes return 200. tsc + eslint clean.
+- notes: 2026-08-10 (task-graph-update.md) — status confirmed DONE: drafted + linked in footer. [P1-18] legal review sign-off remains todo/human_required — drafting isn't review.
 
 ### [P1-18] Legal review sign-off
 - status: todo
@@ -183,6 +230,96 @@
 - human_required: true
 - touches: [n/a]
 - done_when: a qualified reviewer has approved the drafted legal pages.
+- verify: manual
+- notes:
+
+### [P1-SP-01] Diagnose Safepay webhook non-delivery
+- status: todo
+- depends_on: []
+- human_required: false (may escalate to human_required if root cause is Safepay-side)
+- touches: [Safepay dashboard Webhook Logs + Logs v2, ngrok session or deployed URL, app/api/payments/safepay/webhook route]
+- done_when: root cause identified — either (a) a URL mismatch between the registered endpoint and the current ngrok/deployed URL, confirmed and fixed, or (b) a genuine Safepay-side delivery failure confirmed via their logs showing zero delivery attempts, escalated to their support with the 3 sandbox transaction IDs as evidence.
+- verify: a new sandbox transaction results in an **observed, undelivered-by-you** webhook arriving in the app's logs — not a manually replayed one.
+- notes: **this is the #1 open risk carried over from the last status report.** Do not consider Phase-1 payments complete until this passes for real.
+
+### [P1-SP-02] Point the webhook at a stable URL
+- status: todo
+- depends_on: []
+- human_required: false
+- touches: [Vercel deployment, Safepay dashboard endpoint config]
+- done_when: the registered webhook endpoint targets a stable Vercel URL, not a rotating ngrok tunnel — eliminates the "URL went stale after a restart" failure class going forward.
+- verify: registered URL in the Safepay dashboard matches the actual deployed URL exactly
+- notes:
+
+### [P1-SP-03] Reprice all products to PKR in Sanity
+- status: todo
+- depends_on: []
+- human_required: true (agent can write the migration; correct target prices need business/client input, not just a currency-symbol fix)
+- touches: [sanity/schemaTypes/product.ts, a new repricing script, Sanity Studio data]
+- done_when: every product's price field reflects an intentional PKR value — not a leftover USD number (e.g. 19.99) being displayed with an "Rs" label slapped on it.
+- verify: spot-check 5 products in Studio and on the live storefront show correct, intentional PKR prices
+- notes:
+
+### [P1-SP-04] Commit the 57 uncommitted files
+- status: todo
+- depends_on: []
+- human_required: false
+- touches: [entire working tree]
+- done_when: `git status` is clean; all Phase-1 work (auth, admin, demo-route deletions, Safepay integration) is committed with clear per-change messages.
+- verify: `git status` clean, `git log` shows the new commits
+- notes: do this one first, independent of everything else — it's pure risk sitting there for no reason.
+
+### [P1-SP-05] Disable legacy Stripe payment routes
+- status: todo
+- depends_on: [P1-SP-01]
+- human_required: false
+- touches: [app/api/create-payment-intent/route.ts, app/api/create-checkout-session/route.ts, app/api/webhook/route.ts]
+- done_when: the old Stripe endpoints are removed or explicitly disabled (return 410) — right now nothing links to them but they're still live and callable by anyone who finds the URL.
+- verify: hitting the old endpoints directly returns a disabled response, not a working payment flow
+- notes: don't do this until P1-SP-01 passes — keep Stripe as a fallback until Safepay is fully proven, not before.
+
+### [P1-SP-06] Confirm receipt email actually lands
+- status: todo
+- depends_on: []
+- human_required: true
+- touches: [inbox check]
+- done_when: a real test order's receipt email is visually confirmed in the inbox — "sent without error" per Brevo's logs isn't the same claim.
+- verify: manual
+- notes:
+
+### [P1-SP-07] Browser-test the admin panel
+- status: todo
+- depends_on: []
+- human_required: true
+- touches: [/adminpanel/orders, /adminpanel/discounts]
+- done_when: both pages have been manually clicked through in a real browser this session and confirmed working — "code complete + tests" isn't the same as "someone actually looked at it."
+- verify: manual
+- notes:
+
+### [P1-SP-08] Deploy to production
+- status: todo
+- depends_on: [P1-SP-01, P1-SP-03, P1-SP-04]
+- human_required: false (domain purchase/DNS may need a human step)
+- touches: [Vercel project settings, DNS, production environment variables]
+- done_when: the site is live on the real domain with production env vars set.
+- verify: production URL loads; one full transaction completes end-to-end on the live URL
+- notes:
+
+### [P1-SP-09] Safepay production mode
+- status: todo
+- depends_on: [P1-SP-01]
+- human_required: true
+- touches: [Safepay merchant account]
+- done_when: merchant account approved for production, live API key obtained, live webhook endpoint registered against the real production domain.
+- verify: manual
+- notes:
+
+### [P1-SP-10] Branding/content pass
+- status: todo
+- depends_on: []
+- human_required: true (client needs to supply real name/logo/products/copy; agent implements once assets exist)
+- touches: [app/layout.tsx, public/ (logo), about/contact pages, product data]
+- done_when: "Bazaar Nest" placeholder is replaced with real client branding, real product catalog, real about/contact pages.
 - verify: manual
 - notes:
 
