@@ -107,6 +107,21 @@ export async function findOrderByOrderId(orderId: string): Promise<OrderDocument
 }
 
 /**
+ * Find an order by its Safepay tracker token. We persist the token on the
+ * order at checkout-creation time, so the webhook can still match the order
+ * even if Safepay's payload only references the tracker (no order_id).
+ */
+export async function findOrderByTrackerToken(
+  token: string
+): Promise<OrderDocument | null> {
+  if (!token) return null;
+  return serverClient.fetch(
+    `*[_type == "order" && safepay_tracker_token == $trackerToken][0]`,
+    { trackerToken: token }
+  );
+}
+
+/**
  * Persist a customer email onto the order if it's missing (e.g. Checkout
  * Session flow, where Stripe's hosted page collects it after order creation).
  */

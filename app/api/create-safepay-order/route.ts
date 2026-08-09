@@ -9,6 +9,7 @@ import { createPendingOrder, fetchProductsByIds } from '@/lib/orders';
 import { validateDiscountCode } from '@/lib/discounts';
 import { DELIVERY_FEE } from '@/lib/constants';
 import { createSafepayCheckout, isSafepayConfigured } from '@/lib/safepay';
+import { serverClient } from '@/sanity/lib/server-client';
 
 export async function POST(request: Request) {
   try {
@@ -66,7 +67,7 @@ export async function POST(request: Request) {
 
     // Persist a pending order in Sanity BEFORE redirecting to Safepay, so the
     // webhook can find it by order_id and mark it paid.
-    const { orderId } = await createPendingOrder({
+    const { orderId, docId } = await createPendingOrder({
       items: orderItems,
       subtotal,
       total,
@@ -80,13 +81,27 @@ export async function POST(request: Request) {
 
     const checkout = await createSafepayCheckout({
       orderId,
-      // Store prices + DELIVERY_FEE are in PKR; Safepay takes the amount in
-      // the lowest currency unit, so multiply by 100 (paisa).
-      amount: Math.round(total * 100),
+      // VERIFIED 2026-08-09 live: Safepay treats `amount` as the MAJOR unit
+      // (rupees). amount=21999 appeared in their dashboard as "PKR 21,999.00"
+      // — NOT "PKR 219.99". So pass the rupee total (2dp), never paisa.
+      amount: Math.round(total * 100) / 100,
       redirectUrl: `${origin}/checkout/success?method=safepay&order_id=${orderId}`,
       cancelUrl: `${origin}/cart`,
       webhookUrl: `${origin}/api/payments/safepay/webhook`,
     });
+
+    // Persist the Safepay tracker token on the order so the webhook can still
+    // find this order by token if its payload doesn't carry our order_id.
+    if (checkout.token) {
+      try {
+        await serverClient
+          .patch(docId)
+          .setIfMissing({ safepay_tracker_token: checkout.token })
+          .commit();
+      } catch (err: any) {
+        console.error('Failed to persist Safepay tracker token:', err.message);
+      }
+    }
 
     return NextResponse.json({ redirectUrl: checkout.redirectUrl, orderId });
   } catch (error: any) {

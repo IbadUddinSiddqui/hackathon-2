@@ -19,6 +19,7 @@ import { NextResponse } from 'next/server';
 import { verifySafepaySignature } from '@/lib/safepay';
 import {
   findOrderByOrderId,
+  findOrderByTrackerToken,
   markOrderPaid,
   persistCustomerEmail,
   decrementProductStock,
@@ -106,11 +107,9 @@ async function fulfilOrder(
     }).catch((err) => console.error('Receipt email failed:', err.message));
   }
 
-  // 3. Mark paid LAST, atomically (ifRevisionId prevents double-fulfil).
-  const claimed = await markOrderPaid(order, {
-    sessionId: safepayIds.trackerToken,
-    paymentIntentId: safepayIds.reference,
-  });
+  // 3. Mark paid LAST, atomically (ifRevisionId prevents double-fulfil). No
+  //    Stripe IDs involved — Safepay identifiers are persisted separately below.
+  const claimed = await markOrderPaid(order, {});
   if (!claimed) {
     console.log('Safepay: order already claimed by a concurrent webhook:', order.order_id);
     return;
@@ -147,6 +146,11 @@ export async function POST(request: Request) {
   const signature = headers['x-sfpy-signature'] || headers['x-safepay-signature'] || null;
   const timestamp = headers['x-sfpy-timestamp'] || headers['x-safepay-timestamp'] || null;
   const hasSecret = Boolean(process.env.SAFEPAY_WEBHOOK_SECRET);
+
+  // ALWAYS log every request (headers + body) so ANY Safepay delivery — signed
+  // or not — is fully captured for recon. Remove before production hardening.
+  console.log('[Safepay webhook][ALL] headers:', JSON.stringify(headers));
+  console.log('[Safepay webhook][ALL] body:', rawBody.slice(0, LOG_BODY_LIMIT));
 
   // RECON MODE — accept + log everything so we learn the real payload before
   // trusting any assumed shape.
@@ -199,27 +203,29 @@ export async function POST(request: Request) {
   const isSuccess = /(success|succeeded|completed|capture|paid)/.test(eventName);
   const isFailure = /(failed|cancelled|canceled|declined|rejected|error)/.test(eventName);
 
-  if (!orderId) {
-    console.warn('[Safepay webhook] no order_id in verified payload — nothing to fulfil');
-    return NextResponse.json({ received: true });
-  }
+  // Match by order_id first, then fall back to the Safepay tracker token
+  // (persisted on the order at checkout-creation time).
+  const order = orderId ? await findOrderByOrderId(orderId) : null;
+  const matchedOrder =
+    order ?? (trackerToken ? await findOrderByTrackerToken(trackerToken) : null);
 
-  const order = await findOrderByOrderId(orderId);
-
-  if (!order) {
-    console.warn('[Safepay webhook] order not found for order_id:', orderId);
+  if (!matchedOrder) {
+    console.warn('[Safepay webhook] order not found', {
+      orderId: orderId || '(none)',
+      trackerToken: trackerToken || '(none)',
+    });
     return NextResponse.json({ received: true });
   }
 
   if (isSuccess) {
-    await fulfilOrder(order, { trackerToken, reference }, customerEmail);
+    await fulfilOrder(matchedOrder, { trackerToken, reference }, customerEmail);
   } else if (isFailure) {
     // Payment failed — mark the order failed (only if still pending) so the
     // admin panel reflects reality. Stock was never decremented for it.
-    console.log('[Safepay webhook] payment failure event — marking order failed:', orderId);
-    if (order.status === 'pending') {
+    console.log('[Safepay webhook] payment failure event — marking order failed:', matchedOrder.order_id);
+    if (matchedOrder.status === 'pending') {
       try {
-        await serverClient.patch(order._id).set({ status: 'failed' }).commit();
+        await serverClient.patch(matchedOrder._id).set({ status: 'failed' }).commit();
       } catch (err: any) {
         console.error('[Safepay webhook] failed to mark order failed:', err.message);
       }
