@@ -1,5 +1,5 @@
 "use client";
-import React from 'react';
+import React, { useState } from 'react';
 import { useCartStore } from '@/lib/stores/cartStore';
 import Image from 'next/image';
 import getStripe  from '@/lib/get-stripe';
@@ -9,15 +9,53 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
+import { DELIVERY_FEE } from '@/lib/constants';
 
 const CartPage = () => {
-  const { items, updateQuantity, removeItem } = useCartStore();
+  const { items, updateQuantity, removeItem, discountCode, discountAmount, setDiscount, clearDiscount } = useCartStore();
+  const [codeInput, setCodeInput] = useState('');
+  const [applyingCode, setApplyingCode] = useState(false);
+  const [codeError, setCodeError] = useState<string | null>(null);
 
   // Calculate totals
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const discount = 10; // Example discount
-  const deliveryFee = 5; // Example delivery fee
+  const discount = discountCode ? discountAmount : 0;
+  const deliveryFee = DELIVERY_FEE;
   const total = subtotal - discount + deliveryFee;
+
+  const applyDiscountCode = async () => {
+    if (!codeInput.trim()) {
+      setCodeError('Enter a discount code');
+      return;
+    }
+    setApplyingCode(true);
+    setCodeError(null);
+    try {
+      const response = await fetch('/api/validate-discount', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: codeInput, subtotal }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to validate code');
+      if (!data.valid) {
+        setCodeError(data.message || 'Invalid discount code');
+        clearDiscount();
+        return;
+      }
+      setDiscount(data.code, data.discountAmount);
+    } catch (error: any) {
+      setCodeError(error.message || 'Failed to validate code');
+    } finally {
+      setApplyingCode(false);
+    }
+  };
+
+  const removeDiscountCode = () => {
+    clearDiscount();
+    setCodeInput('');
+    setCodeError(null);
+  };
 
   const handleCheckout = async () => {
     const stripe = await getStripe();
@@ -30,11 +68,14 @@ const CartPage = () => {
         },
         body: JSON.stringify({
           items: items.map(item => ({
+            id: item._id,
             name: item.name,
             price: item.price,
             quantity: item.quantity,
+            size: item.size,
             imageUrl: item.imageUrl,
           })),
+          discountCode: discountCode || undefined,
         }),
       });
 
@@ -166,9 +207,11 @@ const CartPage = () => {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground dark:text-gray-400">Discount</span>
+                    <span className="text-muted-foreground dark:text-gray-400">
+                      Discount{discountCode ? ` (${discountCode})` : ''}
+                    </span>
                     <span className="text-red-500 text-xl font-extrabold">
-                      -${discount.toFixed(2)}
+                      {discount > 0 ? `-$${discount.toFixed(2)}` : '$0.00'}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -184,14 +227,46 @@ const CartPage = () => {
                     </span>
                   </div>
                   <Separator className="my-4 dark:bg-gray-700" />
-                  <div className="flex items-center gap-2">
-                    <Input
-                      placeholder="Enter discount code"
-                      className="w-full bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-                    />
-                    <Button variant="outline" className="h-8 dark:bg-gray-700 dark:text-gray-100">
-                      Apply
-                    </Button>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <Input
+                        placeholder="Enter discount code"
+                        value={codeInput}
+                        onChange={(e) => {
+                          setCodeInput(e.target.value);
+                          setCodeError(null);
+                        }}
+                        className="w-full bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+                      />
+                      {discountCode ? (
+                        <Button
+                          variant="outline"
+                          onClick={removeDiscountCode}
+                          className="h-8 dark:bg-gray-700 dark:text-gray-100"
+                        >
+                          Remove
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          onClick={applyDiscountCode}
+                          disabled={applyingCode}
+                          className="h-8 dark:bg-gray-700 dark:text-gray-100"
+                        >
+                          {applyingCode ? '...' : 'Apply'}
+                        </Button>
+                      )}
+                    </div>
+                    {codeError && (
+                      <p className="text-xs text-red-500" role="alert">
+                        {codeError}
+                      </p>
+                    )}
+                    {discountCode && !codeError && (
+                      <p className="text-xs text-green-600 dark:text-green-400">
+                        {discountCode} applied — save ${discount.toFixed(2)}
+                      </p>
+                    )}
                   </div>
                 </div>
               </CardContent>

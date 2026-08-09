@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input" // Assuming you have an Input component
+import { DELIVERY_FEE } from "@/lib/constants"
 
 export default function Order() {
   return (
@@ -24,7 +25,7 @@ export default function Order() {
           
           <div className="flex justify-between">
             <span className="text-muted-foreground">Delivery Fee</span>
-            <span className="text-xl font-extrabold">$5.00</span>
+            <span className="text-xl font-extrabold">${DELIVERY_FEE.toFixed(2)}</span>
           </div>
           
           <div className="flex justify-between font-semibold">

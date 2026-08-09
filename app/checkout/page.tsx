@@ -8,18 +8,24 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { StripePayment } from '../components/CheckOut/CheckOut';
+import { DELIVERY_FEE } from '@/lib/constants';
 
 const CheckoutPage = () => {
-  const { items } = useCartStore();
+  const { items, discountCode, discountAmount } = useCartStore();
 
   // Calculate order summary values
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const discount = 10; // Example discount amount
-  const deliveryFee = 5; // Example delivery fee
+  const discount = discountCode ? discountAmount : 0;
+  const deliveryFee = DELIVERY_FEE;
   const total = subtotal - discount + deliveryFee;
 
   // Stripe expects amounts in cents. Multiply dollars by 100.
   const stripeAmount = Math.round(total * 100);
+
+  // Scroll the user down to the payment form when they click "Proceed to Payment".
+  const scrollToPayment = () => {
+    document.getElementById('payment-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
 
   return (
     <>
@@ -43,8 +49,12 @@ const CheckoutPage = () => {
                   </span>
                 </div>
                 <div className="flex justify-between mb-4">
-                  <span className="text-gray-600 dark:text-gray-400">Discount</span>
-                  <span className="font-bold text-red-500">-${discount.toFixed(2)}</span>
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Discount{discountCode ? ` (${discountCode})` : ''}
+                  </span>
+                  <span className="font-bold text-red-500">
+                    {discount > 0 ? `-$${discount.toFixed(2)}` : '$0.00'}
+                  </span>
                 </div>
                 <div className="flex justify-between mb-4">
                   <span className="text-gray-600 dark:text-gray-400">Delivery Fee</span>
@@ -61,13 +71,25 @@ const CheckoutPage = () => {
                 </div>
               </CardContent>
               <CardFooter className="p-4">
-                <Button className="w-full">Proceed to Payment</Button>
+                <Button className="w-full" onClick={scrollToPayment} disabled={items.length === 0}>
+                  Proceed to Payment
+                </Button>
               </CardFooter>
             </Card>
 
             {/* Stripe Payment Form */}
-            <div >
-              <StripePayment amount={stripeAmount} />
+            <div id="payment-form">
+              <StripePayment
+                amount={stripeAmount}
+                discountCode={discountCode || undefined}
+                items={items.map(item => ({
+                  id: item._id,
+                  name: item.name,
+                  price: item.price,
+                  quantity: item.quantity,
+                  size: item.size,
+                }))}
+              />
             </div>
           </div>
         </div>

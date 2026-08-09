@@ -51,13 +51,13 @@
 - notes:
 
 ### [P1-04] Fix delivery-fee inconsistency
-- status: todo
+- status: done
 - depends_on: []
 - human_required: false
 - touches: [lib/constants.ts, app/cart/page.tsx, app/checkout/page.tsx, app/api/create-checkout-session/route.ts, app/api/create-payment-intent/route.ts]
 - done_when: both checkout flows import `DELIVERY_FEE` from `lib/constants.ts` (no hardcoded `$5`), and both flows include it in the stored order total.
 - verify: `grep -rn "DELIVERY_FEE" app/` shows it used in cart, checkout, and both API routes; no literal `5` fee elsewhere
-- notes:
+- notes: VERIFIED 2026-08-09 — DELIVERY_FEE now imported from lib/constants.ts in app/cart/page.tsx, app/checkout/page.tsx, app/components/Order/Order.tsx (demo, previously hardcoded $5.00), and both API routes. REAL BUG FIXED in app/api/create-checkout-session/route.ts: stored order total was `subtotal - discount` (missing the fee) and the hosted Stripe page never charged delivery — now `total: subtotal - discount + DELIVERY_FEE` and the fee is charged via `shipping_options` (fixed_amount shipping_rate, display_name 'Delivery Fee'). Payment-intent flow already included the fee. grep verify PASS (DELIVERY_FEE in cart, checkout, Order, both API routes; no literal 5 fee anywhere), tsc + eslint clean.
 
 ### [P1-05] Add test runner + npm test script
 - status: todo
