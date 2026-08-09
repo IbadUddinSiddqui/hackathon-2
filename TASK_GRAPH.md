@@ -150,22 +150,22 @@
 - notes:
 
 ### [P1-15] Select and begin onboarding with a Pakistan-viable payment processor
-- status: todo
+- status: in_progress
 - depends_on: []
 - human_required: true
 - touches: [n/a — external account application: PayFast, or alternatively JazzCash/Easypaisa direct]
 - done_when: a merchant account is approved and sandbox/test API credentials are available.
 - verify: manual — sandbox keys received
-- notes:
+- notes: 2026-08-09 — USER SELECTED SAFEPAY (getsafepay.com). Research confirmed: legit, SBP/State-Bank-of-Pakistan licensed PSP (pilot license 2022, full commercial since), free sandbox with test cards, official Node SDK (@sfpy/node-sdk) + REST API, webhook HMAC-SHA256 signed. Known caveat: docs drift from reality + slow support — hence the recon-first plan. Sandbox account creation + webhook endpoint registration in the Safepay dashboard is the USER's pending action (grab SAFEPAY_API_KEY + SAFEPAY_WEBHOOK_SECRET).
 
 ### [P1-16] Scaffold local payment-gateway integration
-- status: todo
+- status: in_progress
 - depends_on: [P1-15]
 - human_required: false
-- touches: [app/api/create-*-payment/route.ts (new), lib/payments/ (new)]
+- touches: [app/api/create-safepay-order/route.ts (new), app/api/payments/safepay/webhook/route.ts (new), lib/safepay.ts (new), app/components/CheckOut/SafepayPayment.tsx (new), app/checkout/page.tsx]
 - done_when: integration code exists behind a feature flag, using sandbox credentials, mirroring the same server-side-pricing/webhook-verified pattern already used for Stripe.
 - verify: sandbox test transaction completes and fulfills an order via webhook, same as P1-09's pattern
-- notes:
+- notes: 2026-08-09 — SAFEPAY SCAFFOLD BUILT (recon-first, per plan): lib/safepay.ts (createSafepayCheckout POST /order/v1/init — defensive parse of token/redirect_url/tracker shapes; buildCheckoutUrl with HMAC-SHA256 tracker signature; verifySafepaySignature — HMAC-SHA256 over `timestamp + '.' + rawBody` with base64-decoded secret, timing-safe, compares `sha256=<hex>`); app/api/create-safepay-order/route.ts (mirror of create-checkout-session: server-side Sanity pricing + validated discount + DELIVERY_FEE, persists pending order BEFORE redirect, returns Safepay redirectUrl); app/api/payments/safepay/webhook/route.ts (RECON MODE: with no SAFEPAY_WEBHOOK_SECRET logs full headers+raw body and returns 200; VERIFIED MODE once secret set — 401 on bad signature, fulfillment TODO until real payload confirmed); checkout UI Safepay option behind NEXT_PUBLIC_SAFEPAY_ENABLED flag; SAFEPAY_* vars documented in .env.example. REMAINING: user registers webhook URL in Safepay dashboard + runs a sandbox transaction → confirm real payload → then implement fulfillment (stock/email/mark-paid like Stripe webhook) → then test like P1-09.
 
 ### [P1-17] Draft legal documents
 - status: done

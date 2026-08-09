@@ -9,6 +9,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { StripePayment, type CheckoutItem } from '../components/CheckOut/CheckOut';
+import { SafepayPayment } from '../components/CheckOut/SafepayPayment';
 import { DELIVERY_FEE } from '@/lib/constants';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -96,7 +97,12 @@ function CodCheckoutForm({
 
 const CheckoutPage = () => {
   const { items, discountCode, discountAmount } = useCartStore();
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'cod'>('card');
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'safepay' | 'cod'>('card');
+
+  // Safepay is behind a feature flag until it's live: set
+  // NEXT_PUBLIC_SAFEPAY_ENABLED=true in .env.local to show the option.
+  const safepayEnabled =
+    process.env.NEXT_PUBLIC_SAFEPAY_ENABLED === 'true';
 
   // Calculate order summary values
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -183,6 +189,25 @@ const CheckoutPage = () => {
                         Pay now with Stripe
                       </span>
                     </button>
+                    {safepayEnabled && (
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod('safepay')}
+                        aria-pressed={paymentMethod === 'safepay'}
+                        className={`rounded-lg border p-3 text-left text-sm transition ${
+                          paymentMethod === 'safepay'
+                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/10 ring-1 ring-blue-500'
+                            : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500'
+                        }`}
+                      >
+                        <span className="block font-semibold text-gray-900 dark:text-gray-100">
+                          Card (Safepay)
+                        </span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          Pay with local cards (PK)
+                        </span>
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={() => setPaymentMethod('cod')}
@@ -223,6 +248,11 @@ const CheckoutPage = () => {
                   amount={stripeAmount}
                   discountCode={discountCode || undefined}
                   items={checkoutItems}
+                />
+              ) : paymentMethod === 'safepay' && safepayEnabled ? (
+                <SafepayPayment
+                  items={checkoutItems}
+                  discountCode={discountCode || undefined}
                 />
               ) : (
                 <CodCheckoutForm items={checkoutItems} discountCode={discountCode || undefined} />
