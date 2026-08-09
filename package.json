@@ -25,6 +25,7 @@
     "@sanity/client": "^6.27.2",
     "@sanity/image-url": "^1.1.0",
     "@sanity/vision": "^3.71.2",
+    "@sentry/nextjs": "^10.69.0",
     "@stripe/react-stripe-js": "^3.1.1",
     "@stripe/stripe-js": "^5.6.0",
     "@types/nodemailer": "^6.4.17",

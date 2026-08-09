@@ -114,13 +114,13 @@
 - notes: VERIFIED 2026-08-09 (partial) — .github/workflows/ci.yml created: runs-on ubuntu-latest, Node 20 (recommended for Next 15; avoids the Node 22 Windows EPERM build bug documented in P1-03), npm ci, then Lint / Typecheck / Unit tests / Build steps (all 4 present, 7 steps total). YAML validated with js-yaml (jobs: check, all 4 required steps present). Push-execution half of verify needs the repo pushed to GitHub — pending user push; workflow will run on every push/PR.
 
 ### [P1-11] Error tracking integration
-- status: todo
+- status: done
 - depends_on: []
 - human_required: false
 - touches: [sentry.client.config.ts, sentry.server.config.ts (new), app/api/**]
 - done_when: Sentry SDK wired into both the Next.js app and API routes.
 - verify: `npm run build` succeeds with Sentry config present
-- notes:
+- notes: VERIFIED 2026-08-09 — @sentry/nextjs 10.69.0 installed. Wired: sentry.client.config.ts (NEXT_PUBLIC_SENTRY_DSN, no replay), sentry.server.config.ts + sentry.edge.config.ts (SENTRY_DSN), instrumentation.ts (register() imports per-runtime configs + `onRequestError = Sentry.captureRequestError` per Sentry 10 recommended hook), app/global-error.tsx (client boundary reporting render errors), next.config.ts wrapped with withSentryConfig (sourcemaps+release disabled without SENTRY_AUTH_TOKEN, errorHandler warns instead of failing, telemetry off). .env.example created documenting ALL env vars incl. the new SENTRY_* + NEXT_PUBLIC_SENTRY_DSN. Production build PASSED under Node 20 (~15 min on this slow FS — build must be run detached with log polling since it exceeds the 600s agent cap; dev server must be stopped first, it locks .next). tsc + eslint clean. Sentry noted: client config deprecation (sentry.client.config.ts → instrumentation-client.ts for Turbopack, Next 15.1.6 doesn't support it yet — safe to defer).
 
 ### [P1-12] Confirm error tracking actually captures errors
 - status: todo
