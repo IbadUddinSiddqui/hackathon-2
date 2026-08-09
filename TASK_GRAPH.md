@@ -42,13 +42,13 @@
 - notes:
 
 ### [P1-03] Remove dead code
-- status: todo
+- status: done
 - depends_on: []
 - human_required: false
 - touches: [hackathon_3_backend_server/, app/components/Payments/, auth.config.ts, app/category.tsx, app/product.tsx]
 - done_when: all listed dead/duplicate files are deleted; nothing in the live app imports them.
 - verify: `npm run build` succeeds; `grep -rn "components/Payments\|auth.config" app/ lib/` returns no matches
-- notes:
+- notes: VERIFIED 2026-08-10 — all listed dead files were already gone (side effects of earlier nodes): hackathon_3_backend_server (submodule — no gitlink in HEAD, no .gitmodules file, zero references), app/components/Payments/ (removed in PKR switch), auth.config.ts (removed in auth consolidation), app/category.tsx + app/product.tsx (removed in demo-route cleanup). app/components/CheckOut/ now contains only live SafepayPayment.tsx. Both verify greps PASS (exit 1 = no matches): `grep -rn "components/Payments|auth.config" app/ lib/` and broader scan for get-stripe|CheckOut/CheckOut|@/app/category|@/app/product|hackathon_3. `npm run build` PASSED (Next 15.1.6, 36 routes, ✓ Compiled successfully, types lint clean, static 36/36; only cosmetic Tailwind `delay-[0]` warnings + known Sentry client-config deprecation note).
 
 ### [P1-04] Fix delivery-fee inconsistency
 - status: done
