@@ -158,6 +158,7 @@
 - done_when: a merchant account is approved and sandbox/test API credentials are available.
 - verify: manual — sandbox keys received
 - notes: 2026-08-09 — USER SELECTED SAFEPAY (getsafepay.com). Research confirmed: legit, SBP/State-Bank-of-Pakistan licensed PSP (pilot license 2022, full commercial since), free sandbox with test cards, official Node SDK (@sfpy/node-sdk) + REST API, webhook HMAC-SHA256 signed. Known caveat: docs drift from reality + slow support — hence the recon-first plan. Sandbox account creation + webhook endpoint registration in the Safepay dashboard is the USER's pending action (grab SAFEPAY_API_KEY + SAFEPAY_WEBHOOK_SECRET).
+- 2026-08-10 — Sandbox credentials received (SAFEPAY_API_KEY + SAFEPAY_WEBHOOK_SECRET in .env.local) and 3 real sandbox test payments captured (test card 4111…1111, e.g. PKR 21,999). done_when met in sandbox. Still formal status in_progress: merchant approval + production keys (P1-SP-09) remain.
 
 ### [P1-15a] Apply for JazzCash merchant account — DEFERRED
 - status: deferred
@@ -178,7 +179,7 @@
 - notes: 2026-08-10 (task-graph-update.md) — DEFERRED. Same as P1-15a — portal timing out, deprioritized, same revisit trigger.
 
 ### [P1-16] Scaffold local payment-gateway integration
-- status: in_progress
+- status: blocked
 - depends_on: [P1-15]
 - human_required: false
 - touches: [app/api/create-safepay-order/route.ts (new), app/api/payments/safepay/webhook/route.ts (new), lib/safepay.ts (new), app/components/CheckOut/SafepayPayment.tsx (new), app/checkout/page.tsx]
@@ -186,6 +187,7 @@
 - verify: sandbox test transaction completes and fulfills an order via webhook, same as P1-09's pattern
 - notes: 2026-08-09 — SAFEPAY SCAFFOLD BUILT (recon-first, per plan): lib/safepay.ts (createSafepayCheckout POST /order/v1/init — defensive parse of token/redirect_url/tracker shapes; buildCheckoutUrl with HMAC-SHA256 tracker signature; verifySafepaySignature — HMAC-SHA256 over `timestamp + '.' + rawBody` with base64-decoded secret, timing-safe, compares `sha256=<hex>`); app/api/create-safepay-order/route.ts (mirror of create-checkout-session: server-side Sanity pricing + validated discount + DELIVERY_FEE, persists pending order BEFORE redirect, returns Safepay redirectUrl); app/api/payments/safepay/webhook/route.ts (RECON MODE: with no SAFEPAY_WEBHOOK_SECRET logs full headers+raw body and returns 200; VERIFIED MODE once secret set — 401 on bad signature, fulfillment TODO until real payload confirmed); checkout UI Safepay option behind NEXT_PUBLIC_SAFEPAY_ENABLED flag; SAFEPAY_* vars documented in .env.example. REMAINING: user registers webhook URL in Safepay dashboard + runs a sandbox transaction → confirm real payload → then implement fulfillment (stock/email/mark-paid like Stripe webhook) → then test like P1-09.
 - 2026-08-09 UPDATE — STORE SWITCHED TO PKR + STRIPE REMOVED FROM CHECKOUT (user decision): DELIVERY_FEE=200 (Rs) + CURRENCY='PKR'/CURRENCY_SYMBOL='Rs' added to lib/constants.ts; createPendingOrder stores currency from input.currency || CURRENCY (orders default pkr; legacy Stripe routes pass 'usd' explicitly so their stored orders match what Stripe charged); order schema initialValue pkr + payment_method list now Card (Safepay)=safepay / COD=cod; checkout page now Safepay + COD ONLY (Stripe card option removed, StripePayment/CheckOut.tsx + lib/get-stripe.js deleted as dead code — zero references verified); all storefront price displays switched from $ to Rs (cart, checkout, wishlist, products pages, ProductsGrid, ProductSearch, Order demo, admin orders revenue, discount manager Fixed(Rs), formatTotal, email receipts); cart 'Proceed to Checkout' now navigates to /checkout instead of Stripe hosted checkout; tests updated (smoke DELIVERY_FEE=200); tsc + eslint clean, 30/30 tests pass, pages render 200. NOTE: product prices in Sanity still hold old USD numbers — user chose to reprice manually in Sanity Studio; Safepay amount = total*100 paisa.
+- 2026-08-10 — CODE COMPLETE + FULFILLMENT PROVEN, but status blocked: the node's verify (a real sandbox transaction fulfills an order via an undelivered-by-us webhook) is blocked on Safepay's sandbox not delivering webhooks — same root cause as P1-SP-01. The full fulfillment chain WAS proven via a validly-signed webhook replayed through ngrok (order 2afd5855 → paid, stock 48→47, receipt emailed). Real-delivery confirmation moves to production (P1-SP-09).
 
 ### [P1-16-jc] JazzCash payment integration — DEFERRED
 - status: deferred
@@ -234,22 +236,23 @@
 - notes:
 
 ### [P1-SP-01] Diagnose Safepay webhook non-delivery
-- status: todo
+- status: blocked
 - depends_on: []
-- human_required: false (may escalate to human_required if root cause is Safepay-side)
+- human_required: true (root cause confirmed Safepay-side 2026-08-10 — escalation to their support is a human action)
 - touches: [Safepay dashboard Webhook Logs + Logs v2, ngrok session or deployed URL, app/api/payments/safepay/webhook route]
 - done_when: root cause identified — either (a) a URL mismatch between the registered endpoint and the current ngrok/deployed URL, confirmed and fixed, or (b) a genuine Safepay-side delivery failure confirmed via their logs showing zero delivery attempts, escalated to their support with the 3 sandbox transaction IDs as evidence.
 - verify: a new sandbox transaction results in an **observed, undelivered-by-you** webhook arriving in the app's logs — not a manually replayed one.
 - notes: **this is the #1 open risk carried over from the last status report.** Do not consider Phase-1 payments complete until this passes for real.
+- notes: 2026-08-10 — DIAGNOSIS COMPLETE, root cause = path (b) SAFEPAY-SIDE. Evidence: (1) user confirmed Safepay dashboard webhook logs are EMPTY (zero delivery attempts ever made); (2) our endpoint provably reachable — POST via the ngrok URL returns 401 on unsigned body (= HMAC rejection working) and the full fulfillment chain (find order → decrement stock → email receipt → mark paid, idempotent + revision-locked) was PROVEN by replaying a validly-signed success webhook through ngrok (order 2afd5855 → paid, stock 48→47, receipt sent); (3) PUBLIC_BASE_URL matches the ngrok URL exactly, SAFEPAY_WEBHOOK_SECRET set, endpoint registered in their dashboard. Conclusion: Safepay sandbox simply does not deliver webhooks for this account (sandbox limitation or merchant-level setting). Verify cannot pass in sandbox — real delivery requires production mode (P1-SP-09). ESCALATION (user action): email support@getsafepay.com with the 3 successful sandbox payment tracker IDs (known one: track_7524538c-7ece-452a-b2d3-2c8f89358fab — PKR 21,999 captured) asking why sandbox webhooks never fire.
 
 ### [P1-SP-02] Point the webhook at a stable URL
-- status: todo
+- status: blocked
 - depends_on: []
 - human_required: false
 - touches: [Vercel deployment, Safepay dashboard endpoint config]
 - done_when: the registered webhook endpoint targets a stable Vercel URL, not a rotating ngrok tunnel — eliminates the "URL went stale after a restart" failure class going forward.
 - verify: registered URL in the Safepay dashboard matches the actual deployed URL exactly
-- notes:
+- notes: 2026-08-10 — BLOCKED: no stable URL exists yet. The only reachable URL is the rotating ngrok tunnel (steed-hangout-smitten.ngrok-free.dev); a stable Vercel URL requires P1-SP-08 deploy, itself blocked on P1-SP-01. The ngrok URL goes stale on every restart — this exact failure class stays open until deployment.
 
 ### [P1-SP-03] Reprice all products to PKR in Sanity
 - status: todo
@@ -270,13 +273,14 @@
 - notes: VERIFIED 2026-08-10 — `git status --short` = 0 lines (clean), 10 new commits in `git log`. Committed in 10 logical groups with per-change messages (all `[P1-SP-04]` except the gitignore chore): (1) .gitignore — dev-server/ngrok logs excluded (log files were busy being written by the running dev server + ngrok, so they're ignored rather than deleted — `git status` shows none of them); (2) auth consolidation (auth.ts, next-auth.d.ts, [...nextauth]/route, promote/register/upload, legacy signin/signup API pages deleted); (3) demo routes removed (chart, Charts, forms, tables, ui); (4) admin panel (orders + discounts pages, lib/admin.ts); (5) discount-code system (lib/discounts.ts, lib/discount-code-admin.ts, routes, schema, tests); (6) sanity server-client + schema wiring + scripts; (7) order refund/idempotency tests; (8) docs (PROJECT_BRIEF/DETAILS, DEPLOYMENT, knowledge, GRAPH_LOOP_STRATEGY); (9) misc UI/config (header, sidebar, cart, typesense, deps, webhook route); (10) TASK_GRAPH.md + task-graph-update.md applied.
 
 ### [P1-SP-05] Disable legacy Stripe payment routes
-- status: todo
+- status: blocked
 - depends_on: [P1-SP-01]
 - human_required: false
 - touches: [app/api/create-payment-intent/route.ts, app/api/create-checkout-session/route.ts, app/api/webhook/route.ts]
 - done_when: the old Stripe endpoints are removed or explicitly disabled (return 410) — right now nothing links to them but they're still live and callable by anyone who finds the URL.
 - verify: hitting the old endpoints directly returns a disabled response, not a working payment flow
 - notes: don't do this until P1-SP-01 passes — keep Stripe as a fallback until Safepay is fully proven, not before.
+- notes: 2026-08-10 — BLOCKED on P1-SP-01 (blocked). Per this node's own note, Stripe stays as the live-but-unlinked fallback until Safepay is proven in production. Revisit after P1-SP-09.
 
 ### [P1-SP-06] Confirm receipt email actually lands
 - status: todo
@@ -297,13 +301,13 @@
 - notes:
 
 ### [P1-SP-08] Deploy to production
-- status: todo
+- status: blocked
 - depends_on: [P1-SP-01, P1-SP-03, P1-SP-04]
 - human_required: false (domain purchase/DNS may need a human step)
 - touches: [Vercel project settings, DNS, production environment variables]
 - done_when: the site is live on the real domain with production env vars set.
 - verify: production URL loads; one full transaction completes end-to-end on the live URL
-- notes:
+- notes: 2026-08-10 — BLOCKED on P1-SP-01 (blocked) + P1-SP-03 (human reprice). DEPLOYMENT.md runbook is ready; no Vercel project exists yet. Unblocks when Safepay webhook delivery is proven (P1-SP-01/P1-SP-09) and prices are repriced (P1-SP-03).
 
 ### [P1-SP-09] Safepay production mode
 - status: todo
