@@ -345,7 +345,7 @@
 - [ ] **P2-EPIC-03** WhatsApp + SMS order notifications
 - [x] **P2-EPIC-04** SEO pass — metadata, Product structured data, sitemap, OG images — EXPANDED + COMPLETED 2026-08-10 (P2-SEO-01..05)
 - [x] **P2-EPIC-05** Rate limiting across auth/discount/payment endpoints — EXPANDED + COMPLETED 2026-08-10 (P2-RL-01..03)
-- [ ] **P2-EPIC-06** Automatic search-index sync (webhook-triggered, not manual script)
+- [x] **P2-EPIC-06** Automatic search-index sync (webhook-triggered, not manual script) — EXPANDED + COMPLETED 2026-08-10 (P2-SS-01..02)
 - [ ] **P2-EPIC-07** Live performance audit (Lighthouse) + fixes
 
 ### P2-EPIC-01 — expanded nodes (Product management admin UI)
@@ -489,6 +489,26 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - done_when: all four card/COD order-creation endpoints return 429 beyond 10/min/IP; webhooks (server-to-server, signature-verified) are NOT rate-limited.
 - verify: `npm test -- rate-limit` passes; tsc clean
 - notes: VERIFIED 2026-08-10 — guards added to all four; webhooks intentionally untouched (they authenticate via signature, not IP).
+
+### P2-EPIC-06 — expanded nodes (Automatic search-index sync) — ALL DONE 2026-08-10
+
+### [P2-SS-01] Reusable Typesense sync lib
+- status: done
+- depends_on: []
+- human_required: false
+- touches: [lib/search-sync.ts (new), lib/search-sync.test.ts (new), lib/typesense.ts]
+- done_when: lib exposes toTypesenseDocument (pure), ensureProductsCollection, syncProductToSearch, removeProductFromSearch, syncAllProducts — reusing the shared Sanity server client (no hardcoded project id like scripts/syncProducts.ts).
+- verify: `npm test -- search-sync` passes
+- notes: VERIFIED 2026-08-10 — 4/4 transform tests (mapping, defaults, no-images skip, unix timestamps).
+
+### [P2-SS-02] Sanity webhook → Typesense sync endpoint
+- status: done
+- depends_on: [P2-SS-01]
+- human_required: false
+- touches: [app/api/webhooks/sanity/route.ts (new), lib/sanity-webhook.ts (new), lib/sanity-webhook.test.ts (new)]
+- done_when: POST /api/webhooks/sanity verifies x-sanity-webhook-signature (HMAC-SHA256, timing-safe), syncs on create/update, deletes on delete, ignores non-product types; GET answers the test ping; SANITY_WEBHOOK_SECRET generated and added to .env.local.
+- verify: `npm test -- sanity-webhook` passes; tsc clean; curl POST without signature returns 401
+- notes: VERIFIED 2026-08-10 — 6/6 signature tests; live curl no-sig → 401. REMAINING (human/deploy): create the webhook in Sanity dashboard (Dataset production, trigger product create/update/delete, URL <PUBLIC_BASE_URL>/api/webhooks/sanity, secret = the SANITY_WEBHOOK_SECRET in .env.local), then restart the deployed server with the env var.
 
 ## PHASE 3 — Professional (epics only)
 
