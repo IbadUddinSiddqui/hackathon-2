@@ -352,13 +352,13 @@
 Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the existing admin guard (lib/admin.ts), the bulk-import validator (lib/bulk-import.ts), and the bulk-import image-upload pattern.
 
 ### [P2-01] Admin API — list products (paginated + searchable)
-- status: todo
+- status: done
 - depends_on: []
 - human_required: false
 - touches: [app/api/admin/products/route.ts (new), lib/admin-products.ts (new), lib/admin-products.test.ts (new), lib/admin.ts, sanity/lib/server-client.ts]
 - done_when: GET /api/admin/products (admin-only) returns `{ items, total, page, pages }` of product summaries (name, price, stock, category, category_slug, brand, size, mainImage URL, created_at) and supports `?page=`, `?limit=`, `?search=`, `?category=`; unauthenticated requests get 401.
 - verify: `npm test -- admin-products` passes; `curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/api/admin/products` returns 401 unauthenticated
-- notes:
+- notes: VERIFIED 2026-08-10 — lib/admin-products.ts (pure: parseListQuery with null-safe param defaults — Number(null)==0 bug caught by test, buildProductListGroq, toProductSummary, validateProductInput); app/api/admin/products/route.ts (isAdmin guard → 401, Promise.all list+count, {items,total,page,pages,limit}). npm test -- admin-products 11/11 PASS; curl unauth = 401; tsc clean.
 
 ### [P2-02] Admin API — create product
 - status: todo
