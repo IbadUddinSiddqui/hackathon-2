@@ -12,7 +12,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { isAdmin } from "@/lib/admin";
 import { serverClient } from "@/sanity/lib/server-client";
-import { parseWorkbook, validateRow, buildTemplate, type ProductPayload } from "@/lib/bulk-import";
+import { parseWorkbook, validateRow, buildTemplate,  } from "@/lib/bulk-import";
 import { findProductByName, uploadImages } from "@/lib/product-images";
 
 type RowResult = {

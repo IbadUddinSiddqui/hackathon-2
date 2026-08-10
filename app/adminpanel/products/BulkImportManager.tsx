@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { UploadCloud, FileSpreadsheet, Download, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
+import Link from "next/link";
 
 type RowResult = {
   row: number;
@@ -143,13 +144,13 @@ export default function BulkImportManager() {
             </>
           )}
         </button>
-        <a
+        <Link
           href="/api/admin/products/bulk-import?template=1"
           className="inline-flex items-center gap-2 rounded-lg border border-stroke bg-white px-5 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-gray-50 dark:border-strokedark dark:bg-boxdark dark:text-white dark:hover:bg-boxdark/80"
         >
           <Download className="h-4 w-4" />
           Download template
-        </a>
+        </Link>
       </div>
 
       {error && (

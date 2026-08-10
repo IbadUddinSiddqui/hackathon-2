@@ -3,8 +3,8 @@ import Header from "@/app/components/Header/Header";
 import Footer from "@/app/components/Footer/Footer";
 
 export const metadata: Metadata = {
-  title: "Terms & Conditions | AnK's",
-  description: "The terms that govern your use of AnK's.",
+  title: "Terms & Conditions | AnKs",
+  description: "The terms that govern your use of AnKs.",
 };
 
 export default function TermsPage() {
@@ -25,7 +25,7 @@ export default function TermsPage() {
               1. Acceptance of terms
             </h2>
             <p>
-              By browsing or purchasing from AnK's you agree to these terms. If you do not
+              By browsing or purchasing from AnKs you agree to these terms. If you do not
               agree, please do not use the store.
             </p>
           </div>
