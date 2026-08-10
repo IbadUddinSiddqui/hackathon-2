@@ -123,13 +123,13 @@
 - notes: VERIFIED 2026-08-09 — @sentry/nextjs 10.69.0 installed. Wired: sentry.client.config.ts (NEXT_PUBLIC_SENTRY_DSN, no replay), sentry.server.config.ts + sentry.edge.config.ts (SENTRY_DSN), instrumentation.ts (register() imports per-runtime configs + `onRequestError = Sentry.captureRequestError` per Sentry 10 recommended hook), app/global-error.tsx (client boundary reporting render errors), next.config.ts wrapped with withSentryConfig (sourcemaps+release disabled without SENTRY_AUTH_TOKEN, errorHandler warns instead of failing, telemetry off). .env.example created documenting ALL env vars incl. the new SENTRY_* + NEXT_PUBLIC_SENTRY_DSN. Production build PASSED under Node 20 (~15 min on this slow FS — build must be run detached with log polling since it exceeds the 600s agent cap; dev server must be stopped first, it locks .next). tsc + eslint clean. Sentry noted: client config deprecation (sentry.client.config.ts → instrumentation-client.ts for Turbopack, Next 15.1.6 doesn't support it yet — safe to defer).
 
 ### [P1-12] Confirm error tracking actually captures errors
-- status: todo
+- status: in_progress
 - depends_on: [P1-11]
 - human_required: true
 - touches: [Sentry dashboard]
 - done_when: a manually-triggered test error appears in the Sentry dashboard.
 - verify: manual — check dashboard
-- notes:
+- notes: 2026-08-10 — AGENT SIDE DONE: user provided Sentry DSN; SENTRY_DSN + NEXT_PUBLIC_SENTRY_DSN added to .env.local; dev server restarted; app/api/sentry-test/route.ts created (fires Sentry.captureException); hit GET /api/sentry-test → 200, response sent:true, only known cosmetic Turbopack warning in logs. REMAINING (human): open Sentry dashboard → Issues → confirm 'Sentry test error — P1-12 verification' appeared, then flip status to done.
 
 ### [P1-13] Add Cash on Delivery checkout option
 - status: done
@@ -318,14 +318,23 @@
 - verify: manual
 - notes:
 
+### [P1-SP-11] Admin bulk product import (Excel upload)
+- status: done
+- depends_on: []
+- human_required: false
+- touches: [lib/bulk-import.ts (new), app/api/admin/products/bulk-import/route.ts (new), app/adminpanel/products/ (new), app/components/Sidebar/index.tsx]
+- done_when: admin can upload an Excel/CSV file and products are bulk-created or updated in Sanity (upsert by name), with a downloadable template and per-row results.
+- verify: `npm test -- bulk-import` passes; tsc clean; GET /api/admin/products/bulk-import?template=1 returns an .xlsx; POST requires admin auth
+- notes: VERIFIED 2026-08-10 — xlsx@0.18.5 installed. lib/bulk-import.ts (pure parse+validate: parseWorkbook normalizes headers, validateRow enforces name/category/category_slug/price/stock/size/image_urls, buildTemplate generates example .xlsx). Route: admin-only (isAdmin guard), multipart upload, max 10MB/2000 rows, downloads image URLs → Sanity assets (Buffer.from, max 8 images), upserts by product name (patch existing / create new). Admin page /adminpanel/products with drag-drop zone, template download, results table (created/updated/skipped with per-row messages), sidebar link added. 7/7 tests pass, tsc clean. NOTE: Excel column 'image_urls' is required (storefront renders images[0]); row without it is skipped with a clear message.
+
 ### [P1-SP-10] Branding/content pass
-- status: todo
+- status: in_progress
 - depends_on: []
 - human_required: true (client needs to supply real name/logo/products/copy; agent implements once assets exist)
 - touches: [app/layout.tsx, public/ (logo), about/contact pages, product data]
 - done_when: "Bazaar Nest" placeholder is replaced with real client branding, real product catalog, real about/contact pages.
 - verify: manual
-- notes:
+- notes: 2026-08-10 — brand name decided = **AnK's** (user). Implemented: metadata titles, legal pages (terms/returns/privacy incl. support@bazaarnest.com→support@anks.com), admin panel titles, email receipts (from/subject/header), constants comment — all 'Bazaar Nest' references gone (grep verify = zero). Logo: user has none yet — placeholder kept. Product catalog: mock kept (user adds real ones later). NEW FEATURE REQUESTED: Excel bulk product import (user uploads .xlsx → products created/updated in Sanity) — built under new node P1-SP-11. Remaining for done: real logo + about/contact copy when client provides.
 
 ---
 
