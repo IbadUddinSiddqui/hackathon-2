@@ -1,4 +1,5 @@
 
+import type { Metadata } from "next";
 import { auth } from "@/auth";
 import { client } from "@/sanity/lib/client";
 import { redirect } from "next/navigation";
@@ -7,6 +8,12 @@ import LogoutButton from "../components/LogoutButton/LogoutButton";
 import Header from "../components/Header/Header";
 import Footer from "../components/Footer/Footer";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Dashboard",
+  description: "Your AnK's account dashboard.",
+  robots: { index: false, follow: false },
+};
 
 export default async function Dashboard() {
     const session = await auth();

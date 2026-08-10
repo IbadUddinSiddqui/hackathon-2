@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Provider } from "@/components/ui/provider"
 import { SessionProvider } from "next-auth/react";
+import { SITE_NAME, SITE_DESCRIPTION, SITE_URL } from "@/lib/site";
 
 // Load custom fonts
 const geistSans = localFont({
@@ -21,8 +22,39 @@ const geistMono = localFont({
 
 // Metadata for the page
 export const metadata: Metadata = {
-  title: "AnK's",
-  description: "Ecommerce website ",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: `${SITE_NAME} — Pakistani Fashion & Clothing Brand`,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  keywords: [
+    "AnK's",
+    "Pakistani clothing brand",
+    "fashion Pakistan",
+    "kurtas",
+    "t-shirts",
+    "streetwear",
+    "online shopping Pakistan",
+  ],
+  authors: [{ name: SITE_NAME }],
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} — Pakistani Fashion & Clothing Brand`,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    locale: "en_PK",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_NAME} — Pakistani Fashion & Clothing Brand`,
+    description: SITE_DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 // RootLayout Component

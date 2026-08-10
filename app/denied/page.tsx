@@ -1,8 +1,15 @@
 import React from "react";
+import type { Metadata } from "next";
 import Header from "../components/Header/Header";
 import Footer from "../components/Footer/Footer";
 import Image from "next/image";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Access Denied",
+  description: "You do not have permission to access this page.",
+  robots: { index: false, follow: false },
+};
 
 export default function Denied() {
   return (
