@@ -3,11 +3,15 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { serverClient as client } from "@/sanity/lib/server-client";
 import { validateEmail, validatePassword, validateName } from "@/utils/validation";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 
 const sanityclient = client
 
 export async function POST(request: Request) {
+  const limited = enforceRateLimit(request, { key: "register", limit: 10, windowMs: 60_000 });
+  if (limited) return limited;
+
   try {
     const { name, email, password } = await request.json();
 

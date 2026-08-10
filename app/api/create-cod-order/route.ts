@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createPendingOrder, fetchProductsByIds } from '@/lib/orders';
 import { validateDiscountCode } from '@/lib/discounts';
 import { DELIVERY_FEE } from '@/lib/constants';
+import { enforceRateLimit } from '@/lib/rate-limit';
 
 /**
  * Cash-on-Delivery checkout: mirrors the card flows' server-side pricing
@@ -10,6 +11,9 @@ import { DELIVERY_FEE } from '@/lib/constants';
  * an admin marks it paid/refunded from the admin panel after delivery.
  */
 export async function POST(request: Request) {
+  const limited = enforceRateLimit(request, { key: 'create-cod-order', limit: 10, windowMs: 60_000 });
+  if (limited) return limited;
+
   try {
     const body = await request.json();
     const items: { id: string; quantity: number; size?: string[] }[] = Array.isArray(

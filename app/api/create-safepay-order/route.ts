@@ -10,8 +10,12 @@ import { validateDiscountCode } from '@/lib/discounts';
 import { DELIVERY_FEE } from '@/lib/constants';
 import { createSafepayCheckout, isSafepayConfigured } from '@/lib/safepay';
 import { serverClient } from '@/sanity/lib/server-client';
+import { enforceRateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: Request) {
+  const limited = enforceRateLimit(request, { key: 'create-safepay-order', limit: 10, windowMs: 60_000 });
+  if (limited) return limited;
+
   try {
     if (!isSafepayConfigured()) {
       return NextResponse.json(

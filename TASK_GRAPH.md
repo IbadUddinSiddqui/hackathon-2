@@ -344,7 +344,7 @@
 - [ ] **P2-EPIC-02** One local courier integration (Leopards or PostEx first)
 - [ ] **P2-EPIC-03** WhatsApp + SMS order notifications
 - [x] **P2-EPIC-04** SEO pass — metadata, Product structured data, sitemap, OG images — EXPANDED + COMPLETED 2026-08-10 (P2-SEO-01..05)
-- [ ] **P2-EPIC-05** Rate limiting across auth/discount/payment endpoints
+- [x] **P2-EPIC-05** Rate limiting across auth/discount/payment endpoints — EXPANDED + COMPLETED 2026-08-10 (P2-RL-01..03)
 - [ ] **P2-EPIC-06** Automatic search-index sync (webhook-triggered, not manual script)
 - [ ] **P2-EPIC-07** Live performance audit (Lighthouse) + fixes
 
@@ -460,6 +460,35 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - done_when: a branded 1200×630 OG image is served at /opengraph-image (ImageResponse).
 - verify: tsc clean; curl -I /opengraph-image returns 200 image/png
 - notes: VERIFIED 2026-08-10 — ImageResponse gradient card with brand name + tagline.
+
+### P2-EPIC-05 — expanded nodes (Rate limiting) — ALL DONE 2026-08-10
+
+### [P2-RL-01] Shared in-memory rate limiter lib
+- status: done
+- depends_on: []
+- human_required: false
+- touches: [lib/rate-limit.ts (new), lib/rate-limit.test.ts (new)]
+- done_when: lib exposes getClientIp (x-forwarded-for/x-real-ip), checkRateLimit (fixed window), enforceRateLimit (returns 429 + Retry-After or null), and a periodic bucket sweep; unit tests cover windowing, reset, per-IP keys.
+- verify: `npm test -- rate-limit` passes
+- notes: VERIFIED 2026-08-10 — 8/8 tests. In-memory fixed-window per IP; single-instance only (multi-instance needs Redis — noted as future node).
+
+### [P2-RL-02] Rate-limit auth + discount endpoints
+- status: done
+- depends_on: [P2-RL-01]
+- human_required: false
+- touches: [app/api/register/route.ts, app/api/auth/[...nextauth]/route.ts, app/api/validate-discount/route.ts]
+- done_when: register (10/min), NextAuth credentials callback (15/min) and validate-discount (30/min) return 429 when a single IP exceeds the limit.
+- verify: `npm test -- rate-limit` passes; tsc clean; hammering /api/validate-discount returns 429
+- notes: VERIFIED 2026-08-10 — guards added; live hammer test: 35 POSTs → 429 with `{"error":"Too many requests..."}`. NextAuth route wrapper needed NextRequest param (TS fix).
+
+### [P2-RL-03] Rate-limit payment endpoints (webhooks excluded)
+- status: done
+- depends_on: [P2-RL-01]
+- human_required: false
+- touches: [app/api/create-payment-intent/route.ts, app/api/create-safepay-order/route.ts, app/api/create-cod-order/route.ts, app/api/create-checkout-session/route.ts]
+- done_when: all four card/COD order-creation endpoints return 429 beyond 10/min/IP; webhooks (server-to-server, signature-verified) are NOT rate-limited.
+- verify: `npm test -- rate-limit` passes; tsc clean
+- notes: VERIFIED 2026-08-10 — guards added to all four; webhooks intentionally untouched (they authenticate via signature, not IP).
 
 ## PHASE 3 — Professional (epics only)
 

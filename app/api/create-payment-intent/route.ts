@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import { createPendingOrder, fetchProductsByIds } from '@/lib/orders';
 import { validateDiscountCode } from '@/lib/discounts';
 import { DELIVERY_FEE } from '@/lib/constants';
+import { enforceRateLimit } from '@/lib/rate-limit';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-01-27.acacia'
@@ -12,6 +13,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 const MAX_AMOUNT_CENTS = 1_000_000;
 
 export async function POST(request: Request) {
+  const limited = enforceRateLimit(request, { key: 'create-payment-intent', limit: 10, windowMs: 60_000 });
+  if (limited) return limited;
+
   try {
     const body = await request.json();
     const items: { id: string; quantity: number; size?: string[] }[] = Array.isArray(body?.items)
