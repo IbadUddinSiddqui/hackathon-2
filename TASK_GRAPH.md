@@ -370,13 +370,13 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes: VERIFIED 2026-08-10 — lib/admin-products.ts gains ProductInput type, normalizeCreateInput (coerces numbers, accepts arrays or comma-strings, drops non-http URLs), validateProductInput(input, {requireImages}) — true for create (schema min 1 image). lib/product-images.ts extracted (findProductByName + uploadImages) from bulk-import route; bulk-import route now imports them (dedupe). POST /api/admin/products: guard→400 invalid body→normalize→validate→409 duplicate name→uploadImages→create→201 {product:{_id}}. npm test 15/15 admin-products, FULL suite 52/52 pass, tsc clean, unauth POST = 401.
 
 ### [P2-03] Admin API — update product
-- status: todo
+- status: done
 - depends_on: [P2-02]
 - human_required: false
 - touches: [app/api/admin/products/[id]/route.ts (new), lib/admin-products.ts, lib/admin-products.test.ts]
 - done_when: PATCH /api/admin/products/[id] (admin-only) partially updates editable fields (name, description, price, stock, category, category_slug, size, brand, tags) and returns the updated doc; 404 for unknown id; 400 on validation failure; 401 unauthenticated.
 - verify: `npm test -- admin-products` passes and `npx tsc --noEmit` clean
-- notes:
+- notes: VERIFIED 2026-08-10 — lib/admin-products.ts adds normalizeUpdateInput (null-safe clearing of description/brand via `!= null` — reviewer caught String(null)=="null" bug), validateUpdateInput (per-field rules, nothing required), buildUpdatePatch (excludes imageUrls). app/api/admin/products/[id]/route.ts PATCH: guard→404 unknown id→400 invalid/no-fields→409 rename collision (findProductByName, same-id exempt)→patch().set()→refetch→summary; `!full` → 404 guard for delete race (reviewer). npm test 23/23 admin-products; FULL suite 60/60; tsc clean; unauth PATCH = 401. KNOWN TRADE-OFF (accepted): duplicate-name check is check-then-write (TOCTOU) — Sanity has no unique constraint.
 
 ### [P2-04] Admin API — delete product
 - status: todo

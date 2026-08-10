@@ -4,7 +4,10 @@ import {
   buildProductListGroq,
   toProductSummary,
   normalizeCreateInput,
+  normalizeUpdateInput,
   validateProductInput,
+  validateUpdateInput,
+  buildUpdatePatch,
 } from "./admin-products";
 
 describe("parseListQuery", () => {
@@ -132,6 +135,61 @@ describe("normalizeCreateInput", () => {
     const input = normalizeCreateInput({ price: "abc", stock: undefined });
     expect(input.price).toBeUndefined();
     expect(input.stock).toBeUndefined();
+  });
+});
+
+describe("normalizeUpdateInput", () => {
+  it("preserves an explicit empty description/brand so fields can be cleared", () => {
+    const input = normalizeUpdateInput({ description: "", brand: "" });
+    expect(input.description).toBe("");
+    expect(input.brand).toBe("");
+  });
+
+  it("leaves absent optional fields undefined", () => {
+    const input = normalizeUpdateInput({ price: 2000 });
+    expect(input.description).toBeUndefined();
+    expect(input.brand).toBeUndefined();
+    expect(input.price).toBe(2000);
+  });
+});
+
+describe("validateUpdateInput", () => {
+  it("accepts a partial update with only some fields", () => {
+    expect(validateUpdateInput({ price: 1999, stock: 12 })).toBeNull();
+    expect(validateUpdateInput({ name: "Renamed Tee" })).toBeNull();
+  });
+
+  it("rejects provided-but-invalid fields", () => {
+    expect(validateUpdateInput({ price: -5 })).toContain("price");
+    expect(validateUpdateInput({ name: "   " })).toContain("name");
+    expect(validateUpdateInput({ size: [] })).toContain("size");
+    expect(validateUpdateInput({ category: "" })).toContain("category");
+  });
+
+  it("does not require fields that were not sent", () => {
+    expect(validateUpdateInput({ name: "Tee" })).toBeNull();
+  });
+});
+
+describe("buildUpdatePatch", () => {
+  it("includes only provided editable fields", () => {
+    const patch = buildUpdatePatch({
+      price: 1999,
+      size: ["S", "L"],
+      tags: ["new"],
+      imageUrls: ["https://cdn.example.com/x.jpg"],
+    });
+    expect(patch).toEqual({ price: 1999, size: ["S", "L"], tags: ["new"] });
+    expect(patch.imageUrls).toBeUndefined();
+  });
+
+  it("allows clearing description and brand", () => {
+    const patch = buildUpdatePatch({ description: "", brand: "" });
+    expect(patch).toEqual({ description: "", brand: "" });
+  });
+
+  it("returns an empty patch when nothing editable is provided", () => {
+    expect(buildUpdatePatch({ imageUrls: ["https://x.com/a.jpg"] })).toEqual({});
   });
 });
 

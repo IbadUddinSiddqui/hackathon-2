@@ -179,6 +179,65 @@ export function normalizeCreateInput(raw: Record<string, unknown>): Partial<Prod
   };
 }
 
+const UPDATEABLE_FIELDS = [
+  "name",
+  "description",
+  "price",
+  "stock",
+  "category",
+  "category_slug",
+  "size",
+  "brand",
+  "tags",
+] as const;
+
+/**
+ * Normalize a raw PATCH body. Unlike create, an explicitly-sent empty
+ * description/brand is preserved as "" so the caller can CLEAR the field.
+ */
+export function normalizeUpdateInput(raw: Record<string, unknown>): Partial<ProductInput> {
+  const input = normalizeCreateInput(raw);
+  // `!= null` (not `!== undefined`): null and undefined both mean "not sent",
+  // so an explicit null never becomes the literal string "null" in the doc.
+  if (raw.description != null) input.description = String(raw.description).trim();
+  if (raw.brand != null) input.brand = String(raw.brand).trim();
+  return input;
+}
+
+/**
+ * Partial-update validation (P2-03): only rules for fields that were actually
+ * provided are applied — unlike create, nothing is required.
+ */
+export function validateUpdateInput(input: Partial<ProductInput>): string | null {
+  const err = (msg: string) => msg;
+
+  if (input.name !== undefined && !String(input.name).trim()) return err("name cannot be empty");
+  if (input.price !== undefined && (!Number.isFinite(input.price) || input.price < 0))
+    return err("price must be a non-negative number");
+  if (input.stock !== undefined && (!Number.isFinite(input.stock) || input.stock < 0))
+    return err("stock must be a non-negative number");
+  if (input.category !== undefined && !String(input.category).trim())
+    return err("category cannot be empty");
+  if (input.category_slug !== undefined && !String(input.category_slug).trim())
+    return err("category_slug cannot be empty");
+  if (input.size !== undefined) {
+    if (!Array.isArray(input.size) || input.size.length === 0)
+      return err("size must be a non-empty array");
+    if (input.size.some((s) => !String(s).trim())) return err("size entries cannot be empty");
+  }
+
+  return null;
+}
+
+/** Collect only the provided, editable fields into a Sanity `.set()` patch. */
+export function buildUpdatePatch(input: Partial<ProductInput>): Record<string, unknown> {
+  const patch: Record<string, unknown> = {};
+  for (const key of UPDATEABLE_FIELDS) {
+    if (input[key] !== undefined) patch[key] = input[key];
+  }
+  return patch;
+}
+
 /**
  * Shared validation for create/update payloads (P2-02/P2-03 reuse this).
  * `requireImages` is true for create (the Sanity schema mandates min 1 image
