@@ -379,13 +379,13 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes: VERIFIED 2026-08-10 — lib/admin-products.ts adds normalizeUpdateInput (null-safe clearing of description/brand via `!= null` — reviewer caught String(null)=="null" bug), validateUpdateInput (per-field rules, nothing required), buildUpdatePatch (excludes imageUrls). app/api/admin/products/[id]/route.ts PATCH: guard→404 unknown id→400 invalid/no-fields→409 rename collision (findProductByName, same-id exempt)→patch().set()→refetch→summary; `!full` → 404 guard for delete race (reviewer). npm test 23/23 admin-products; FULL suite 60/60; tsc clean; unauth PATCH = 401. KNOWN TRADE-OFF (accepted): duplicate-name check is check-then-write (TOCTOU) — Sanity has no unique constraint.
 
 ### [P2-04] Admin API — delete product
-- status: todo
+- status: done
 - depends_on: [P2-03]
 - human_required: false
 - touches: [app/api/admin/products/[id]/route.ts, lib/admin-products.ts, lib/admin-products.test.ts]
 - done_when: DELETE /api/admin/products/[id] (admin-only) deletes the doc and returns 200; 404 for unknown id; 401 unauthenticated.
 - verify: `npm test -- admin-products` passes and `npx tsc --noEmit` clean
-- notes:
+- notes: VERIFIED 2026-08-10 — DELETE handler added to app/api/admin/products/[id]/route.ts (same guard/fetch-404 pattern as PATCH): guard→404 unknown id→serverClient.delete(id)→200 {deleted,id}. npm test 23/23 admin-products; tsc clean; unauth DELETE = 401. RECOMMENDATION (not built — future node): deleting a doc leaves its image assets orphaned in Sanity; a future cleanup node could fetch + delete assets (serverClient.delete(assetId)).
 
 ### [P2-05] Admin products hub page — list + search (tabs: All Products | Bulk Import)
 - status: todo

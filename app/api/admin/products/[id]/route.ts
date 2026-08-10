@@ -1,7 +1,7 @@
 // app/api/admin/products/[id]/route.ts
 // Admin-only product management API — single-product operations.
-//   PATCH /api/admin/products/[id]  partial update (P2-03)
-//   DELETE /api/admin/products/[id] delete (P2-04 — added later)
+//   PATCH  /api/admin/products/[id]  partial update (P2-03)
+//   DELETE /api/admin/products/[id]  delete (P2-04)
 // 401 unauthenticated · 400 invalid body/validation · 404 unknown id · 409 dup name.
 
 import { NextResponse } from "next/server";
@@ -100,5 +100,33 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   } catch (error: any) {
     console.error("Failed to update product:", error);
     return NextResponse.json({ error: "Failed to update product" }, { status: 500 });
+  }
+}
+
+export async function DELETE(_request: Request, { params }: RouteParams) {
+  const session = await auth();
+  if (!isAdmin(session)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { id } = await params;
+  if (!id) {
+    return NextResponse.json({ error: "Missing product id" }, { status: 400 });
+  }
+
+  try {
+    const existing = await serverClient.fetch(
+      `*[_type == "product" && _id == $id][0]{_id}`,
+      { id }
+    );
+    if (!existing) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    await serverClient.delete(id);
+    return NextResponse.json({ deleted: true, id });
+  } catch (error: any) {
+    console.error("Failed to delete product:", error);
+    return NextResponse.json({ error: "Failed to delete product" }, { status: 500 });
   }
 }
