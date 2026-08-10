@@ -3,8 +3,8 @@ import Header from "@/app/components/Header/Header";
 import Footer from "@/app/components/Footer/Footer";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Bazaar Nest",
-  description: "How Bazaar Nest collects, uses, and protects your personal information.",
+  title: "Privacy Policy | AnK's",
+  description: "How AnK's collects, uses, and protects your personal information.",
 };
 
 export default function PrivacyPage() {
@@ -79,7 +79,7 @@ export default function PrivacyPage() {
               6. Contact
             </h2>
             <p>
-              Questions about this policy? Contact us at support@bazaarnest.com.
+              Questions about this policy? Contact us at support@anks.com.
             </p>
           </div>
         </section>

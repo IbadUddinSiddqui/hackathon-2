@@ -6,7 +6,7 @@ import { serverClient } from "@/sanity/lib/server-client";
 import { formatDate, formatOrderId, formatTotal, statusStyle } from "@/lib/orders-ui";
 
 export const metadata: Metadata = {
-  title: "Orders | Bazaar Nest Admin",
+  title: "Orders | AnK's Admin",
   description: "Manage customer orders",
 };
 

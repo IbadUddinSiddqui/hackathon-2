@@ -3,8 +3,8 @@ import Header from "@/app/components/Header/Header";
 import Footer from "@/app/components/Footer/Footer";
 
 export const metadata: Metadata = {
-  title: "Returns & Exchanges | Bazaar Nest",
-  description: "How to return or exchange an order from Bazaar Nest.",
+  title: "Returns & Exchanges | AnK's",
+  description: "How to return or exchange an order from AnK's.",
 };
 
 export default function ReturnsPage() {
@@ -45,7 +45,7 @@ export default function ReturnsPage() {
               3. How to start a return
             </h2>
             <p>
-              Email us at support@bazaarnest.com with your order number and the items you wish
+              Email us at support@anks.com with your order number and the items you wish
               to return. We will confirm eligibility and share the return address and any
               pickup instructions. Please do not ship items back without confirmation.
             </p>

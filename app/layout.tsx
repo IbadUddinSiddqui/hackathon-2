@@ -21,7 +21,7 @@ const geistMono = localFont({
 
 // Metadata for the page
 export const metadata: Metadata = {
-  title: "Bazaar Nest",
+  title: "AnK's",
   description: "Ecommerce website ",
 };
 

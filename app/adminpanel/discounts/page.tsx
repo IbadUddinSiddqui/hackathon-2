@@ -5,7 +5,7 @@ import { serverClient } from "@/sanity/lib/server-client";
 import DiscountCodesManager from "./DiscountCodesManager";
 
 export const metadata: Metadata = {
-  title: "Discount Codes | Bazaar Nest Admin",
+  title: "Discount Codes | AnK's Admin",
   description: "Manage discount codes",
 };
 

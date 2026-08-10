@@ -50,13 +50,13 @@ export async function sendOrderReceipt(input: {
     .join('');
 
   await transporter.sendMail({
-    from: process.env.EMAIL_FROM || `Bazaar Nest <${process.env.SMTP_USER || 'no-reply@localhost'}>`,
+    from: process.env.EMAIL_FROM || `AnK's <${process.env.SMTP_USER || 'no-reply@localhost'}>`,
     to: input.to,
-    subject: `Your Bazaar Nest order #${input.orderId.slice(0, 8).toUpperCase()} is confirmed!`,
+    subject: `Your AnK's order #${input.orderId.slice(0, 8).toUpperCase()} is confirmed!`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#333;">
         <div style="background:#000;color:#fff;padding:20px;text-align:center;">
-          <h1 style="margin:0;font-size:20px;">Bazaar Nest</h1>
+          <h1 style="margin:0;font-size:20px;">AnK's</h1>
         </div>
         <div style="padding:24px;">
           <h2 style="margin-top:0;">Thank you for your order! 🎉</h2>
