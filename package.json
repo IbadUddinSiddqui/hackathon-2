@@ -44,7 +44,7 @@
     "meilisearch": "^0.48.2",
     "micro": "^10.0.1",
     "module_name": "^1.0.0",
-    "next": "^15.1.6",
+    "next": "15.1.11",
     "next-auth": "^5.0.0-beta.25",
     "next-sanity": "^9.8.43",
     "next-themes": "^0.4.4",
