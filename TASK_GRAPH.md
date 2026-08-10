@@ -340,13 +340,79 @@
 
 ## PHASE 2 — Important (epics only — expand each into a node sub-graph, same format as Phase 1, once Phase 1 is done or explicitly deferred)
 
-- [ ] **P2-EPIC-01** Product management admin UI (replace reliance on raw Sanity Studio)
+- [x] **P2-EPIC-01** Product management admin UI (replace reliance on raw Sanity Studio) — EXPANDED 2026-08-10 into P2-01..P2-07 below
 - [ ] **P2-EPIC-02** One local courier integration (Leopards or PostEx first)
 - [ ] **P2-EPIC-03** WhatsApp + SMS order notifications
 - [ ] **P2-EPIC-04** SEO pass — metadata, Product structured data, sitemap, OG images
 - [ ] **P2-EPIC-05** Rate limiting across auth/discount/payment endpoints
 - [ ] **P2-EPIC-06** Automatic search-index sync (webhook-triggered, not manual script)
 - [ ] **P2-EPIC-07** Live performance audit (Lighthouse) + fixes
+
+### P2-EPIC-01 — expanded nodes (Product management admin UI)
+Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the existing admin guard (lib/admin.ts), the bulk-import validator (lib/bulk-import.ts), and the bulk-import image-upload pattern.
+
+### [P2-01] Admin API — list products (paginated + searchable)
+- status: todo
+- depends_on: []
+- human_required: false
+- touches: [app/api/admin/products/route.ts (new), lib/admin-products.ts (new), lib/admin-products.test.ts (new), lib/admin.ts, sanity/lib/server-client.ts]
+- done_when: GET /api/admin/products (admin-only) returns `{ items, total, page, pages }` of product summaries (name, price, stock, category, category_slug, brand, size, mainImage URL, created_at) and supports `?page=`, `?limit=`, `?search=`, `?category=`; unauthenticated requests get 401.
+- verify: `npm test -- admin-products` passes; `curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/api/admin/products` returns 401 unauthenticated
+- notes:
+
+### [P2-02] Admin API — create product
+- status: todo
+- depends_on: [P2-01]
+- human_required: false
+- touches: [app/api/admin/products/route.ts, lib/admin-products.ts, lib/admin-products.test.ts, lib/bulk-import.ts (reuse validateRow), app/api/admin/products/bulk-import/route.ts (image-upload pattern)]
+- done_when: POST /api/admin/products (admin-only) accepts the same JSON fields as the import template (name, description, price, stock, category, category_slug, size, brand, tags, imageUrls), validates via the existing row validator, uploads image URLs as Sanity assets, creates the doc, returns 201 + new `_id`; 400 on validation failure; 401 unauthenticated.
+- verify: `npm test -- admin-products` passes and `npx tsc --noEmit` clean
+- notes:
+
+### [P2-03] Admin API — update product
+- status: todo
+- depends_on: [P2-02]
+- human_required: false
+- touches: [app/api/admin/products/[id]/route.ts (new), lib/admin-products.ts, lib/admin-products.test.ts]
+- done_when: PATCH /api/admin/products/[id] (admin-only) partially updates editable fields (name, description, price, stock, category, category_slug, size, brand, tags) and returns the updated doc; 404 for unknown id; 400 on validation failure; 401 unauthenticated.
+- verify: `npm test -- admin-products` passes and `npx tsc --noEmit` clean
+- notes:
+
+### [P2-04] Admin API — delete product
+- status: todo
+- depends_on: [P2-03]
+- human_required: false
+- touches: [app/api/admin/products/[id]/route.ts, lib/admin-products.ts, lib/admin-products.test.ts]
+- done_when: DELETE /api/admin/products/[id] (admin-only) deletes the doc and returns 200; 404 for unknown id; 401 unauthenticated.
+- verify: `npm test -- admin-products` passes and `npx tsc --noEmit` clean
+- notes:
+
+### [P2-05] Admin products hub page — list + search (tabs: All Products | Bulk Import)
+- status: todo
+- depends_on: [P2-01]
+- human_required: false
+- touches: [app/adminpanel/products/page.tsx, app/adminpanel/products/ProductListManager.tsx (new), app/adminpanel/products/BulkImportManager.tsx]
+- done_when: /adminpanel/products shows a tabbed view — "All Products" (searchable table: thumbnail, name, price, stock, category, actions) fed by GET /api/admin/products — alongside the existing "Bulk Import" tab, which stays unchanged.
+- verify: `npx tsc --noEmit` clean; page returns 200 for an admin session (307 → /denied without)
+- notes:
+
+### [P2-06] Admin product create/edit form + delete wiring
+- status: todo
+- depends_on: [P2-02, P2-03, P2-04, P2-05]
+- human_required: false
+- touches: [app/adminpanel/products/new/page.tsx (new), app/adminpanel/products/[id]/edit/page.tsx (new), app/adminpanel/products/ProductForm.tsx (new), lib/admin-products.ts]
+- done_when: /adminpanel/products/new renders a form that creates via POST /api/admin/products; /adminpanel/products/[id]/edit loads + saves via PATCH; delete buttons (list + edit) call DELETE with a confirm dialog; form fields mirror the Sanity product schema.
+- verify: `npx tsc --noEmit` clean; both pages return 200 for an admin session
+- notes:
+
+### [P2-07] Owner browser-test the product admin UI
+- status: todo
+- depends_on: [P2-06]
+- human_required: true
+- touches: [/adminpanel/products, /adminpanel/products/new, /adminpanel/products/[id]/edit]
+- done_when: owner clicks through list/search, create, edit, delete against real Sanity data in a real browser and confirms each works.
+- verify: manual — owner confirmation
+- notes:
 
 ## PHASE 3 — Professional (epics only)
 
