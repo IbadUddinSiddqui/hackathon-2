@@ -388,22 +388,22 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes: VERIFIED 2026-08-10 — DELETE handler added to app/api/admin/products/[id]/route.ts (same guard/fetch-404 pattern as PATCH): guard→404 unknown id→serverClient.delete(id)→200 {deleted,id}. npm test 23/23 admin-products; tsc clean; unauth DELETE = 401. RECOMMENDATION (not built — future node): deleting a doc leaves its image assets orphaned in Sanity; a future cleanup node could fetch + delete assets (serverClient.delete(assetId)).
 
 ### [P2-05] Admin products hub page — list + search (tabs: All Products | Bulk Import)
-- status: todo
+- status: done
 - depends_on: [P2-01]
 - human_required: false
 - touches: [app/adminpanel/products/page.tsx, app/adminpanel/products/ProductListManager.tsx (new), app/adminpanel/products/BulkImportManager.tsx]
 - done_when: /adminpanel/products shows a tabbed view — "All Products" (searchable table: thumbnail, name, price, stock, category, actions) fed by GET /api/admin/products — alongside the existing "Bulk Import" tab, which stays unchanged.
 - verify: `npx tsc --noEmit` clean; page returns 200 for an admin session (307 → /denied without)
-- notes:
+- notes: VERIFIED 2026-08-10 — app/adminpanel/products/page.tsx rebuilt as tabbed hub (header + ProductsHub); ProductsHub.tsx (client tabs: All Products | Bulk Import); ProductListManager.tsx (debounced search → GET /api/admin/products, paginated table: thumbnail/name/price/stock badge/category, Edit link + Delete with confirm, empty/loading states, 401 → /login). BulkImportManager untouched. tsc clean; full suite 60/60; /adminpanel/products + /new + /[id]/edit all 307 → /denied unauth.
 
 ### [P2-06] Admin product create/edit form + delete wiring
-- status: todo
+- status: done
 - depends_on: [P2-02, P2-03, P2-04, P2-05]
 - human_required: false
 - touches: [app/adminpanel/products/new/page.tsx (new), app/adminpanel/products/[id]/edit/page.tsx (new), app/adminpanel/products/ProductForm.tsx (new), lib/admin-products.ts]
 - done_when: /adminpanel/products/new renders a form that creates via POST /api/admin/products; /adminpanel/products/[id]/edit loads + saves via PATCH; delete buttons (list + edit) call DELETE with a confirm dialog; form fields mirror the Sanity product schema.
 - verify: `npx tsc --noEmit` clean; both pages return 200 for an admin session
-- notes:
+- notes: VERIFIED 2026-08-10 — ProductForm.tsx (shared client form: create→POST /api/admin/products incl. imageUrls list; edit→PATCH /api/admin/products/[id]; Delete button w/ confirm→DELETE; comma-separated size/tags; numeric price/stock; error+message states; 401 handling via API). new/page.tsx + [id]/edit/page.tsx (guard, edit fetches doc via serverClient projection, notFound() when missing). tsc clean; 60/60; all pages 307 → /denied unauth.
 
 ### [P2-07] Owner browser-test the product admin UI
 - status: todo
