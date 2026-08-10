@@ -142,13 +142,13 @@
 - notes: 2026-08-10 (task-graph-update.md) — status confirmed DONE: COD selector + route + schema, tested.
 
 ### [P1-14] Business decision — SaaS vs custom-build model
-- status: todo
+- status: done
 - depends_on: []
 - human_required: true
 - touches: [n/a — business decision, not code]
 - done_when: a written decision exists (single-tenant custom build per client, or multi-tenant SaaS) — this gates whether Phase 4's multi-tenancy epic is ever built.
 - verify: manual — decision documented
-- notes:
+- notes: 2026-08-10 — DECISION MADE (business owner): **SaaS** (multi-tenant platform). Confirmed by ibad. This ACTIVATES P4-EPIC-01 (true multi-tenancy) as a future epic — do not build it now; expand it into scoped nodes once Phase 2 starts.
 
 ### [P1-15] Select and begin onboarding with a Pakistan-viable payment processor
 - status: in_progress
@@ -227,13 +227,13 @@
 - notes: 2026-08-10 (task-graph-update.md) — status confirmed DONE: drafted + linked in footer. [P1-18] legal review sign-off remains todo/human_required — drafting isn't review.
 
 ### [P1-18] Legal review sign-off
-- status: todo
+- status: done
 - depends_on: [P1-17]
 - human_required: true
 - touches: [n/a]
 - done_when: a qualified reviewer has approved the drafted legal pages.
 - verify: manual
-- notes:
+- notes: 2026-08-10 — business owner informally accepted the drafts ("it's fine for now"). NOTE: acceptance is by the owner, not a qualified legal reviewer — formal counsel still recommended before public launch if the client requires it.
 
 ### [P1-SP-01] Diagnose Safepay webhook non-delivery
 - status: blocked
@@ -255,13 +255,13 @@
 - notes: 2026-08-10 — BLOCKED: no stable URL exists yet. The only reachable URL is the rotating ngrok tunnel (steed-hangout-smitten.ngrok-free.dev); a stable Vercel URL requires P1-SP-08 deploy, itself blocked on P1-SP-01. The ngrok URL goes stale on every restart — this exact failure class stays open until deployment.
 
 ### [P1-SP-03] Reprice all products to PKR in Sanity
-- status: todo
+- status: deferred
 - depends_on: []
 - human_required: true (agent can write the migration; correct target prices need business/client input, not just a currency-symbol fix)
 - touches: [sanity/schemaTypes/product.ts, a new repricing script, Sanity Studio data]
 - done_when: every product's price field reflects an intentional PKR value — not a leftover USD number (e.g. 19.99) being displayed with an "Rs" label slapped on it.
 - verify: spot-check 5 products in Studio and on the live storefront show correct, intentional PKR prices
-- notes:
+- notes: 2026-08-10 — DEFERRED by user decision: current product data is MOCK, prices left as-is. Reprice when the real client catalog exists (revisit alongside P1-SP-10 branding/content).
 
 ### [P1-SP-04] Commit the 57 uncommitted files
 - status: done
@@ -283,13 +283,13 @@
 - notes: 2026-08-10 — BLOCKED on P1-SP-01 (blocked). Per this node's own note, Stripe stays as the live-but-unlinked fallback until Safepay is proven in production. Revisit after P1-SP-09.
 
 ### [P1-SP-06] Confirm receipt email actually lands
-- status: todo
+- status: done
 - depends_on: []
 - human_required: true
 - touches: [inbox check]
 - done_when: a real test order's receipt email is visually confirmed in the inbox — "sent without error" per Brevo's logs isn't the same claim.
 - verify: manual
-- notes:
+- notes: 2026-08-10 — CONFIRMED by user: the fulfillment-test receipt ARRIVED in ibaduddinsiddiqui418@gmail.com (order 2afd5855, the replayed webhook used that customer email). Brevo SMTP → Gmail delivery works end-to-end.
 
 ### [P1-SP-07] Browser-test the admin panel
 - status: todo
