@@ -341,8 +341,8 @@
 ## PHASE 2 — Important (epics only — expand each into a node sub-graph, same format as Phase 1, once Phase 1 is done or explicitly deferred)
 
 - [x] **P2-EPIC-01** Product management admin UI (replace reliance on raw Sanity Studio) — EXPANDED 2026-08-10 into P2-01..P2-07 below
-- [ ] **P2-EPIC-02** One local courier integration (Leopards or PostEx first)
-- [ ] **P2-EPIC-03** WhatsApp + SMS order notifications
+- [ ] **P2-EPIC-02** One local courier integration (Leopards or PostEx first) — BLOCKED-ON-MERCHANT: needs a courier business account (Leopards/PostEx) + API credentials before any code can be written. Owner to sign up; see P2-EPIC-02 note below.
+- [ ] **P2-EPIC-03** WhatsApp + SMS order notifications — BLOCKED-ON-MERCHANT: needs WhatsApp Business API (Meta) + an SMS gateway account (e.g. Twilio/Infobip) before code can be written. Owner to sign up; see P2-EPIC-03 note below.
 - [x] **P2-EPIC-04** SEO pass — metadata, Product structured data, sitemap, OG images — EXPANDED + COMPLETED 2026-08-10 (P2-SEO-01..05)
 - [x] **P2-EPIC-05** Rate limiting across auth/discount/payment endpoints — EXPANDED + COMPLETED 2026-08-10 (P2-RL-01..03)
 - [x] **P2-EPIC-06** Automatic search-index sync (webhook-triggered, not manual script) — EXPANDED + COMPLETED 2026-08-10 (P2-SS-01..02)
@@ -509,6 +509,9 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - done_when: POST /api/webhooks/sanity verifies x-sanity-webhook-signature (HMAC-SHA256, timing-safe), syncs on create/update, deletes on delete, ignores non-product types; GET answers the test ping; SANITY_WEBHOOK_SECRET generated and added to .env.local.
 - verify: `npm test -- sanity-webhook` passes; tsc clean; curl POST without signature returns 401
 - notes: VERIFIED 2026-08-10 — 6/6 signature tests; live curl no-sig → 401. REMAINING (human/deploy): create the webhook in Sanity dashboard (Dataset production, trigger product create/update/delete, URL <PUBLIC_BASE_URL>/api/webhooks/sanity, secret = the SANITY_WEBHOOK_SECRET in .env.local), then restart the deployed server with the env var.
+
+### P2-EPIC-02 / P2-EPIC-03 — BLOCKED (external accounts required)
+2026-08-10 — Not expanded/implemented: both epics require third-party merchant/provider accounts the owner must open first (courier: Leopards or PostEx business account + API creds; notifications: WhatsApp Business API + SMS gateway). Once accounts exist, expand each into scoped nodes (same schema) before implementing. The order-notification email path already works (Brevo SMTP, lib/email.ts) as the interim customer notification channel.
 
 ### P2-EPIC-07 — expanded nodes (Lighthouse performance audit)
 
