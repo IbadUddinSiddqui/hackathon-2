@@ -128,19 +128,65 @@ export function toProductSummary(doc: RawProductDoc): ProductSummary {
   };
 }
 
-/** Shared validation for create/update payloads (P2-02/P2-03 reuse this). */
+/** Normalized create/update payload — same fields as the import template. */
+export type ProductInput = {
+  name: string;
+  description?: string;
+  price: number;
+  stock: number;
+  category: string;
+  category_slug: string;
+  size: string[];
+  brand?: string;
+  tags: string[];
+  imageUrls: string[];
+};
+
+function toStringArray(v: unknown): string[] {
+  if (Array.isArray(v)) return v.map((x) => String(x).trim()).filter(Boolean);
+  const s = String(v ?? "").trim();
+  return s ? s.split(",").map((x) => x.trim()).filter(Boolean) : [];
+}
+
+function toOptionalString(v: unknown): string | undefined {
+  const s = String(v ?? "").trim();
+  return s ? s : undefined;
+}
+
+function toOptionalNumber(v: unknown): number | undefined {
+  if (v === undefined || v === null || v === "") return undefined;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : undefined;
+}
+
+/**
+ * Defensively coerce a raw JSON body into a ProductInput-shaped object
+ * (string arrays accept both arrays and comma-separated strings, prices/stock
+ * accept numbers or numeric strings, non-http URLs are dropped).
+ */
+export function normalizeCreateInput(raw: Record<string, unknown>): Partial<ProductInput> {
+  return {
+    name: toOptionalString(raw.name),
+    description: toOptionalString(raw.description),
+    price: toOptionalNumber(raw.price),
+    stock: toOptionalNumber(raw.stock),
+    category: toOptionalString(raw.category),
+    category_slug: toOptionalString(raw.category_slug),
+    size: toStringArray(raw.size),
+    brand: toOptionalString(raw.brand),
+    tags: toStringArray(raw.tags),
+    imageUrls: toStringArray(raw.imageUrls).filter((u) => /^https?:\/\//i.test(u)),
+  };
+}
+
+/**
+ * Shared validation for create/update payloads (P2-02/P2-03 reuse this).
+ * `requireImages` is true for create (the Sanity schema mandates min 1 image
+ * and the storefront renders images[0]) but false for partial updates.
+ */
 export function validateProductInput(
-  input: Partial<{
-    name: string;
-    description: string;
-    price: number;
-    stock: number;
-    category: string;
-    category_slug: string;
-    size: string[];
-    brand: string;
-    tags: string[];
-  }>
+  input: Partial<ProductInput>,
+  options: { requireImages?: boolean } = {}
 ): string | null {
   const err = (msg: string) => msg;
 
@@ -155,6 +201,13 @@ export function validateProductInput(
   if (!Array.isArray(input.size) || input.size.length === 0)
     return err("size must be a non-empty array");
   if (input.size.some((s) => !String(s).trim())) return err("size entries cannot be empty");
+
+  if (options.requireImages) {
+    if (!Array.isArray(input.imageUrls) || input.imageUrls.length === 0)
+      return err("imageUrls is required (at least one http(s) URL)");
+    if (input.imageUrls.some((u) => !/^https?:\/\//i.test(String(u))))
+      return err("imageUrls entries must be http(s) URLs");
+  }
 
   return null;
 }

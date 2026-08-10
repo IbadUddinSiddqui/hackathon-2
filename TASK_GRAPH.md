@@ -361,13 +361,13 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes: VERIFIED 2026-08-10 — lib/admin-products.ts (pure: parseListQuery with null-safe param defaults — Number(null)==0 bug caught by test, buildProductListGroq, toProductSummary, validateProductInput); app/api/admin/products/route.ts (isAdmin guard → 401, Promise.all list+count, {items,total,page,pages,limit}). npm test -- admin-products 11/11 PASS; curl unauth = 401; tsc clean.
 
 ### [P2-02] Admin API — create product
-- status: todo
+- status: done
 - depends_on: [P2-01]
 - human_required: false
 - touches: [app/api/admin/products/route.ts, lib/admin-products.ts, lib/admin-products.test.ts, lib/bulk-import.ts (reuse validateRow), app/api/admin/products/bulk-import/route.ts (image-upload pattern)]
 - done_when: POST /api/admin/products (admin-only) accepts the same JSON fields as the import template (name, description, price, stock, category, category_slug, size, brand, tags, imageUrls), validates via the existing row validator, uploads image URLs as Sanity assets, creates the doc, returns 201 + new `_id`; 400 on validation failure; 401 unauthenticated.
 - verify: `npm test -- admin-products` passes and `npx tsc --noEmit` clean
-- notes:
+- notes: VERIFIED 2026-08-10 — lib/admin-products.ts gains ProductInput type, normalizeCreateInput (coerces numbers, accepts arrays or comma-strings, drops non-http URLs), validateProductInput(input, {requireImages}) — true for create (schema min 1 image). lib/product-images.ts extracted (findProductByName + uploadImages) from bulk-import route; bulk-import route now imports them (dedupe). POST /api/admin/products: guard→400 invalid body→normalize→validate→409 duplicate name→uploadImages→create→201 {product:{_id}}. npm test 15/15 admin-products, FULL suite 52/52 pass, tsc clean, unauth POST = 401.
 
 ### [P2-03] Admin API — update product
 - status: todo

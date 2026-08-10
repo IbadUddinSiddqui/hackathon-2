@@ -13,6 +13,7 @@ import { auth } from "@/auth";
 import { isAdmin } from "@/lib/admin";
 import { serverClient } from "@/sanity/lib/server-client";
 import { parseWorkbook, validateRow, buildTemplate, type ProductPayload } from "@/lib/bulk-import";
+import { findProductByName, uploadImages } from "@/lib/product-images";
 
 type RowResult = {
   row: number;
@@ -156,50 +157,5 @@ export async function POST(request: Request) {
   });
 }
 
-async function findProductByName(name: string): Promise<string | null> {
-  const doc = await serverClient.fetch(
-    `*[_type == "product" && name == $name][0]{_id}`,
-    { name }
-  );
-  return doc?._id ?? null;
-}
-
-/** Download each image URL and store it as a Sanity image asset. */
-async function uploadImages(urls: string[], productName: string): Promise<{ _type: "image"; asset: { _type: "reference"; _ref: string } }[]> {
-  const assets: { _type: "image"; asset: { _type: "reference"; _ref: string } }[] = [];
-
-  for (const url of urls.slice(0, 8)) {
-    try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(20_000) });
-      if (!res.ok) continue;
-
-      const contentType = res.headers.get("content-type") || "image/jpeg";
-      const ext = contentType.includes("png") ? "png" : contentType.includes("webp") ? "webp" : "jpg";
-      const body = await res.arrayBuffer();
-      if (body.byteLength === 0) continue;
-
-      const asset = await serverClient.assets.upload(
-        "image",
-        Buffer.from(body),
-        {
-          contentType,
-          filename: `${slugify(productName)}-${assets.length + 1}.${ext}`,
-        }
-      );
-
-      assets.push({ _type: "image", asset: { _type: "reference", _ref: asset._id } });
-    } catch {
-      // Skip unreachable/broken image URLs silently — the product still imports.
-    }
-  }
-
-  return assets;
-}
-
-function slugify(s: string): string {
-  return s
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "")
-    .slice(0, 48);
-}
+// findProductByName + uploadImages now live in lib/product-images.ts (shared
+// with the create/update/delete admin APIs).

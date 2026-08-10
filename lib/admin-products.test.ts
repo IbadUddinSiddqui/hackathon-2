@@ -3,6 +3,7 @@ import {
   parseListQuery,
   buildProductListGroq,
   toProductSummary,
+  normalizeCreateInput,
   validateProductInput,
 } from "./admin-products";
 
@@ -97,18 +98,76 @@ describe("toProductSummary", () => {
   });
 });
 
+describe("normalizeCreateInput", () => {
+  it("coerces numeric strings and trims text fields", () => {
+    const input = normalizeCreateInput({
+      name: "  Tee  ",
+      price: "1499",
+      stock: "10",
+      category: " T-Shirts ",
+      category_slug: "t-shirts",
+    });
+    expect(input.name).toBe("Tee");
+    expect(input.price).toBe(1499);
+    expect(input.stock).toBe(10);
+    expect(input.category).toBe("T-Shirts");
+  });
+
+  it("accepts arrays or comma-separated strings for size/tags/imageUrls", () => {
+    const fromArrays = normalizeCreateInput({
+      size: ["S", " M "],
+      tags: ["new", "summer"],
+      imageUrls: ["https://cdn.example.com/a.jpg", "not-a-url"],
+    });
+    expect(fromArrays.size).toEqual(["S", "M"]);
+    expect(fromArrays.tags).toEqual(["new", "summer"]);
+    expect(fromArrays.imageUrls).toEqual(["https://cdn.example.com/a.jpg"]);
+
+    const fromString = normalizeCreateInput({ size: "S,M,L", tags: "new" });
+    expect(fromString.size).toEqual(["S", "M", "L"]);
+    expect(fromString.tags).toEqual(["new"]);
+  });
+
+  it("turns invalid numbers into undefined", () => {
+    const input = normalizeCreateInput({ price: "abc", stock: undefined });
+    expect(input.price).toBeUndefined();
+    expect(input.stock).toBeUndefined();
+  });
+});
+
 describe("validateProductInput", () => {
-  it("accepts a valid payload", () => {
+  it("accepts a valid create payload with images", () => {
     expect(
-      validateProductInput({
-        name: "Tee",
-        price: 1499,
-        stock: 10,
-        category: "T-Shirts",
-        category_slug: "t-shirts",
-        size: ["S", "M"],
-      })
+      validateProductInput(
+        {
+          name: "Tee",
+          price: 1499,
+          stock: 10,
+          category: "T-Shirts",
+          category_slug: "t-shirts",
+          size: ["S", "M"],
+          imageUrls: ["https://cdn.example.com/a.jpg"],
+        },
+        { requireImages: true }
+      )
     ).toBeNull();
+  });
+
+  it("requires imageUrls when requireImages is set", () => {
+    const valid = {
+      name: "Tee",
+      price: 1,
+      stock: 1,
+      category: "A",
+      category_slug: "a",
+      size: ["S"],
+    };
+    expect(validateProductInput(valid, { requireImages: true })).toContain("imageUrls");
+    expect(
+      validateProductInput({ ...valid, imageUrls: ["ftp://nope"] }, { requireImages: true })
+    ).toContain("imageUrls");
+    // But a partial update (no images) is fine without the flag.
+    expect(validateProductInput(valid)).toBeNull();
   });
 
   it("rejects missing name, negative price, empty size", () => {
