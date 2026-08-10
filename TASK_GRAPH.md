@@ -343,7 +343,7 @@
 - [x] **P2-EPIC-01** Product management admin UI (replace reliance on raw Sanity Studio) — EXPANDED 2026-08-10 into P2-01..P2-07 below
 - [ ] **P2-EPIC-02** One local courier integration (Leopards or PostEx first)
 - [ ] **P2-EPIC-03** WhatsApp + SMS order notifications
-- [ ] **P2-EPIC-04** SEO pass — metadata, Product structured data, sitemap, OG images
+- [x] **P2-EPIC-04** SEO pass — metadata, Product structured data, sitemap, OG images — EXPANDED + COMPLETED 2026-08-10 (P2-SEO-01..05)
 - [ ] **P2-EPIC-05** Rate limiting across auth/discount/payment endpoints
 - [ ] **P2-EPIC-06** Automatic search-index sync (webhook-triggered, not manual script)
 - [ ] **P2-EPIC-07** Live performance audit (Lighthouse) + fixes
@@ -413,6 +413,53 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - done_when: owner clicks through list/search, create, edit, delete against real Sanity data in a real browser and confirms each works.
 - verify: manual — owner confirmation
 - notes:
+
+### P2-EPIC-04 — expanded nodes (SEO pass) — ALL DONE 2026-08-10
+
+### [P2-SEO-01] Metadata for every page + root SEO defaults
+- status: done
+- depends_on: []
+- human_required: false
+- touches: [lib/site.ts (new), app/layout.tsx, app/page.tsx, app/search/page.tsx, app/denied/page.tsx, app/dashboard/page.tsx, app/{cart,wishlist,login,register,checkout,checkout/success}/layout.tsx (new)]
+- done_when: root layout has metadataBase, title template (`%s | AnK's`), description, OG + twitter defaults; every storefront page has a title/description; noindex on auth/cart/admin pages.
+- verify: tsc clean; curl / shows `<meta name="description">` + OG tags
+- notes: VERIFIED 2026-08-10 — lib/site.ts (SITE_NAME/DESCRIPTION/URL via NEXT_PUBLIC_SITE_URL → PUBLIC_BASE_URL → localhost). Root metadata overhauled; client pages (cart/wishlist/login/register/checkout/checkout-success) get metadata via server layouts; denied/dashboard noindex. tsc clean; 60/60 tests.
+
+### [P2-SEO-02] Category page — server-rendered with generateMetadata
+- status: done
+- depends_on: [P2-SEO-01]
+- human_required: false
+- touches: [app/products/[category]/page.tsx, app/products/[category]/CategoryClient.tsx (new), lib/typesense.ts, sanity/lib/client.ts]
+- done_when: /products/[category] renders server-side (data fetched server-side from Sanity + Typesense, merged+deduped) with per-category title/description; client UI kept as child with filters/pagination.
+- verify: tsc clean; curl /products/mens-clothing returns 200 and includes category `<title>`
+- notes: VERIFIED 2026-08-10 — page converted to server component (await params, generateMetadata, server fetch), UI extracted verbatim to CategoryClient (initialProducts prop, no fetch). Behavior preserved.
+
+### [P2-SEO-03] Product detail — server-rendered, JSON-LD Product schema, OG image
+- status: done
+- depends_on: [P2-SEO-01]
+- human_required: false
+- touches: [app/products/[category]/[productId]/page.tsx, app/products/[category]/[productId]/ProductDetailClient.tsx (new), sanity/lib/client.ts, sanity/lib/image.ts]
+- done_when: /products/[category]/[productId] renders server-side with generateMetadata (name, description, product-image OG), JSON-LD Product schema (PKR price, InStock/OutOfStock), lookup by _id OR slug.
+- verify: tsc clean; curl a product URL shows `<title>` + `<script type="application/ld+json">`
+- notes: VERIFIED 2026-08-10 — server page fetches by (_id == $id || slug.current == $id), maps images via urlFor, emits JSON-LD + OG image; UI extracted to ProductDetailClient.
+
+### [P2-SEO-04] Sitemap + robots.txt
+- status: done
+- depends_on: [P2-SEO-01]
+- human_required: false
+- touches: [app/sitemap.ts (new), app/robots.ts (new), lib/site.ts]
+- done_when: /sitemap.xml lists home, search, all categories and products from Sanity with absolute URLs; /robots.txt disallows auth/cart/admin, points to sitemap.
+- verify: curl /sitemap.xml + /robots.txt return 200 with expected content
+- notes: VERIFIED 2026-08-10 — sitemap returns live Sanity categories (mens-clothing, footwear, …) + products; robots.txt has all disallows + Sitemap link. URLs resolve via PUBLIC_BASE_URL (ngrok) until a real domain is set (NEXT_PUBLIC_SITE_URL).
+
+### [P2-SEO-05] Default OG image
+- status: done
+- depends_on: [P2-SEO-01]
+- human_required: false
+- touches: [app/opengraph-image.tsx (new)]
+- done_when: a branded 1200×630 OG image is served at /opengraph-image (ImageResponse).
+- verify: tsc clean; curl -I /opengraph-image returns 200 image/png
+- notes: VERIFIED 2026-08-10 — ImageResponse gradient card with brand name + tagline.
 
 ## PHASE 3 — Professional (epics only)
 
