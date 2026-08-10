@@ -123,13 +123,13 @@
 - notes: VERIFIED 2026-08-09 — @sentry/nextjs 10.69.0 installed. Wired: sentry.client.config.ts (NEXT_PUBLIC_SENTRY_DSN, no replay), sentry.server.config.ts + sentry.edge.config.ts (SENTRY_DSN), instrumentation.ts (register() imports per-runtime configs + `onRequestError = Sentry.captureRequestError` per Sentry 10 recommended hook), app/global-error.tsx (client boundary reporting render errors), next.config.ts wrapped with withSentryConfig (sourcemaps+release disabled without SENTRY_AUTH_TOKEN, errorHandler warns instead of failing, telemetry off). .env.example created documenting ALL env vars incl. the new SENTRY_* + NEXT_PUBLIC_SENTRY_DSN. Production build PASSED under Node 20 (~15 min on this slow FS — build must be run detached with log polling since it exceeds the 600s agent cap; dev server must be stopped first, it locks .next). tsc + eslint clean. Sentry noted: client config deprecation (sentry.client.config.ts → instrumentation-client.ts for Turbopack, Next 15.1.6 doesn't support it yet — safe to defer).
 
 ### [P1-12] Confirm error tracking actually captures errors
-- status: in_progress
+- status: done
 - depends_on: [P1-11]
 - human_required: true
 - touches: [Sentry dashboard]
 - done_when: a manually-triggered test error appears in the Sentry dashboard.
 - verify: manual — check dashboard
-- notes: 2026-08-10 — AGENT SIDE DONE: user provided Sentry DSN; SENTRY_DSN + NEXT_PUBLIC_SENTRY_DSN added to .env.local; dev server restarted; app/api/sentry-test/route.ts created (fires Sentry.captureException); hit GET /api/sentry-test → 200, response sent:true, only known cosmetic Turbopack warning in logs. REMAINING (human): open Sentry dashboard → Issues → confirm 'Sentry test error — P1-12 verification' appeared, then flip status to done.
+- notes: 2026-08-10 — AGENT SIDE DONE: user provided Sentry DSN; SENTRY_DSN + NEXT_PUBLIC_SENTRY_DSN added to .env.local; dev server restarted; app/api/sentry-test/route.ts created (fires Sentry.captureException); hit GET /api/sentry-test → 200, response sent:true, only known cosmetic Turbopack warning in logs. REMAINING (human): open Sentry dashboard → Issues → confirm 'Sentry test error — P1-12 verification' appeared, then flip status to done. 2026-08-10 — OWNER CONFIRMED: test error visible in Sentry dashboard (verification ID seen). DONE.
 
 ### [P1-13] Add Cash on Delivery checkout option
 - status: done
@@ -292,13 +292,13 @@
 - notes: 2026-08-10 — CONFIRMED by user: the fulfillment-test receipt ARRIVED in ibaduddinsiddiqui418@gmail.com (order 2afd5855, the replayed webhook used that customer email). Brevo SMTP → Gmail delivery works end-to-end.
 
 ### [P1-SP-07] Browser-test the admin panel
-- status: todo
+- status: in_progress
 - depends_on: []
 - human_required: true
-- touches: [/adminpanel/orders, /adminpanel/discounts]
+- touches: [/adminpanel/orders, /adminpanel/discounts, /adminpanel/products]
 - done_when: both pages have been manually clicked through in a real browser this session and confirmed working — "code complete + tests" isn't the same as "someone actually looked at it."
 - verify: manual
-- notes:
+- notes: 2026-08-10 — OWNER tested /adminpanel/orders, order detail (status changer + product links), /adminpanel/discounts (create/edit/disable) — all OK. REMAINING: /adminpanel/products bulk-import test (owner will do later).
 
 ### [P1-SP-08] Deploy to production
 - status: blocked
@@ -310,13 +310,13 @@
 - notes: 2026-08-10 — BLOCKED on P1-SP-01 (blocked) + P1-SP-03 (human reprice). DEPLOYMENT.md runbook is ready; no Vercel project exists yet. Unblocks when Safepay webhook delivery is proven (P1-SP-01/P1-SP-09) and prices are repriced (P1-SP-03).
 
 ### [P1-SP-09] Safepay production mode
-- status: todo
+- status: deferred
 - depends_on: [P1-SP-01]
 - human_required: true
 - touches: [Safepay merchant account]
 - done_when: merchant account approved for production, live API key obtained, live webhook endpoint registered against the real production domain.
 - verify: manual
-- notes:
+- notes: 2026-08-10 — OWNER: leave for now (deferred). Resume when ready to apply for Safepay production/live merchant access.
 
 ### [P1-SP-11] Admin bulk product import (Excel upload)
 - status: done
