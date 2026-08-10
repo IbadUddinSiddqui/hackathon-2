@@ -346,7 +346,7 @@
 - [x] **P2-EPIC-04** SEO pass — metadata, Product structured data, sitemap, OG images — EXPANDED + COMPLETED 2026-08-10 (P2-SEO-01..05)
 - [x] **P2-EPIC-05** Rate limiting across auth/discount/payment endpoints — EXPANDED + COMPLETED 2026-08-10 (P2-RL-01..03)
 - [x] **P2-EPIC-06** Automatic search-index sync (webhook-triggered, not manual script) — EXPANDED + COMPLETED 2026-08-10 (P2-SS-01..02)
-- [ ] **P2-EPIC-07** Live performance audit (Lighthouse) + fixes
+- [x] **P2-EPIC-07** Live performance audit (Lighthouse) + fixes — EXPANDED 2026-08-10 (P2-LH-01..02)
 
 ### P2-EPIC-01 — expanded nodes (Product management admin UI)
 Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the existing admin guard (lib/admin.ts), the bulk-import validator (lib/bulk-import.ts), and the bulk-import image-upload pattern.
@@ -509,6 +509,26 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - done_when: POST /api/webhooks/sanity verifies x-sanity-webhook-signature (HMAC-SHA256, timing-safe), syncs on create/update, deletes on delete, ignores non-product types; GET answers the test ping; SANITY_WEBHOOK_SECRET generated and added to .env.local.
 - verify: `npm test -- sanity-webhook` passes; tsc clean; curl POST without signature returns 401
 - notes: VERIFIED 2026-08-10 — 6/6 signature tests; live curl no-sig → 401. REMAINING (human/deploy): create the webhook in Sanity dashboard (Dataset production, trigger product create/update/delete, URL <PUBLIC_BASE_URL>/api/webhooks/sanity, secret = the SANITY_WEBHOOK_SECRET in .env.local), then restart the deployed server with the env var.
+
+### P2-EPIC-07 — expanded nodes (Lighthouse performance audit)
+
+### [P2-LH-01] Run Lighthouse audit and record baseline
+- status: done
+- depends_on: []
+- human_required: false
+- touches: [http://localhost:3000]
+- done_when: a Lighthouse run (performance/seo/accessibility/best-practices) records baseline scores + top failures into this node's notes.
+- verify: lighthouse JSON output captured with scores
+- notes: VERIFIED 2026-08-10 (dev server, Lighthouse 13.4.1) — BASELINE: performance 32 / seo 92 / accessibility 86 / best-practices 96. Performance failures are dev-mode artifacts (unminified JS, missing source maps, slow dev SSR, unused code). A11y: icon-only testimonial arrows (no name), icon-only footer social links (no name), contrast (FLASH SALE red-500, shadcn outline buttons). BP: console errors (no actionable snippet — dev noise), missing source maps (dev-only). FULL AUDIT MUST BE RE-RUN POST-DEPLOY against the production build.
+
+### [P2-LH-02] Fix actionable audit findings
+- status: done
+- depends_on: [P2-LH-01]
+- human_required: false
+- touches: [app/components/Testiomnials/Tetimonials.tsx, app/components/Footer/Footer.tsx, app/components/Hero/Hero.tsx]
+- done_when: every actionable finding (correctable from code, not dev-mode artifacts) is fixed; remaining items are documented.
+- verify: re-run the affected Lighthouse category, show the delta
+- notes: VERIFIED 2026-08-10 — FIXED: aria-label on testimonial prev/next buttons; aria-label on 4 footer social links (Twitter/Facebook/Instagram/GitHub); FLASH SALE text-red-500 → text-red-600 (contrast on white). RE-RUN DELTA: seo 92→100, accessibility 86→96, best-practices 96→96, performance 32→33 (dev noise). REMAINING (documented, design-token level): color-contrast on shadcn outline buttons + testimonial card grays (needs brand/theme decision); errors-in-console (no actionable detail); valid-source-maps (dev-only). REAL PERFORMANCE NUMBERS REQUIRE THE PRODUCTION BUILD + DEPLOY (human/deploy step).
 
 ## PHASE 3 — Professional (epics only)
 

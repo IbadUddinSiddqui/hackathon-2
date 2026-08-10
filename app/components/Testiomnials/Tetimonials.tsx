@@ -150,6 +150,7 @@ const TestimonialCard: React.FC = () => {
         <button
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
           disabled={isPrevDisabled}
+          aria-label="Previous testimonials"
           className={`px-4 text-black  py-4 text-[22px] md:text-2xl lg:text-3xl ${
             isPrevDisabled
               ? "opacity-50 cursor-not-allowed"
@@ -165,6 +166,7 @@ const TestimonialCard: React.FC = () => {
             )
           }
           disabled={isNextDisabled}
+          aria-label="Next testimonials"
           className={`px-2 py-4 text-[22px] text-black md:text-2xl lg:text-3xl ${
             isNextDisabled
               ? "opacity-50 cursor-not-allowed"

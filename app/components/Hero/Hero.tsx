@@ -51,7 +51,7 @@ export default function FashionHero() {
             >
               <FlashSaleIcon />
               <div className="flex gap-2 font-medium text-gray-800">
-                <span className="text-red-500">FLASH SALE:</span>
+                <span className="text-red-600">FLASH SALE:</span>
                 <span>{timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m</span>
               </div>
             </motion.div>

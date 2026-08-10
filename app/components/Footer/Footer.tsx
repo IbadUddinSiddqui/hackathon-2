@@ -34,10 +34,10 @@ function Footer() {
           <div className=''><Image width={150} height={50} src='/logo-full-black.svg' alt='logo '  /></div>
           <p className='mt-2 text-base text-gray-500'>We have clothes that suits your style and which youre proud to wear. From women to men.</p>
           <div className='flex mt-4 gap-2'>
-            <Link href='/' className='my-2'><TiSocialTwitter /></Link>
-            <Link href='/'className='my-2'><FaFacebook /></Link>
-            <Link href='/' className='my-2'><LuInstagram /></Link>
-          <Link href='/' className='my-2  '><BsGithub /></Link>
+            <Link href='/' className='my-2' aria-label='Twitter'><TiSocialTwitter /></Link>
+            <Link href='/' className='my-2' aria-label='Facebook'><FaFacebook /></Link>
+            <Link href='/' className='my-2' aria-label='Instagram'><LuInstagram /></Link>
+          <Link href='/' className='my-2' aria-label='GitHub'><BsGithub /></Link>
           </div>
       </div>
         <div className='flex flex-col  text-center md:text-left text-black '>
