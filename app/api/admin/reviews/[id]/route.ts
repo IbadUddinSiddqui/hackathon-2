@@ -2,10 +2,9 @@
 // P3-16 — approve/reject a review. Also logs to the audit trail.
 
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
-import { isAdmin } from "@/lib/admin";
 import { serverClient } from "@/sanity/lib/server-client";
 import { logAdminAction } from "@/lib/audit";
+import { getTenantContext, tenantFilter } from "@/lib/tenants";
 
 const VALID_STATUSES = ["approved", "rejected"];
 
@@ -13,10 +12,11 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!isAdmin(session)) {
+  const ctx = await getTenantContext();
+  if (!ctx) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const { session, tenantId } = ctx;
 
   const { id } = await params;
 
@@ -37,8 +37,8 @@ export async function PATCH(
 
   try {
     const existing = await serverClient.fetch(
-      `*[_id == $id][0]{_id, customerName, customerEmail}`,
-      { id }
+      `*[_id == $id && ${tenantFilter()}][0]{_id, customerName, customerEmail}`,
+      { id, tenantId }
     );
     if (!existing) {
       return NextResponse.json({ error: "Review not found" }, { status: 404 });
@@ -48,6 +48,7 @@ export async function PATCH(
 
     logAdminAction({
       adminEmail: session?.user?.email,
+      tenantId,
       action: "update",
       targetType: "product",
       targetId: id,

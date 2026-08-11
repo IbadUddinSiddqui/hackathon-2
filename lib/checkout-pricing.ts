@@ -40,20 +40,22 @@ export type PricedOrder = {
 export type PricingError = { error: string };
 
 export async function priceCheckout(input: {
+  tenantId?: string; // P4-03 — isolate pricing to the active SaaS tenant
   items: { id: string; quantity: number; size?: string[] }[];
   customerEmail?: string;
   discountCode?: string;
   giftCardCode?: string;
   creditAmount?: number;
 }): Promise<PricedOrder | PricingError> {
+  const tenantId = input.tenantId || "tenant-anks";
   if (!Array.isArray(input.items) || input.items.length === 0) {
     return { error: "Cart is empty" };
   }
 
   // Fetch real products AND active flash sales in parallel (server-truth).
   const [products, sales] = await Promise.all([
-    fetchProductsByIds(input.items.map((i) => i.id)),
-    getActiveFlashSales(),
+    fetchProductsByIds(input.items.map((i) => i.id), tenantId),
+    getActiveFlashSales(tenantId),
   ]);
   const productMap = new Map(products.map((p) => [p._id, p]));
   const salePriceMap = buildSalePriceMap(sales);
@@ -80,7 +82,7 @@ export async function priceCheckout(input: {
 
   // Discount (server-validated).
   const discountResult = input.discountCode
-    ? await validateDiscountCode(input.discountCode, subtotal)
+    ? await validateDiscountCode(input.discountCode, subtotal, tenantId)
     : { valid: true as const, discountAmount: 0, code: "" };
   if (!discountResult.valid) {
     return { error: discountResult.message };
@@ -95,6 +97,7 @@ export async function priceCheckout(input: {
     const redeemed = await redeemGiftCard({
       code: input.giftCardCode,
       amount: Math.max(0, total),
+      tenantId,
     });
     if (redeemed.applied <= 0) {
       return { error: redeemed.message || "Gift card could not be applied" };
@@ -108,6 +111,7 @@ export async function priceCheckout(input: {
   let creditApplied = 0;
   if (input.customerEmail && input.creditAmount && input.creditAmount > 0) {
     creditApplied = await applyStoreCredit({
+      tenantId,
       email: input.customerEmail,
       requested: input.creditAmount,
       remainingTotal: Math.max(0, total),

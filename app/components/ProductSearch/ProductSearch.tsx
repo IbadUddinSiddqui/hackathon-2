@@ -5,6 +5,7 @@ import Typesense from 'typesense';
 import Link from 'next/link';
 import { FaSearch } from 'react-icons/fa';
 import Image from 'next/image';
+import { clientTenantId } from '@/lib/tenant-client';
 
 // 1. Configure Typesense Client (values come from env vars, see .env.local)
 const client = new Typesense.Client({
@@ -34,10 +35,12 @@ export default function HeaderSearch() {
 
     try {
       setLoading(true);
+      // P4-03 — only show the active tenant's products in search results.
+      const tenantId = clientTenantId();
       const searchResults = await client.collections('products').documents().search({
         q: searchQuery,
         query_by: 'name,description,brand,category,tags',
-        filter_by: '', // Add filters here if needed
+        filter_by: `tenant_id:=${tenantId}`,
         sort_by: 'ratings:desc,created_at:desc',
         per_page: 12
       });

@@ -4,23 +4,22 @@
 // Unauthenticated → 401.
 
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
-import { isAdmin } from "@/lib/admin";
 import { serverClient } from "@/sanity/lib/server-client";
 import {
   parseCustomerListQuery,
   buildCustomerListGroq,
   toCustomerSummary,
 } from "@/lib/admin-customers";
+import { getTenantContext } from "@/lib/tenants";
 
 export async function GET(request: Request) {
-  const session = await auth();
-  if (!isAdmin(session)) {
+  const ctx = await getTenantContext();
+  if (!ctx) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const query = parseCustomerListQuery(new URL(request.url));
-  const { groq, countGroq, params } = buildCustomerListGroq(query);
+  const { groq, countGroq, params } = buildCustomerListGroq(query, ctx.tenantId);
 
   try {
     const [docs, total] = await Promise.all([

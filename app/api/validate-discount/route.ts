@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { validateDiscountCode } from "@/lib/discounts";
 import { enforceRateLimit } from "@/lib/rate-limit";
+import { getActiveTenantId } from "@/lib/tenants";
 
 /**
  * Validate a discount code for the given subtotal. Used by the cart page's
@@ -20,7 +21,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid subtotal" }, { status: 400 });
     }
 
-    const result = await validateDiscountCode(code, subtotal);
+    const result = await validateDiscountCode(code, subtotal, await getActiveTenantId());
 
     if (!result.valid) {
       return NextResponse.json(

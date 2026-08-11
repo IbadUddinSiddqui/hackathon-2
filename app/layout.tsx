@@ -7,6 +7,8 @@ import { SessionProvider } from "next-auth/react";
 import { SITE_NAME, SITE_DESCRIPTION, SITE_URL } from "@/lib/site";
 import { localeFromCookie, localeDir, LOCALE_COOKIE } from "@/lib/i18n";
 import { LocaleProvider } from "@/lib/locale-provider";
+import { getActiveTenant, ensureDefaultTenant } from "@/lib/tenants";
+import { TenantProvider, type TenantBranding } from "@/lib/tenant-provider";
 
 // Load custom fonts
 const geistSans = localFont({
@@ -21,48 +23,46 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
-
-
-// Metadata for the page
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: {
-    default: `${SITE_NAME} — Pakistani Fashion & Clothing Brand`,
-    template: `%s | ${SITE_NAME}`,
-  },
-  description: SITE_DESCRIPTION,
-  keywords: [
-    "AnK's",
-    "Pakistani clothing brand",
-    "fashion Pakistan",
-    "kurtas",
-    "t-shirts",
-    "streetwear",
-    "online shopping Pakistan",
-  ],
-  authors: [{ name: SITE_NAME }],
-  openGraph: {
-    type: "website",
-    siteName: SITE_NAME,
-    title: `${SITE_NAME} — Pakistani Fashion & Clothing Brand`,
-    description: SITE_DESCRIPTION,
-    url: SITE_URL,
-    locale: "en_PK",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: `${SITE_NAME} — Pakistani Fashion & Clothing Brand`,
-    description: SITE_DESCRIPTION,
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
+// P4-05 — per-tenant metadata (name + tagline) so each storefront is branded.
+export async function generateMetadata(): Promise<Metadata> {
+  const tenant = await getActiveTenant();
+  const name = tenant.name || SITE_NAME;
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: {
+      default: `${name} — Pakistani Fashion & Clothing Brand`,
+      template: `%s | ${name}`,
+    },
+    description: tenant.branding?.tagline || SITE_DESCRIPTION,
+    keywords: [
+      name,
+      "Pakistani clothing brand",
+      "fashion Pakistan",
+      "kurtas",
+      "t-shirts",
+      "streetwear",
+      "online shopping Pakistan",
+    ],
+    authors: [{ name }],
+    openGraph: {
+      type: "website",
+      siteName: name,
+      title: `${name} — Pakistani Fashion & Clothing Brand`,
+      description: tenant.branding?.tagline || SITE_DESCRIPTION,
+      url: SITE_URL,
+      locale: "en_PK",
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
 
 // RootLayout Component
 // P3-20/P3-22 — reads the locale cookie so <html lang/dir> and the client
 // provider stay in sync with the language switcher.
+// P4-04/P4-05 — resolves the active tenant (Host header) and seeds the client.
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -71,8 +71,22 @@ export default async function RootLayout({
   const cookieStore = await cookies();
   const locale = localeFromCookie(cookieStore.get(LOCALE_COOKIE)?.value);
 
+  // P4-01 — make sure the default tenant exists (idempotent; awaited so a
+  // fresh serverless instance can't be torn down before the write completes).
+  await ensureDefaultTenant();
+
+  const tenant = await getActiveTenant();
+  const tenantBranding: TenantBranding = {
+    _id: tenant._id,
+    name: tenant.name,
+    tagline: tenant.branding?.tagline,
+    contactEmail: tenant.branding?.contactEmail,
+    whatsapp: tenant.branding?.whatsapp,
+    accentColor: tenant.branding?.accentColor,
+  };
+
   return (
-    <html lang={locale} dir={localeDir(locale)}>
+    <html lang={locale} dir={localeDir(locale)} data-tenant-id={tenant._id}>
       {/* P3-22 — Urdu Nastaliq font (only used when html[lang="ur"]) */}
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -89,11 +103,12 @@ export default async function RootLayout({
         )}
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-      {/* ChakraProvider wrapped around the body with custom theme */}
         <Provider>
           <SessionProvider>
             <LocaleProvider locale={locale}>
-              {children}
+              <TenantProvider tenant={tenantBranding}>
+                {children}
+              </TenantProvider>
             </LocaleProvider>
           </SessionProvider>
         </Provider>

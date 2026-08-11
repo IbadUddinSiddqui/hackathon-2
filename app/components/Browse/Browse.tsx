@@ -4,11 +4,14 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { client } from '@/sanity/lib/client';
+import { clientTenantId } from '@/lib/tenant-client';
 
-// Fetch unique category slugs directly from Sanity
+// Fetch unique category slugs directly from Sanity (P4-03 — tenant-scoped)
 const fetchCategorySlugs = async (): Promise<string[]> => {
+  const tenantId = clientTenantId();
   const slugs = await client.fetch<string[]>(
-    `*[_type == "product"].category_slug`
+    `*[_type == "product" && (!defined(tenantId) || tenantId == $tenantId)].category_slug`,
+    { tenantId }
   );
   return Array.from(new Set(slugs.filter((slug): slug is string => typeof slug === 'string'))).slice(0, 4);
 };

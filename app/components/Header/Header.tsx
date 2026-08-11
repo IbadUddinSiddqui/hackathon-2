@@ -12,6 +12,7 @@ import { useCartStore } from "@/lib/stores/cartStore";
 import { useWishlistStore } from "@/lib/stores/wishlistStore";
 import { useLocale } from "@/lib/locale-provider";
 import { t } from "@/lib/i18n";
+import { useTenant } from "@/lib/tenant-provider";
 import LanguageSwitcher from "../LanguageSwitcher/LanguageSwitcher";
 
 const Header = () => {
@@ -22,6 +23,9 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const { locale } = useLocale();
+  // P4-05 — per-tenant branding (name + accent color) from the tenant doc.
+  const { tenant } = useTenant();
+  const accent = tenant.accentColor || undefined;
 
   return (
     <div className="sticky top-0 z-50">
@@ -30,10 +34,15 @@ const Header = () => {
         initial={{ y: -50 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.5 }}
-        className="bg-gradient-to-r from-black to-gray-900 h-8 flex justify-center items-center"
+        className="h-8 flex justify-center items-center"
+        style={
+          accent
+            ? { background: `linear-gradient(90deg, ${accent}, #000)` }
+            : undefined
+        }
       >
         <p className="text-white text-center text-sm sm:text-base font-medium" dir="auto">
-          {t(locale, "header.banner")}{" "}
+          {tenant.name} — {t(locale, "header.banner")}{" "}
           <Link href="/register" className="underline hover:text-yellow-400 transition-colors">
             {t(locale, "header.claim")}
           </Link>
@@ -62,7 +71,7 @@ const Header = () => {
                 src="/logo-text-black.svg"
                 width={200}
                 height={40}
-                alt="logo"
+                alt={tenant.name}
                 className="hover:opacity-80 transition-opacity"
               />
             </Link>

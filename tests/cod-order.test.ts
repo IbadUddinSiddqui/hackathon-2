@@ -13,6 +13,14 @@ vi.mock('@/sanity/lib/server-client', () => ({
   },
 }));
 
+// The route now resolves its tenant via @/lib/tenants -> @/auth -> next-auth
+// (which vitest can't resolve). Mock the module so the tenant is a constant
+// and the server-client fetch sequences below stay stable.
+vi.mock('@/lib/tenants', () => ({
+  getActiveTenantId: vi.fn(async () => 'tenant-anks'),
+  DEFAULT_TENANT_ID: 'tenant-anks',
+}));
+
 const mockFetch = vi.mocked(serverClient.fetch) as unknown as ReturnType<typeof vi.fn>;
 const mockCreate = vi.mocked(serverClient.create) as unknown as ReturnType<typeof vi.fn>;
 

@@ -4,10 +4,13 @@
 
 import { NextResponse } from "next/server";
 import { fetchFeedProducts, buildFeedXml } from "@/lib/merchant-feed";
+import { getActiveTenantId } from "@/lib/tenants";
 
 export async function GET() {
   try {
-    const products = await fetchFeedProducts();
+    // P4-03 — the feed is tenant-scoped (resolved from the Host header).
+    const tenantId = await getActiveTenantId();
+    const products = await fetchFeedProducts(tenantId);
     const xml = buildFeedXml(products);
     return new NextResponse(xml, {
       headers: {

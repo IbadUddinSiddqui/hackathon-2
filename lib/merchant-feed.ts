@@ -3,6 +3,7 @@
 // Sanity fetch. Prices are PKR (Google requires the ISO currency code).
 
 import { serverClient } from "@/sanity/lib/server-client";
+import { tenantFilter, DEFAULT_TENANT_ID } from "@/lib/tenants";
 
 export type FeedProduct = {
   id: string;
@@ -29,8 +30,14 @@ export function priceString(price: number): string {
   return `${Number(price || 0).toFixed(2)} PKR`;
 }
 
-/** Fetch products from Sanity for the feed. */
-export async function fetchFeedProducts(): Promise<FeedProduct[]> {
+/**
+ * Fetch products from Sanity for the feed. P4-03 — tenant-scoped: the feed
+ * served on a tenant's domain only lists that tenant's products (legacy docs
+ * without tenantId still match via tenantFilter).
+ */
+export async function fetchFeedProducts(
+  tenantId: string = DEFAULT_TENANT_ID
+): Promise<FeedProduct[]> {
   const baseUrl = process.env.PUBLIC_BASE_URL || "https://anks.com";
   const docs: {
     _id: string;
@@ -41,7 +48,8 @@ export async function fetchFeedProducts(): Promise<FeedProduct[]> {
     brand?: string;
     images?: { asset?: { url?: string } }[];
   }[] = await serverClient.fetch(
-    `*[_type == "product"]{_id, name, description, price, stock, brand, "images": images[]{asset->{url}}}`
+    `*[_type == "product" && ${tenantFilter()}]{_id, name, description, price, stock, brand, "images": images[]{asset->{url}}}`,
+    { tenantId }
   );
 
   return docs.map((doc) => ({

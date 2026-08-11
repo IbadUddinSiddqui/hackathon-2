@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { client } from "@/sanity/lib/client";
 import { SITE_URL } from "@/lib/site";
+import { getActiveTenantId, tenantFilter } from "@/lib/tenants";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticEntries: MetadataRoute.Sitemap = [
@@ -9,9 +10,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   // Indexable pages only — auth, cart/checkout and admin routes are noindex.
+  // P4-03 — tenant-scoped: a tenant's sitemap only lists its own products.
   try {
+    const tenantId = await getActiveTenantId();
     const products = await client.fetch<{ _id: string; category_slug?: string }[]>(
-      `*[_type == "product"]{_id, category_slug}`
+      `*[_type == "product" && ${tenantFilter()}]{_id, category_slug}`,
+      { tenantId }
     );
 
     const categories = [

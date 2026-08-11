@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import { client } from "@/sanity/lib/client";
 import { searchClient } from "@/lib/typesense";
 import CategoryClient from "./CategoryClient";
+import { getActiveTenantId } from "@/lib/tenants";
 import type { Product } from "@/types/products";
 
 // Same data source the old client page used (Sanity + Typesense merged and
 // de-duplicated), now fetched server-side so the page is indexable.
 async function fetchCategoryProducts(category: string): Promise<Product[]> {
-  const sanityQuery = `*[_type == "product" && category_slug == $categorySlug]{
+  const tenantId = await getActiveTenantId();
+  const sanityQuery = `*[_type == "product" && category_slug == $categorySlug && (!defined(tenantId) || tenantId == $tenantId)]{
     _id,
     name,
     ratings,
@@ -22,6 +24,7 @@ async function fetchCategoryProducts(category: string): Promise<Product[]> {
 
   const sanityProducts: Product[] = await client.fetch(sanityQuery, {
     categorySlug: category,
+    tenantId,
   });
 
   let typesenseProducts: Product[] = [];

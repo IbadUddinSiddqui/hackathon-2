@@ -4,6 +4,7 @@ import Header from "@/app/components/Header/Header";
 import Footer from "@/app/components/Footer/Footer";
 import { getActiveBundles, bundleSubtotal, bundleSavings, type BundleDoc } from "@/lib/bundles";
 import { CURRENCY_SYMBOL } from "@/lib/constants";
+import { getActiveTenantId } from "@/lib/tenants";
 
 export const metadata: Metadata = {
   title: "Bundles | AnK's",
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default async function BundlesPage() {
-  const bundles = await getActiveBundles().catch(() => []);
+  const bundles = await getActiveBundles(await getActiveTenantId()).catch(() => []);
 
   return (
     <>

@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import { client } from "./sanity/lib/client";
 import bcrypt from "bcryptjs";
+import { DEFAULT_TENANT_ID } from "@/lib/tenants";
 
 // Single source of truth for authentication.
 // The route handler at app/api/auth/[...nextauth]/route.ts re-exports `handlers`
@@ -41,6 +42,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 email: user.email,
                 name: user.name,
                 role: user.role,
+                // P4-02 — which tenant this user belongs to (SaaS).
+                tenantId: user.tenantId || DEFAULT_TENANT_ID,
               }
             : null;
         } catch (error) {
@@ -56,6 +59,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.id = user.id;
         token.role = user.role || "user";
+        token.tenantId = user.tenantId || DEFAULT_TENANT_ID;
       }
       return token;
     },
@@ -65,6 +69,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // Read the role from the JWT (not the sign-in `user` object, which is
         // undefined on subsequent requests).
         session.user.role = token.role || "user";
+        session.user.tenantId = token.tenantId || DEFAULT_TENANT_ID;
       }
       return session;
     },

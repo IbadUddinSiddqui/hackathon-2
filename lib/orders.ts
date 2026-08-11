@@ -15,6 +15,7 @@ export type OrderDocument = {
   _id: string;
   _rev?: string;
   _type: 'order';
+  tenantId?: string; // P4-01 — owning SaaS tenant
   order_id: string;
   status: string;
   customer_email?: string;
@@ -49,11 +50,14 @@ export type SanityProductRef = {
  * Fetch products from Sanity by id. Used server-side so prices/names in orders
  * come from the database, never from the browser.
  */
-export async function fetchProductsByIds(ids: string[]): Promise<SanityProductRef[]> {
+export async function fetchProductsByIds(
+  ids: string[],
+  tenantId: string = "tenant-anks"
+): Promise<SanityProductRef[]> {
   if (ids.length === 0) return [];
   return serverClient.fetch(
-    `*[_id in $ids]{_id, name, price, stock, size}`,
-    { ids }
+    `*[_id in $ids && (!defined(tenantId) || tenantId == $tenantId)]{_id, name, price, stock, size}`,
+    { ids, tenantId }
   );
 }
 
@@ -63,6 +67,7 @@ export async function fetchProductsByIds(ids: string[]): Promise<SanityProductRe
  * find this document and mark it paid.
  */
 export async function createPendingOrder(input: {
+  tenantId?: string; // P4-01 — owning SaaS tenant (default: platform tenant)
   items: OrderItemInput[];
   subtotal: number;
   total: number;
@@ -80,6 +85,7 @@ export async function createPendingOrder(input: {
   const orderId = uuidv4();
   const doc = await serverClient.create({
     _type: 'order',
+    tenantId: input.tenantId || 'tenant-anks',
     order_id: orderId,
     status: 'pending',
     payment_method: input.paymentMethod || 'card',

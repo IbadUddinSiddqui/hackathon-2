@@ -7,6 +7,7 @@
 import { NextResponse } from "next/server";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { saveAbandonedCart, type CartItemInput } from "@/lib/abandoned-cart";
+import { getActiveTenantId } from "@/lib/tenants";
 
 export async function POST(request: Request) {
   const limited = enforceRateLimit(request, { key: "cart-capture", limit: 20, windowMs: 60_000 });
@@ -32,6 +33,7 @@ export async function POST(request: Request) {
     }
 
     await saveAbandonedCart({
+      tenantId: await getActiveTenantId(),
       email,
       items,
       checkoutUrl: body?.checkoutUrl || "/checkout",

@@ -64,6 +64,7 @@ async function syncProducts() {
         name: 'products',
         fields: [
           { name: 'id', type: 'string' },
+          { name: 'tenant_id', type: 'string', facet: true },
           { name: 'name', type: 'string' },
           { name: 'description', type: 'string' },
           { name: 'price', type: 'float' },
@@ -86,6 +87,7 @@ async function syncProducts() {
     const products = await sanity.fetch<SanityProduct[]>(`
       *[_type == "product"]{
         _id,
+        tenantId,
         name,
         description,
         price,
@@ -115,6 +117,7 @@ async function syncProducts() {
 
       return {
         id: product._id,
+        tenant_id: (product as any).tenantId || 'tenant-anks',
         name: product.name,
         description: product.description || '',
         price: product.price,

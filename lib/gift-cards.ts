@@ -22,13 +22,16 @@ export function normalizeGiftCardCode(raw: string): string {
   return (raw || "").trim().toUpperCase();
 }
 
-/** Find a gift card by exact normalized code. */
-export async function findGiftCard(code: string): Promise<GiftCardDoc | null> {
+/** Find a gift card by exact normalized code. P4-03 — tenant-scoped. */
+export async function findGiftCard(
+  code: string,
+  tenantId: string = "tenant-anks"
+): Promise<GiftCardDoc | null> {
   const normalized = normalizeGiftCardCode(code);
   if (!normalized) return null;
   return serverClient.fetch(
-    `*[_type == "giftCard" && code == $code][0]`,
-    { code: normalized }
+    `*[_type == "giftCard" && code == $code && (!defined(tenantId) || tenantId == $tenantId)][0]`,
+    { code: normalized, tenantId }
   );
 }
 
@@ -37,13 +40,14 @@ export async function findGiftCard(code: string): Promise<GiftCardDoc | null> {
  * success; rejects inactive, expired, or zero-balance cards.
  */
 export async function validateGiftCard(
-  rawCode: string | undefined
+  rawCode: string | undefined,
+  tenantId: string = "tenant-anks"
 ): Promise<GiftCardValidation> {
   if (!rawCode || !rawCode.trim()) {
     return { valid: false, message: "Enter a gift card code" };
   }
   const code = normalizeGiftCardCode(rawCode);
-  const card = await findGiftCard(code);
+  const card = await findGiftCard(code, tenantId);
   if (!card) return { valid: false, message: "Invalid gift card code" };
   if (card.active === false) return { valid: false, message: "This gift card is no longer active" };
   if (card.expiresAt && new Date(card.expiresAt) < new Date()) {
@@ -63,8 +67,9 @@ export async function validateGiftCard(
 export async function redeemGiftCard(input: {
   code: string;
   amount: number;
+  tenantId?: string;
 }): Promise<{ applied: number; message?: string }> {
-  const result = await validateGiftCard(input.code);
+  const result = await validateGiftCard(input.code, input.tenantId);
   if (!result.valid) return { applied: 0, message: result.message };
 
   const applied = Math.min(input.amount, result.card.balance || 0);

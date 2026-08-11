@@ -4,13 +4,19 @@
 // live in scripts/syncProducts.ts (which hardcoded the Sanity project id —
 // here we reuse sanity/lib/server-client.ts instead). NEVER import from a
 // client component.
+//
+// P4-03 — multi-tenant: every indexed doc carries `tenant_id` and every sync
+// is scoped to one tenant, so a tenant's storefront search never sees another
+// tenant's products.
 
 import { serverClient } from "@/sanity/lib/server-client";
 import { adminClient } from "@/lib/typesense";
 import { HTTPError } from "typesense/lib/Typesense/Errors";
+import { tenantFilter, DEFAULT_TENANT_ID } from "@/lib/tenants";
 
 export type SanityProductDoc = {
   _id: string;
+  tenantId?: string;
   name: string;
   description?: string;
   price: number;
@@ -28,6 +34,7 @@ export type SanityProductDoc = {
 
 export type TypesenseProduct = {
   id: string;
+  tenant_id: string;
   name: string;
   description: string;
   price: number;
@@ -43,8 +50,10 @@ export type TypesenseProduct = {
   created_at: number;
 };
 
-const PRODUCT_PROJECTION = `*[_type == "product"]{
+const PRODUCT_PROJECTION = (tenantId: string) =>
+  `*[_type == "product" && ${tenantFilter()}]{
   _id,
+  tenantId,
   name,
   description,
   price,
@@ -71,6 +80,7 @@ export function toTypesenseDocument(
 
   return {
     id: product._id,
+    tenant_id: product.tenantId || DEFAULT_TENANT_ID,
     name: product.name,
     description: product.description || "",
     price: product.price,
@@ -104,6 +114,7 @@ export async function ensureProductsCollection(): Promise<void> {
     name: "products",
     fields: [
       { name: "id", type: "string" },
+      { name: "tenant_id", type: "string", facet: true },
       { name: "name", type: "string" },
       { name: "description", type: "string" },
       { name: "price", type: "float" },
@@ -127,6 +138,7 @@ export async function syncProductToSearch(productId: string): Promise<boolean> {
   const product = await serverClient.fetch<SanityProductDoc | null>(
     `*[_type == "product" && _id == $id][0]{
       _id,
+      tenantId,
       name,
       description,
       price,
@@ -164,10 +176,18 @@ export async function removeProductFromSearch(productId: string): Promise<void> 
   }
 }
 
-/** Full reindex — used by the manual sync script and on-demand. */
-export async function syncAllProducts(): Promise<{ synced: number; skipped: number }> {
+/**
+ * Full reindex for ONE tenant — used by the manual sync script and on-demand.
+ * P4-03: scoped by tenant so the shared index never mixes stores.
+ */
+export async function syncAllProducts(
+  tenantId: string = DEFAULT_TENANT_ID
+): Promise<{ synced: number; skipped: number }> {
   await ensureProductsCollection();
-  const products = await serverClient.fetch<SanityProductDoc[]>(PRODUCT_PROJECTION);
+  const products = await serverClient.fetch<SanityProductDoc[]>(
+    PRODUCT_PROJECTION(tenantId),
+    { tenantId }
+  );
 
   const documents: TypesenseProduct[] = [];
   let skipped = 0;

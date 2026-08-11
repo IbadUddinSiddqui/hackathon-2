@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import DefaultLayout from "@/app/components/Layouts/DefaultLayout";
 import OrderRow from "./OrderRow";
-import { requireAdmin } from "@/lib/admin";
 import { serverClient } from "@/sanity/lib/server-client";
+import { requireTenantAdmin, tenantFilter } from "@/lib/tenants";
 import { formatDate, formatOrderId, formatTotal, statusStyle } from "@/lib/orders-ui";
 
 export const metadata: Metadata = {
@@ -28,9 +28,9 @@ type Order = {
   items?: OrderItem[];
 };
 
-async function getOrders(): Promise<Order[]> {
+async function getOrders(tenantId: string): Promise<Order[]> {
   return serverClient.fetch(
-    `*[_type == "order"] | order(created_at desc) {
+    `*[_type == "order" && ${tenantFilter()}] | order(created_at desc) {
       _id,
       order_id,
       status,
@@ -45,12 +45,12 @@ async function getOrders(): Promise<Order[]> {
 }
 
 export default async function OrdersPage() {
-  await requireAdmin();
+  const { tenantId } = await requireTenantAdmin();
 
   let orders: Order[] = [];
   let loadError = false;
   try {
-    orders = await getOrders();
+    orders = await getOrders(tenantId);
   } catch (error) {
     console.error("Failed to load orders:", error);
     loadError = true;

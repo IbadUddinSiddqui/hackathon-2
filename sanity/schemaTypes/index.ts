@@ -10,7 +10,8 @@ import giftCard from './giftCard'
 import bundle from './bundle'
 import flashSale from './flashSale'
 import review from './review'
+import tenant from './tenant'
 
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [product, user, order, discountCode, customer, auditLog, abandonedCart, giftCard, bundle, flashSale, review],
+  types: [product, user, order, discountCode, customer, auditLog, abandonedCart, giftCard, bundle, flashSale, review, tenant],
 }

@@ -43,19 +43,24 @@ export function parseCustomerListQuery(url: URL): CustomerListQuery {
 }
 
 /** Build list + count GROQ for customers. search matches email or name prefix. */
-export function buildCustomerListGroq(query: CustomerListQuery): {
+export function buildCustomerListGroq(
+  query: CustomerListQuery,
+  tenantId: string = "tenant-anks"
+): {
   groq: string;
   countGroq: string;
   params: Record<string, unknown>;
 } {
   const filters = [
     "_type == \"customer\"",
+    "(!defined(tenantId) || tenantId == $tenantId)",
     "(!defined($search) || email match $search || name match $search)",
   ].join(" && ");
 
   const offset = (query.page - 1) * query.limit;
   // Optional filter must be null, never undefined (GROQ rejects "undefined").
   const params: Record<string, unknown> = {
+    tenantId,
     search: query.search ? `${query.search}*` : null,
     offset,
     limit: query.limit,

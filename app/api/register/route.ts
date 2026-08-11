@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { serverClient as client } from "@/sanity/lib/server-client";
 import { validateEmail, validatePassword, validateName } from "@/utils/validation";
 import { enforceRateLimit } from "@/lib/rate-limit";
+import { getActiveTenantId } from "@/lib/tenants";
 
 
 const sanityclient = client
@@ -54,9 +55,11 @@ if (!validateName(name)) {
     );
   }
 
-    // Create new user (role defaults to "user"; admins are promoted via /api/promote)
+    // Create new user (role defaults to "user"; admins are promoted via /api/promote).
+    // P4-02 — the user belongs to the tenant serving this request.
     const newUser = await sanityclient.create({
       _type: "user",
+      tenantId: await getActiveTenantId(),
       name,
       email,
       password: hashedPassword,

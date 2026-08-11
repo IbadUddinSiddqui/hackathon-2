@@ -45,8 +45,8 @@ export const SAFEPAY_CHECKOUT_BASE = SAFEPAY_API_BASE;
 
 export const SAFEPAY_CURRENCY = process.env.SAFEPAY_CURRENCY || 'PKR';
 
-export function isSafepayConfigured(): boolean {
-  return Boolean(process.env.SAFEPAY_API_KEY);
+export function isSafepayConfigured(apiKey?: string): boolean {
+  return Boolean(apiKey || process.env.SAFEPAY_API_KEY);
 }
 
 export type SafepayCheckoutInput = {
@@ -56,6 +56,8 @@ export type SafepayCheckoutInput = {
   redirectUrl: string; // where the customer lands after paying
   cancelUrl: string; // where the customer lands if they cancel
   webhookUrl: string; // our server-to-server notification endpoint
+  // P4-06 — per-tenant API key (falls back to SAFEPAY_API_KEY).
+  apiKey?: string;
 };
 
 /**
@@ -67,9 +69,9 @@ export type SafepayCheckoutInput = {
 export async function createSafepayCheckout(
   input: SafepayCheckoutInput
 ): Promise<{ redirectUrl: string; token?: string }> {
-  const apiKey = process.env.SAFEPAY_API_KEY;
+  const apiKey = input.apiKey || process.env.SAFEPAY_API_KEY;
   if (!apiKey) {
-    throw new Error('SAFEPAY_API_KEY is not set');
+    throw new Error('Safepay API key is not set (SAFEPAY_API_KEY or tenant payment config)');
   }
 
   const body = {

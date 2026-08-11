@@ -5,9 +5,8 @@
 // Unauthenticated → 401.
 
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
-import { isAdmin } from "@/lib/admin";
 import { serverClient } from "@/sanity/lib/server-client";
+import { getTenantContext, tenantFilter } from "@/lib/tenants";
 
 const PROJECTION = `{
   _id, rating, title, body, customerName, customerEmail, status, createdAt,
@@ -15,14 +14,15 @@ const PROJECTION = `{
 }`;
 
 export async function GET() {
-  const session = await auth();
-  if (!isAdmin(session)) {
+  const ctx = await getTenantContext();
+  if (!ctx) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
     const reviews = await serverClient.fetch(
-      `*[_type == "review"] | order(status == "pending" desc, createdAt desc) ${PROJECTION}`
+      `*[_type == "review" && ${tenantFilter()}] | order(status == "pending" desc, createdAt desc) ${PROJECTION}`,
+      { tenantId: ctx.tenantId }
     );
     return NextResponse.json({ reviews });
   } catch (error: any) {

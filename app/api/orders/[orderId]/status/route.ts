@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
-import { isAdmin } from "@/lib/admin";
 import { serverClient } from "@/sanity/lib/server-client";
 import { refundOrder } from "@/lib/orders";
 import { logAdminAction } from "@/lib/audit";
+import { getTenantContext, tenantFilter } from "@/lib/tenants";
 
 const VALID_STATUSES = ["pending", "paid", "failed", "refunded"];
 
@@ -15,11 +14,11 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ orderId: string }> }
 ) {
-  const session = await auth();
-
-  if (!isAdmin(session)) {
+  const ctx = await getTenantContext();
+  if (!ctx) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const { session, tenantId } = ctx;
 
   const { orderId } = await params;
 
@@ -52,6 +51,7 @@ export async function PATCH(
       }
       logAdminAction({
         adminEmail: session?.user?.email,
+        tenantId,
         action: "status_change",
         targetType: "order",
         targetId: orderId,
@@ -62,8 +62,8 @@ export async function PATCH(
     }
 
     const order = await serverClient.fetch(
-      `*[_type == "order" && _id == $id][0]{_id}`,
-      { id: orderId }
+      `*[_type == "order" && _id == $id && ${tenantFilter()}][0]{_id}`,
+      { id: orderId, tenantId }
     );
 
     if (!order) {
@@ -74,6 +74,7 @@ export async function PATCH(
 
     logAdminAction({
       adminEmail: session?.user?.email,
+      tenantId,
       action: "status_change",
       targetType: "order",
       targetId: orderId,

@@ -3,8 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import DefaultLayout from "@/app/components/Layouts/DefaultLayout";
 import StatusChanger from "../StatusChanger";
-import { requireAdmin } from "@/lib/admin";
 import { serverClient } from "@/sanity/lib/server-client";
+import { requireTenantAdmin, tenantFilter } from "@/lib/tenants";
 import { formatDate, formatOrderId, formatTotal } from "@/lib/orders-ui";
 
 export const metadata: Metadata = {
@@ -39,9 +39,9 @@ type Order = {
   items?: OrderItem[];
 };
 
-async function getOrderById(id: string): Promise<Order | null> {
+async function getOrderById(id: string, tenantId: string): Promise<Order | null> {
   return serverClient.fetch(
-    `*[_type == "order" && _id == $id][0] {
+    `*[_type == "order" && _id == $id && ${tenantFilter()}][0] {
       _id,
       order_id,
       status,
@@ -93,11 +93,11 @@ export default async function OrderDetailPage({
 }: {
   params: Promise<{ orderId: string }>;
 }) {
-  await requireAdmin();
+  const { tenantId } = await requireTenantAdmin();
 
   const { orderId } = await params;
   // A genuine "not found" renders 404; fetch failures bubble up to app/error.tsx.
-  const order = await getOrderById(orderId);
+  const order = await getOrderById(orderId, tenantId);
 
   if (!order) {
     notFound();

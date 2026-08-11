@@ -1,4 +1,11 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+
+// merchant-feed.ts imports @/lib/tenants -> @/auth -> next-auth (vitest can't
+// resolve next/server). The tested functions are pure, so mock server deps.
+vi.mock("@/auth", () => ({ auth: vi.fn() }));
+vi.mock("@/lib/admin", () => ({ isAdmin: vi.fn(() => true) }));
+vi.mock("next/headers", () => ({ headers: vi.fn(async () => new Headers()) }));
+
 import { escapeXml, priceString, buildFeedXml, type FeedProduct } from "./merchant-feed";
 
 const product: FeedProduct = {

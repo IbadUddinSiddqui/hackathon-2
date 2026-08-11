@@ -1,19 +1,18 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
 import { serverClient } from "@/sanity/lib/server-client";
 import {
-  discountCodeGuard,
   validateDiscountCodeInput,
   type DiscountCodeInput,
 } from "@/lib/discount-code-admin";
 import { logAdminAction } from "@/lib/audit";
+import { getTenantContext, tenantFilter } from "@/lib/tenants";
 
 export async function GET() {
-  const unauthorized = await discountCodeGuard();
-  if (unauthorized) return unauthorized;
+  const ctx = await getTenantContext();
+  if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const codes = await serverClient.fetch(
-    `*[_type == "discountCode"] | order(code asc) {
+    `*[_type == "discountCode" && ${tenantFilter()}] | order(code asc) {
       _id,
       code,
       type,
@@ -22,16 +21,17 @@ export async function GET() {
       maxUses,
       usedCount,
       expiresAt
-    }`
+    }`,
+    { tenantId: ctx.tenantId }
   );
 
   return NextResponse.json({ codes });
 }
 
 export async function POST(request: Request) {
-  const unauthorized = await discountCodeGuard();
-  if (unauthorized) return unauthorized;
-  const session = await auth();
+  const ctx = await getTenantContext();
+  if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { session, tenantId } = ctx;
 
   let body: DiscountCodeInput;
   try {
@@ -46,10 +46,10 @@ export async function POST(request: Request) {
   }
 
   try {
-    // Prevent duplicate codes.
+    // Prevent duplicate codes (tenant-scoped).
     const existing = await serverClient.fetch(
-      `*[_type == "discountCode" && code == $code][0]{_id}`,
-      { code: String(body.code).trim().toUpperCase() }
+      `*[_type == "discountCode" && code == $code && ${tenantFilter()}][0]{_id}`,
+      { code: String(body.code).trim().toUpperCase(), tenantId }
     );
     if (existing) {
       return NextResponse.json(
@@ -60,6 +60,7 @@ export async function POST(request: Request) {
 
     const doc = await serverClient.create({
       _type: "discountCode",
+      tenantId,
       code: String(body.code).trim().toUpperCase(),
       type: body.type,
       value: body.value,
@@ -71,6 +72,7 @@ export async function POST(request: Request) {
 
     logAdminAction({
       adminEmail: session?.user?.email,
+      tenantId,
       action: "create",
       targetType: "discountCode",
       targetId: doc._id,

@@ -12,19 +12,14 @@ import { serverClient } from '@/sanity/lib/server-client';
 import { enforceRateLimit } from '@/lib/rate-limit';
 import { linkCustomerToOrder } from '@/lib/customers';
 import { markCartCompleted } from '@/lib/abandoned-cart';
+import { getActiveTenantId, getPaymentConfig } from '@/lib/tenants';
+import { recordUsage } from '@/lib/billing';
 
 export async function POST(request: Request) {
   const limited = enforceRateLimit(request, { key: 'create-safepay-order', limit: 10, windowMs: 60_000 });
   if (limited) return limited;
 
   try {
-    if (!isSafepayConfigured()) {
-      return NextResponse.json(
-        { error: 'Safepay is not configured (set SAFEPAY_API_KEY)' },
-        { status: 503 }
-      );
-    }
-
     const { items, customerEmail, discountCode, giftCardCode, creditAmount } = await request.json();
     const customerEmailValue = typeof customerEmail === 'string' ? customerEmail : '';
     const discountCodeValue = typeof discountCode === 'string' ? discountCode : '';
@@ -34,9 +29,22 @@ export async function POST(request: Request) {
         ? Math.max(0, creditAmount)
         : 0;
 
+    // P4-03/P4-06: the order belongs to the tenant serving this request, and
+    // its own Safepay keys/currency apply (falling back to env vars).
+    const tenantId = await getActiveTenantId();
+    const paymentConfig = await getPaymentConfig(tenantId);
+
+    if (!isSafepayConfigured(paymentConfig.safepayApiKey)) {
+      return NextResponse.json(
+        { error: 'Safepay is not configured for this store (set SAFEPAY_API_KEY or a tenant payment config)' },
+        { status: 503 }
+      );
+    }
+
     // Server-side pricing: real Sanity prices (flash-sale aware), validated
     // discount + gift card, store credit capped at balance, delivery fee last.
     const priced = await priceCheckout({
+      tenantId,
       items,
       customerEmail: customerEmailValue,
       discountCode: discountCodeValue,
@@ -50,6 +58,7 @@ export async function POST(request: Request) {
     // Persist a pending order in Sanity BEFORE redirecting to Safepay, so the
     // webhook can find it by order_id and mark it paid.
     const { orderId, docId } = await createPendingOrder({
+      tenantId,
       items: priced.items,
       subtotal: priced.subtotal,
       total: priced.total,
@@ -66,11 +75,14 @@ export async function POST(request: Request) {
     // P3-01: upsert the customer doc (by email) + attach the reference.
     await linkCustomerToOrder({
       orderDocId: docId,
+      tenantId,
       email: customerEmailValue,
       orderTotal: priced.total,
     });
     // P3-06: this email just started paying — mark their abandoned cart recovered.
-    await markCartCompleted(customerEmailValue);
+    await markCartCompleted(customerEmailValue, tenantId);
+    // P4-07: meter this order against the tenant's plan.
+    await recordUsage(tenantId, 'orders', 1);
 
     // PUBLIC_BASE_URL lets us hand Safepay a reachable server-to-server URL
     // during local dev (e.g. the ngrok tunnel). Without it, `origin` is
@@ -84,6 +96,8 @@ export async function POST(request: Request) {
       // (rupees). amount=21999 appeared in their dashboard as "PKR 21,999.00"
       // — NOT "PKR 219.99". So pass the rupee total (2dp), never paisa.
       amount: Math.round(priced.total * 100) / 100,
+      currency: paymentConfig.currency,
+      apiKey: paymentConfig.safepayApiKey,
       redirectUrl: `${baseUrl}/checkout/success?method=safepay&order_id=${orderId}`,
       cancelUrl: `${baseUrl}/cart`,
       webhookUrl: `${baseUrl}/api/payments/safepay/webhook`,

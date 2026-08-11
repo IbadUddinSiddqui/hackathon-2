@@ -22,7 +22,8 @@ export type DiscountValidation =
  */
 export async function validateDiscountCode(
   rawCode: string | undefined,
-  subtotal: number
+  subtotal: number,
+  tenantId: string = "tenant-anks"
 ): Promise<DiscountValidation> {
   if (!rawCode || !rawCode.trim()) {
     return { valid: false, message: "Enter a discount code" };
@@ -31,8 +32,8 @@ export async function validateDiscountCode(
   const code = rawCode.trim().toUpperCase();
 
   const doc: DiscountCodeDoc | null = await serverClient.fetch(
-    `*[_type == "discountCode" && code == $code][0]`,
-    { code }
+    `*[_type == "discountCode" && code == $code && (!defined(tenantId) || tenantId == $tenantId)][0]`,
+    { code, tenantId }
   );
 
   if (!doc) {
@@ -71,10 +72,13 @@ export async function validateDiscountCode(
  * order is actually paid (not when it's merely validated). Uses an atomic
  * increment so concurrent orders never lose an update.
  */
-export async function incrementDiscountUsage(code: string) {
+export async function incrementDiscountUsage(
+  code: string,
+  tenantId: string = "tenant-anks"
+) {
   const doc: { _id: string } | null = await serverClient.fetch(
-    `*[_type == "discountCode" && code == $code][0]{_id}`,
-    { code }
+    `*[_type == "discountCode" && code == $code && (!defined(tenantId) || tenantId == $tenantId)][0]{_id}`,
+    { code, tenantId }
   );
 
   if (!doc) return;

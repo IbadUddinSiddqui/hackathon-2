@@ -17,6 +17,8 @@
 // we learn about the real shape goes straight back into this file.
 import { NextResponse } from 'next/server';
 import { verifySafepaySignature } from '@/lib/safepay';
+import { getPaymentConfig } from '@/lib/tenants';
+import { enforceRateLimit } from '@/lib/rate-limit';
 import {
   findOrderByOrderId,
   findOrderByTrackerToken,
@@ -135,7 +137,7 @@ async function fulfilOrder(
   // 5. Bump the discount code's usage counter now that the order is paid.
   if (order.discount_code) {
     try {
-      await incrementDiscountUsage(order.discount_code);
+      await incrementDiscountUsage(order.discount_code, order.tenantId);
     } catch (err: any) {
       console.error('Failed to increment discount usage:', err.message);
     }
@@ -146,7 +148,7 @@ async function fulfilOrder(
   const points = pointsEarned(order.total || 0);
   if (points > 0 && recipient) {
     try {
-      await addLoyaltyPoints(recipient, points);
+      await addLoyaltyPoints(recipient, points, order.tenantId);
     } catch (err: any) {
       console.error('Failed to award loyalty points:', err.message);
     }
@@ -154,38 +156,22 @@ async function fulfilOrder(
 }
 
 export async function POST(request: Request) {
+  const limited = enforceRateLimit(request, {
+    key: 'safepay-webhook',
+    limit: 30,
+    windowMs: 60_000,
+  });
+  if (limited) return limited;
+
   const rawBody = await request.text();
   const headers = Object.fromEntries(request.headers.entries());
   const signature = headers['x-sfpy-signature'] || headers['x-safepay-signature'] || null;
   const timestamp = headers['x-sfpy-timestamp'] || headers['x-safepay-timestamp'] || null;
-  const hasSecret = Boolean(process.env.SAFEPAY_WEBHOOK_SECRET);
 
   // ALWAYS log every request (headers + body) so ANY Safepay delivery — signed
   // or not — is fully captured for recon. Remove before production hardening.
   console.log('[Safepay webhook][ALL] headers:', JSON.stringify(headers));
   console.log('[Safepay webhook][ALL] body:', rawBody.slice(0, LOG_BODY_LIMIT));
-
-  // RECON MODE — accept + log everything so we learn the real payload before
-  // trusting any assumed shape.
-  if (!hasSecret) {
-    console.log('[Safepay webhook][RECON] headers:', JSON.stringify(headers, null, 2));
-    console.log('[Safepay webhook][RECON] body:', rawBody.slice(0, LOG_BODY_LIMIT));
-    return NextResponse.json({ received: true, recon: true });
-  }
-
-  const valid = verifySafepaySignature({ rawBody, signature, timestamp });
-  if (!valid) {
-    console.warn('[Safepay webhook] signature verification FAILED', {
-      hasSignature: Boolean(signature),
-      hasTimestamp: Boolean(timestamp),
-    });
-    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
-  }
-
-  // VERIFIED MODE — the request is authentic. Always log the full body so we
-  // keep learning the real shape even as fulfillment runs.
-  console.log('[Safepay webhook] verified — headers:', JSON.stringify(headers));
-  console.log('[Safepay webhook] verified — body:', rawBody.slice(0, LOG_BODY_LIMIT));
 
   let data: any = {};
   try {
@@ -205,6 +191,69 @@ export async function POST(request: Request) {
   const reference =
     data?.data?.reference ?? data?.data?.id ?? data?.data?.transaction?.id ?? data?.reference ?? undefined;
 
+  // P4-06 — verify against the PLATFORM secret first (covers the default
+  // tenant, the common case) WITHOUT touching Sanity. Only if that fails do we
+  // look up the order and retry with the tenant's own webhook secret — so
+  // unauthenticated requests can't trigger Sanity reads. If no secret exists
+  // at all, stay in RECON MODE (accept + log) while we learn the real payload.
+  let webhookSecret = process.env.SAFEPAY_WEBHOOK_SECRET;
+  let valid =
+    Boolean(webhookSecret) &&
+    verifySafepaySignature({ rawBody, signature, timestamp, webhookSecret });
+
+  let order: Awaited<ReturnType<typeof findOrderByOrderId>> = null;
+  let matchedOrder: Awaited<ReturnType<typeof findOrderByOrderId>> = null;
+  if (!valid) {
+    order = orderId ? await findOrderByOrderId(orderId) : null;
+    matchedOrder =
+      order ?? (trackerToken ? await findOrderByTrackerToken(trackerToken) : null);
+
+    if (matchedOrder?.tenantId && matchedOrder.tenantId !== 'tenant-anks') {
+      try {
+        const cfg = await getPaymentConfig(matchedOrder.tenantId);
+        if (cfg.safepayWebhookSecret) {
+          valid = verifySafepaySignature({
+            rawBody,
+            signature,
+            timestamp,
+            webhookSecret: cfg.safepayWebhookSecret,
+          });
+        }
+      } catch (err: any) {
+        console.error('[Safepay webhook] failed to load tenant payment config:', err.message);
+      }
+    }
+  }
+
+  // RECON MODE — no secret configured (platform or tenant): accept + log
+  // everything so we learn the real payload before trusting any assumed shape.
+  if (!webhookSecret && !valid) {
+    console.log('[Safepay webhook][RECON] headers:', JSON.stringify(headers, null, 2));
+    console.log('[Safepay webhook][RECON] body:', rawBody.slice(0, LOG_BODY_LIMIT));
+    return NextResponse.json({ received: true, recon: true });
+  }
+
+  if (!valid) {
+    console.warn('[Safepay webhook] signature verification FAILED', {
+      hasSignature: Boolean(signature),
+      hasTimestamp: Boolean(timestamp),
+    });
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+  }
+
+  // Resolve the order for fulfillment (already resolved above when the
+  // platform secret didn't match; otherwise do it now).
+  if (!matchedOrder) {
+    order = orderId ? await findOrderByOrderId(orderId) : null;
+    matchedOrder =
+      order ?? (trackerToken ? await findOrderByTrackerToken(trackerToken) : null);
+  }
+
+  // VERIFIED MODE — the request is authentic. Always log the full body so we
+  // keep learning the real shape even as fulfillment runs.
+  console.log('[Safepay webhook] verified — headers:', JSON.stringify(headers));
+  console.log('[Safepay webhook] verified — body:', rawBody.slice(0, LOG_BODY_LIMIT));
+
   console.log('[Safepay webhook] parsed', {
     eventName: eventName || '(none)',
     orderId: orderId || '(none)',
@@ -215,12 +264,6 @@ export async function POST(request: Request) {
   // recognize the event, acknowledge without fulfilling — never guess.
   const isSuccess = /(success|succeeded|completed|capture|paid)/.test(eventName);
   const isFailure = /(failed|cancelled|canceled|declined|rejected|error)/.test(eventName);
-
-  // Match by order_id first, then fall back to the Safepay tracker token
-  // (persisted on the order at checkout-creation time).
-  const order = orderId ? await findOrderByOrderId(orderId) : null;
-  const matchedOrder =
-    order ?? (trackerToken ? await findOrderByTrackerToken(trackerToken) : null);
 
   if (!matchedOrder) {
     console.warn('[Safepay webhook] order not found', {

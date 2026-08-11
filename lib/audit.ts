@@ -14,6 +14,7 @@ export type AuditTarget =
 
 export function logAdminAction(input: {
   adminEmail?: string | null;
+  tenantId?: string | null;
   action: AuditAction;
   targetType: AuditTarget;
   targetId?: string;
@@ -29,6 +30,7 @@ export function logAdminAction(input: {
   serverClient
     .create({
       _type: "auditLog",
+      tenantId: input.tenantId || "tenant-anks",
       adminEmail: email,
       action: input.action,
       targetType: input.targetType,

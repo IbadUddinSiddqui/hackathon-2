@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import DefaultLayout from "@/app/components/Layouts/DefaultLayout";
-import { requireAdmin } from "@/lib/admin";
 import { serverClient } from "@/sanity/lib/server-client";
+import { requireTenantAdmin } from "@/lib/tenants";
 import { formatDate, formatTotal, statusStyle } from "@/lib/orders-ui";
 import AdjustCustomer from "./AdjustCustomer";
 
@@ -20,21 +20,21 @@ type Order = {
   items?: { quantity?: number }[];
 };
 
-async function getCustomer(customerId: string) {
+async function getCustomer(customerId: string, tenantId: string) {
   return serverClient.fetch(
-    `*[_type == "customer" && _id == $id][0]{
+    `*[_type == "customer" && _id == $id && (!defined(tenantId) || tenantId == $tenantId)][0]{
       _id, email, name, phone, orderCount, totalSpent, creditBalance, points, createdAt
     }`,
-    { id: customerId }
+    { id: customerId, tenantId }
   );
 }
 
-async function getCustomerOrders(customerId: string): Promise<Order[]> {
+async function getCustomerOrders(customerId: string, tenantId: string): Promise<Order[]> {
   return serverClient.fetch(
-    `*[_type == "order" && customer._ref == $customerId] | order(created_at desc) {
+    `*[_type == "order" && customer._ref == $customerId && (!defined(tenantId) || tenantId == $tenantId)] | order(created_at desc) {
       _id, order_id, status, total, created_at, items[]{quantity}
     }`,
-    { customerId }
+    { customerId, tenantId }
   );
 }
 
@@ -43,18 +43,18 @@ export default async function CustomerDetailPage({
 }: {
   params: Promise<{ customerId: string }>;
 }) {
-  await requireAdmin();
+  const { tenantId } = await requireTenantAdmin();
   const { customerId } = await params;
 
   let customer: Awaited<ReturnType<typeof getCustomer>> | null = null;
   try {
-    customer = await getCustomer(customerId);
+    customer = await getCustomer(customerId, tenantId);
   } catch (error) {
     console.error("Failed to load customer:", error);
   }
   if (!customer) notFound();
 
-  const orders = await getCustomerOrders(customerId).catch(() => []);
+  const orders = await getCustomerOrders(customerId, tenantId).catch(() => []);
 
   return (
     <DefaultLayout>

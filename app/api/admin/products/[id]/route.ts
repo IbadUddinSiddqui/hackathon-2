@@ -5,8 +5,6 @@
 // 401 unauthenticated · 400 invalid body/validation · 404 unknown id · 409 dup name.
 
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
-import { isAdmin } from "@/lib/admin";
 import { serverClient } from "@/sanity/lib/server-client";
 import {
   normalizeUpdateInput,
@@ -16,14 +14,17 @@ import {
 } from "@/lib/admin-products";
 import { findProductByName } from "@/lib/product-images";
 import { logAdminAction } from "@/lib/audit";
+import { getTenantContext } from "@/lib/tenants";
+import { tenantFilter } from "@/lib/tenants";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
 export async function PATCH(request: Request, { params }: RouteParams) {
-  const session = await auth();
-  if (!isAdmin(session)) {
+  const ctx = await getTenantContext();
+  if (!ctx) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const { session, tenantId } = ctx;
 
   const { id } = await params;
   if (!id) {
@@ -49,10 +50,11 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   }
 
   try {
-    // 404 before touching anything.
+    // 404 before touching anything (tenant-scoped so cross-tenant docs are
+    // invisible → 404, never editable).
     const existing = await serverClient.fetch(
-      `*[_type == "product" && _id == $id][0]{_id}`,
-      { id }
+      `*[_type == "product" && _id == $id && ${tenantFilter()}][0]{_id}`,
+      { id, tenantId }
     );
     if (!existing) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
@@ -60,7 +62,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     // Renaming must not collide with another product (name is the upsert key).
     if (input.name !== undefined) {
-      const otherId = await findProductByName(input.name);
+      const otherId = await findProductByName(input.name, tenantId);
       if (otherId && otherId !== id) {
         return NextResponse.json(
           { error: `A product named "${input.name}" already exists` },
@@ -97,6 +99,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     logAdminAction({
       adminEmail: session?.user?.email,
+      tenantId,
       action: "update",
       targetType: "product",
       targetId: id,
@@ -114,10 +117,11 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 }
 
 export async function DELETE(_request: Request, { params }: RouteParams) {
-  const session = await auth();
-  if (!isAdmin(session)) {
+  const ctx = await getTenantContext();
+  if (!ctx) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const { session, tenantId } = ctx;
 
   const { id } = await params;
   if (!id) {
@@ -126,8 +130,8 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
 
   try {
     const existing = await serverClient.fetch(
-      `*[_type == "product" && _id == $id][0]{_id, name}`,
-      { id }
+      `*[_type == "product" && _id == $id && ${tenantFilter()}][0]{_id, name}`,
+      { id, tenantId }
     );
     if (!existing) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
@@ -137,6 +141,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
 
     logAdminAction({
       adminEmail: session?.user?.email,
+      tenantId,
       action: "delete",
       targetType: "product",
       targetId: id,

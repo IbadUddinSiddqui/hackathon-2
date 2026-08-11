@@ -5,8 +5,9 @@ import { urlFor } from "@/sanity/lib/image";
 import ProductDetailClient, { type ProductDetail } from "./ProductDetailClient";
 import { SITE_NAME } from "@/lib/site";
 import { getActiveFlashSales, isSaleActive } from "@/lib/flash-sales";
+import { getActiveTenantId } from "@/lib/tenants";
 
-const PRODUCT_QUERY = `*[_type == "product" && (_id == $id || slug.current == $id)][0]{
+const PRODUCT_QUERY = `*[_type == "product" && (_id == $id || slug.current == $id) && (!defined(tenantId) || tenantId == $tenantId)][0]{
   _id,
   name,
   ratings,
@@ -22,8 +23,8 @@ const PRODUCT_QUERY = `*[_type == "product" && (_id == $id || slug.current == $i
   created_at
 }`;
 
-async function getProduct(id: string): Promise<ProductDetail | null> {
-  const raw = await client.fetch(PRODUCT_QUERY, { id });
+async function getProduct(id: string, tenantId: string): Promise<ProductDetail | null> {
+  const raw = await client.fetch(PRODUCT_QUERY, { id, tenantId });
   if (!raw) return null;
 
   return {
@@ -40,7 +41,7 @@ export async function generateMetadata({
   params: Promise<{ productId: string }>;
 }): Promise<Metadata> {
   const { productId } = await params;
-  const product = await getProduct(productId);
+  const product = await getProduct(productId, await getActiveTenantId());
 
   if (!product) {
     return { title: "Product Not Found" };
@@ -68,7 +69,8 @@ export default async function ProductDetailPage({
   params: Promise<{ productId: string }>;
 }) {
   const { productId } = await params;
-  const product = await getProduct(productId);
+  const tenantId = await getActiveTenantId();
+  const product = await getProduct(productId, tenantId);
 
   if (!product) {
     notFound();
@@ -77,7 +79,7 @@ export default async function ProductDetailPage({
   // P3-13 — find an active flash sale covering this product (server-truth).
   let flashSale: { salePrice: number; endsAt: string } | undefined;
   try {
-    const sales = await getActiveFlashSales();
+    const sales = await getActiveFlashSales(tenantId);
     for (const sale of sales) {
       const inSale = (sale.products || []).some(
         (ref: any) => (ref?._ref || ref?._id) === product._id

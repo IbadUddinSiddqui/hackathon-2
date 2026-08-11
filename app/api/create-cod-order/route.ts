@@ -4,6 +4,8 @@ import { priceCheckout } from '@/lib/checkout-pricing';
 import { enforceRateLimit } from '@/lib/rate-limit';
 import { linkCustomerToOrder } from '@/lib/customers';
 import { markCartCompleted } from '@/lib/abandoned-cart';
+import { getActiveTenantId } from '@/lib/tenants';
+import { recordUsage } from '@/lib/billing';
 
 /**
  * Cash-on-Delivery checkout: mirrors the card flows' server-side pricing
@@ -31,9 +33,13 @@ export async function POST(request: Request) {
         ? Math.max(0, body.creditAmount)
         : 0;
 
+    // P4-03: the order belongs to the tenant serving this request (Host header).
+    const tenantId = await getActiveTenantId();
+
     // Server-side pricing: real Sanity prices, validated discount/gift card,
     // store credit capped at the balance, delivery fee added last.
     const priced = await priceCheckout({
+      tenantId,
       items,
       customerEmail,
       discountCode,
@@ -45,6 +51,7 @@ export async function POST(request: Request) {
     }
 
     const { orderId, docId } = await createPendingOrder({
+      tenantId,
       items: priced.items,
       subtotal: priced.subtotal,
       total: priced.total,
@@ -59,9 +66,11 @@ export async function POST(request: Request) {
     });
 
     // P3-01: upsert the customer doc (by email) + attach the reference.
-    await linkCustomerToOrder({ orderDocId: docId, email: customerEmail, orderTotal: priced.total });
+    await linkCustomerToOrder({ orderDocId: docId, tenantId, email: customerEmail, orderTotal: priced.total });
     // P3-06: this email just ordered — their abandoned cart is recovered.
-    await markCartCompleted(customerEmail);
+    await markCartCompleted(customerEmail, tenantId);
+    // P4-07: meter this order against the tenant's plan.
+    await recordUsage(tenantId, 'orders', 1);
 
     return NextResponse.json({ success: true, orderId, total: priced.total });
   } catch (err: any) {

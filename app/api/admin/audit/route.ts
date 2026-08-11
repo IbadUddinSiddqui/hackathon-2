@@ -3,16 +3,15 @@
 // Unauthenticated → 401.
 
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
-import { isAdmin } from "@/lib/admin";
 import { serverClient } from "@/sanity/lib/server-client";
+import { getTenantContext, tenantFilter } from "@/lib/tenants";
 
 const VALID_ACTIONS = ["create", "update", "delete", "status_change"];
 const VALID_TARGETS = ["product", "order", "discountCode", "customer"];
 
 export async function GET(request: Request) {
-  const session = await auth();
-  if (!isAdmin(session)) {
+  const ctx = await getTenantContext();
+  if (!ctx) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -22,12 +21,14 @@ export async function GET(request: Request) {
 
   const filters = [
     "_type == \"auditLog\"",
+    `(${tenantFilter()})`,
     "(!defined($action) || action == $action)",
     "(!defined($targetType) || targetType == $targetType)",
   ].join(" && ");
 
   // Optional filters must be null, never undefined (GROQ rejects "undefined").
   const params: Record<string, unknown> = {
+    tenantId: ctx.tenantId,
     action: action && VALID_ACTIONS.includes(action) ? action : null,
     targetType: targetType && VALID_TARGETS.includes(targetType) ? targetType : null,
   };

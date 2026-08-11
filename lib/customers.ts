@@ -22,15 +22,16 @@ export function normalizeEmail(email: string): string {
   return (email || "").trim().toLowerCase();
 }
 
-/** Find a customer by normalized email, or null. */
+/** Find a customer by normalized email, or null. P4-03 — tenant-scoped. */
 export async function findCustomerByEmail(
-  email: string
+  email: string,
+  tenantId: string = "tenant-anks"
 ): Promise<CustomerDoc | null> {
   const normalized = normalizeEmail(email);
   if (!normalized) return null;
   return serverClient.fetch(
-    `*[_type == "customer" && email == $email][0]`,
-    { email: normalized }
+    `*[_type == "customer" && email == $email && (!defined(tenantId) || tenantId == $tenantId)][0]`,
+    { email: normalized, tenantId }
   );
 }
 
@@ -41,14 +42,16 @@ export async function findCustomerByEmail(
  * order doc as `customer` reference.
  */
 export async function upsertCustomerFromOrder(input: {
+  tenantId?: string;
   email: string;
   name?: string;
   orderTotal?: number;
 }): Promise<string | null> {
   const email = normalizeEmail(input.email);
   if (!email) return null;
+  const tenantId = input.tenantId || "tenant-anks";
 
-  const existing = await findCustomerByEmail(email);
+  const existing = await findCustomerByEmail(email, tenantId);
   if (existing) {
     const patch = serverClient
       .patch(existing._id)
@@ -59,6 +62,7 @@ export async function upsertCustomerFromOrder(input: {
 
   const doc = await serverClient.create({
     _type: "customer",
+    tenantId,
     email,
     name: (input.name || "").trim(),
     orderCount: 1,
@@ -77,12 +81,14 @@ export async function upsertCustomerFromOrder(input: {
  */
 export async function linkCustomerToOrder(input: {
   orderDocId: string;
+  tenantId?: string;
   email: string;
   name?: string;
   orderTotal?: number;
 }) {
   try {
     const customerId = await upsertCustomerFromOrder({
+      tenantId: input.tenantId,
       email: input.email,
       name: input.name,
       orderTotal: input.orderTotal,
@@ -98,8 +104,11 @@ export async function linkCustomerToOrder(input: {
 }
 
 /** P3-10 — Read a customer's store-credit balance. */
-export async function getCreditBalance(email: string): Promise<number> {
-  const customer = await findCustomerByEmail(email);
+export async function getCreditBalance(
+  email: string,
+  tenantId: string = "tenant-anks"
+): Promise<number> {
+  const customer = await findCustomerByEmail(email, tenantId);
   return customer?.creditBalance || 0;
 }
 
@@ -110,9 +119,10 @@ export async function getCreditBalance(email: string): Promise<number> {
  */
 export async function deductCredit(
   email: string,
-  amount: number
+  amount: number,
+  tenantId: string = "tenant-anks"
 ): Promise<boolean> {
-  const customer = await findCustomerByEmail(email);
+  const customer = await findCustomerByEmail(email, tenantId);
   if (!customer || amount <= 0) return false;
   if ((customer.creditBalance || 0) < amount) return false;
 
@@ -124,9 +134,13 @@ export async function deductCredit(
 }
 
 /** P3-14 — Add loyalty points to a customer (e.g. after a paid order). */
-export async function addLoyaltyPoints(email: string, points: number) {
+export async function addLoyaltyPoints(
+  email: string,
+  points: number,
+  tenantId: string = "tenant-anks"
+) {
   if (!normalizeEmail(email) || points <= 0) return;
-  const customer = await findCustomerByEmail(email);
+  const customer = await findCustomerByEmail(email, tenantId);
   if (!customer) return;
   await serverClient.patch(customer._id).inc({ points }).commit();
 }

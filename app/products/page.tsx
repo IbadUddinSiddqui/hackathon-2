@@ -10,6 +10,7 @@ import Header from '@/app/components/Header/Header';
 import Footer from '@/app/components/Footer/Footer';
 import { searchClient } from '@/lib/typesense';
 import { Product } from '@/types/products';
+import { clientTenantId } from '@/lib/tenant-client';
 
 const ITEMS_PER_PAGE = 9;
 
@@ -27,9 +28,9 @@ const ProductsPage = () => {
       setIsLoading(true);
       setError(null);
 
-      // Fetch all products from Sanity
+      // Fetch all products from Sanity (P4-03 — scoped to the active tenant)
       const sanityProducts: Product[] = await client.fetch(
-        `*[_type == "product"]{
+        `*[_type == "product" && (!defined(tenantId) || tenantId == $tenantId)]{
           _id,
           name,
           ratings,
@@ -40,7 +41,8 @@ const ProductsPage = () => {
           size,
           tags,
           category_slug
-        }`
+        }`,
+        { tenantId: clientTenantId() }
       );
 
       // Fetch all products from Typesense

@@ -11,27 +11,33 @@ import { getCreditBalance, deductCredit, findCustomerByEmail } from "@/lib/custo
  * customer doesn't exist. Deducts only the applied amount.
  */
 export async function applyStoreCredit(input: {
+  tenantId?: string;
   email: string;
   requested: number;
   remainingTotal: number;
 }): Promise<number> {
   const email = (input.email || "").trim().toLowerCase();
   if (!email || input.requested <= 0 || input.remainingTotal <= 0) return 0;
+  const tenantId = input.tenantId || "tenant-anks";
 
-  const balance = await getCreditBalance(email);
+  const balance = await getCreditBalance(email, tenantId);
   if (balance <= 0) return 0;
 
   const applied = Math.min(input.requested, balance, input.remainingTotal);
   if (applied <= 0) return 0;
 
-  const ok = await deductCredit(email, applied);
+  const ok = await deductCredit(email, applied, tenantId);
   return ok ? applied : 0;
 }
 
 /** P3-10 — give a customer store credit (admin refunds, promotions, etc.). */
-export async function grantStoreCredit(email: string, amount: number) {
+export async function grantStoreCredit(
+  email: string,
+  amount: number,
+  tenantId: string = "tenant-anks"
+) {
   if (amount <= 0) return;
-  const customer = await findCustomerByEmail(email);
+  const customer = await findCustomerByEmail(email, tenantId);
   if (!customer) return;
   // Import lazily to avoid a circular import (customers.ts doesn't import us).
   const { serverClient } = await import("@/sanity/lib/server-client");

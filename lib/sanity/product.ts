@@ -1,5 +1,6 @@
 // lib/sanity/product.ts
 import { client } from '@/sanity/lib/client';
+import { clientTenantId } from '@/lib/tenant-client';
 
 export type SanityProduct = {
   _id: string;
@@ -19,8 +20,9 @@ export type SanityProduct = {
 };
 
 export async function getSanityProducts(category?: string): Promise<SanityProduct[]> {
-  return client.fetch(`
-    *[_type == "product" ${category ? `&& category_slug == "${category}"` : ''}] {
+  const tenantId = clientTenantId();
+  return client.fetch(
+    `*[_type == "product" && (!defined(tenantId) || tenantId == $tenantId) ${category ? `&& category_slug == "${category}"` : ''}] {
       _id,
       name,
       ratings,
@@ -35,6 +37,7 @@ export async function getSanityProducts(category?: string): Promise<SanityProduc
       brand,
       tags,
       created_at
-    }
-  `);
+    }`,
+    { tenantId }
+  );
 }

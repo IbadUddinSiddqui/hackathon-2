@@ -32,13 +32,14 @@ export function computeSubtotal(items: CartItemInput[]): number {
 
 /** Find the most recent abandoned-cart doc for an email, or null. */
 export async function findAbandonedCartByEmail(
-  email: string
+  email: string,
+  tenantId: string = "tenant-anks"
 ): Promise<AbandonedCartDoc | null> {
   const normalized = normalizeEmail(email);
   if (!normalized) return null;
   return serverClient.fetch(
-    `*[_type == "abandonedCart" && email == $email] | order(createdAt desc) [0]`,
-    { email: normalized }
+    `*[_type == "abandonedCart" && email == $email && (!defined(tenantId) || tenantId == $tenantId)] | order(createdAt desc) [0]`,
+    { email: normalized, tenantId }
   );
 }
 
@@ -47,6 +48,7 @@ export async function findAbandonedCartByEmail(
  * saves during one checkout session don't create duplicates. Idempotent.
  */
 export async function saveAbandonedCart(input: {
+  tenantId?: string;
   email: string;
   items: CartItemInput[];
   subtotal?: number;
@@ -54,10 +56,12 @@ export async function saveAbandonedCart(input: {
 }): Promise<void> {
   const email = normalizeEmail(input.email);
   if (!email) return;
+  const tenantId = input.tenantId || "tenant-anks";
 
-  const existing = await findAbandonedCartByEmail(email);
+  const existing = await findAbandonedCartByEmail(email, tenantId);
   const doc = {
     _type: "abandonedCart",
+    tenantId,
     email,
     items: input.items.map((i) => ({
       _key: i.id,
@@ -93,12 +97,15 @@ export async function saveAbandonedCart(input: {
  * P3-06 — Mark carts for this email as recovered/completed once an order is
  * actually placed (called by the order-creation routes).
  */
-export async function markCartCompleted(email: string): Promise<void> {
+export async function markCartCompleted(
+  email: string,
+  tenantId: string = "tenant-anks"
+): Promise<void> {
   const normalized = normalizeEmail(email);
   if (!normalized) return;
   const docs = await serverClient.fetch(
-    `*[_type == "abandonedCart" && email == $email && status in ["abandoned", "reminded"]]{_id}`,
-    { email: normalized }
+    `*[_type == "abandonedCart" && email == $email && (!defined(tenantId) || tenantId == $tenantId) && status in ["abandoned", "reminded"]]{_id}`,
+    { email: normalized, tenantId }
   );
   if (!docs?.length) return;
   const tx = serverClient.transaction();

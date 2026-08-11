@@ -38,10 +38,12 @@ export function saleEndsAt(sale: FlashSaleDoc): string {
   return sale.endsAt;
 }
 
-/** Fetch all enabled sales (active flag true). */
-export async function getActiveFlashSales(): Promise<FlashSaleDoc[]> {
+/** Fetch all enabled sales (active flag true). P4-03 — tenant-scoped. */
+export async function getActiveFlashSales(
+  tenantId: string = "tenant-anks"
+): Promise<FlashSaleDoc[]> {
   return serverClient.fetch(
-    `*[_type == "flashSale" && active != false]{
+    `*[_type == "flashSale" && active != false && (!defined(tenantId) || tenantId == $tenantId)]{
       _id,
       name,
       salePrice,

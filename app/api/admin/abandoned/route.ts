@@ -5,24 +5,24 @@
 // Unauthenticated → 401.
 
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
-import { isAdmin } from "@/lib/admin";
 import { serverClient } from "@/sanity/lib/server-client";
 import { remindCart, type AbandonedCartDoc } from "@/lib/abandoned-cart";
+import { getTenantContext, tenantFilter } from "@/lib/tenants";
 
 const PROJECTION = `{
   _id, email, items, subtotal, checkoutUrl, status, remindedAt, createdAt
 }`;
 
 export async function GET() {
-  const session = await auth();
-  if (!isAdmin(session)) {
+  const ctx = await getTenantContext();
+  if (!ctx) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
     const carts = await serverClient.fetch(
-      `*[_type == "abandonedCart"] | order(createdAt desc) ${PROJECTION}`
+      `*[_type == "abandonedCart" && ${tenantFilter()}] | order(createdAt desc) ${PROJECTION}`,
+      { tenantId: ctx.tenantId }
     );
     return NextResponse.json({ carts });
   } catch (error: any) {
@@ -32,8 +32,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const session = await auth();
-  if (!isAdmin(session)) {
+  const ctx = await getTenantContext();
+  if (!ctx) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -50,8 +50,8 @@ export async function POST(request: Request) {
 
   try {
     const cart: AbandonedCartDoc | null = await serverClient.fetch(
-      `*[_id == $id][0]${PROJECTION}`,
-      { id }
+      `*[_id == $id && ${tenantFilter()}][0]${PROJECTION}`,
+      { id, tenantId: ctx.tenantId }
     );
     if (!cart) {
       return NextResponse.json({ error: "Cart not found" }, { status: 404 });

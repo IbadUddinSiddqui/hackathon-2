@@ -55,14 +55,20 @@ export function parseListQuery(url: URL): ProductListQuery {
 /**
  * Build the GROQ list + count queries and their params.
  * `search` is matched as a prefix (`tee*`) against `name`.
+ * `tenantId` (P4-03) isolates the query to one SaaS tenant; legacy docs
+ * without a tenantId still match (see lib/tenants.ts tenantFilter).
  */
-export function buildProductListGroq(query: ProductListQuery): {
+export function buildProductListGroq(
+  query: ProductListQuery,
+  tenantId: string = "tenant-anks"
+): {
   groq: string;
   countGroq: string;
   params: Record<string, unknown>;
 } {
   const filters = [
     "_type == \"product\"",
+    "(!defined(tenantId) || tenantId == $tenantId)",
     "(!defined($category) || category == $category)",
     "(!defined($search) || name match $search)",
   ].join(" && ");
@@ -73,6 +79,7 @@ export function buildProductListGroq(query: ProductListQuery): {
   // rejects ("Unable to parse value of \"$category=undefined\"") and the
   // route's catch block turns into a 500. `!defined($category)` matches null.
   const params: Record<string, unknown> = {
+    tenantId,
     category: query.category ?? null,
     search: query.search ? `${query.search}*` : null,
     offset,

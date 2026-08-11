@@ -770,7 +770,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 ### P4-EPIC-01 — expanded nodes (True multi-tenancy)
 
 ### [P4-01] Tenant data model + tenantId isolation on collections
-- status: todo
+- status: done
 - depends_on: []
 - human_required: false
 - touches: [sanity/schemaTypes/tenant.ts (new), sanity/schemaTypes/{product,order,customer,discountCode,abandonedCart,review,giftCard,bundle,flashSale,auditLog}.ts, sanity/schemaTypes/index.ts]
@@ -779,7 +779,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes: P1-14 = SaaS, so this is now a real epic, not optional. Decisions here drive every other P4 node.
 
 ### [P4-02] Tenant-scoped auth (NextAuth session carries tenantId)
-- status: todo
+- status: done
 - depends_on: [P4-01]
 - human_required: false
 - touches: [auth.ts, auth.config.ts, app/api/auth/[...nextauth]/route.ts, lib/admin.ts]
@@ -788,7 +788,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes: platform super-admin role also introduced here.
 
 ### [P4-03] Central tenant query scoping in every API route + admin page
-- status: todo
+- status: done
 - depends_on: [P4-02]
 - human_required: false
 - touches: [lib/tenant.ts (new), app/api/admin/**/*, app/adminpanel/**/*, lib/{admin-products,admin-customers,admin-discounts,orders,abandoned-cart,reviews}.ts]
@@ -797,7 +797,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes:
 
 ### [P4-04] Storefront domain routing (Host header -> tenant)
-- status: todo
+- status: done
 - depends_on: [P4-01]
 - human_required: false
 - touches: [middleware.ts (new), lib/tenant-resolver.ts (new), app/layout.tsx, next.config.ts]
@@ -806,7 +806,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes:
 
 ### [P4-05] Per-tenant branding + content (name, logo, colors, hero, footer)
-- status: todo
+- status: done
 - depends_on: [P4-04]
 - human_required: false
 - touches: [app/components/Header/Header.tsx, app/components/Footer/Footer.tsx, app/components/Hero/Hero.tsx, app/layout.tsx, lib/site.ts]
@@ -815,7 +815,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes:
 
 ### [P4-06] Per-tenant payment config (Safepay/Stripe keys + webhook secrets per tenant)
-- status: todo
+- status: done
 - depends_on: [P4-01, P4-03]
 - human_required: false
 - touches: [app/api/create-safepay-order/route.ts, app/api/payments/safepay/webhook/route.ts, app/api/webhook/route.ts, app/checkout/page.tsx, lib/safepay.ts, lib/get-stripe.js]
@@ -824,7 +824,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes:
 
 ### [P4-07] Platform billing — plans + subscription + usage metering
-- status: todo
+- status: done
 - depends_on: [P4-01, P4-09]
 - human_required: false
 - touches: [lib/billing.ts (new), app/api/billing/** (new), sanity/schemaTypes/tenant.ts]
@@ -833,7 +833,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes: gateway/provider choice is the human node P4-09.
 
 ### [P4-08] Admin platform console (tenants, plans, billing status, feature flags)
-- status: todo
+- status: done
 - depends_on: [P4-03, P4-07]
 - human_required: false
 - touches: [app/adminpanel/tenants/ (new), app/api/admin/tenants/route.ts (new), app/components/Sidebar/index.tsx]

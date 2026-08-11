@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import DefaultLayout from "@/app/components/Layouts/DefaultLayout";
-import { requireAdmin } from "@/lib/admin";
+import { requireTenantAdmin } from "@/lib/tenants";
 import { serverClient } from "@/sanity/lib/server-client";
 import DiscountCodesManager from "./DiscountCodesManager";
 
@@ -20,9 +20,9 @@ export type DiscountCode = {
   expiresAt?: string;
 };
 
-async function getDiscountCodes(): Promise<DiscountCode[]> {
+async function getDiscountCodes(tenantId: string): Promise<DiscountCode[]> {
   return serverClient.fetch(
-    `*[_type == "discountCode"] | order(code asc) {
+    `*[_type == "discountCode" && (!defined(tenantId) || tenantId == $tenantId)] | order(code asc) {
       _id,
       code,
       type,
@@ -31,17 +31,18 @@ async function getDiscountCodes(): Promise<DiscountCode[]> {
       maxUses,
       usedCount,
       expiresAt
-    }`
+    }`,
+    { tenantId }
   );
 }
 
 export default async function DiscountsPage() {
-  await requireAdmin();
+  const { tenantId } = await requireTenantAdmin();
 
   let codes: DiscountCode[] = [];
   let loadError = false;
   try {
-    codes = await getDiscountCodes();
+    codes = await getDiscountCodes(tenantId);
   } catch (error) {
     console.error("Failed to load discount codes:", error);
     loadError = true;

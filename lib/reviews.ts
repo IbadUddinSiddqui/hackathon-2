@@ -41,9 +41,13 @@ export function validateReviewInput(input: ReviewInput): string | null {
 }
 
 /** Persist a new review with status 'pending' (awaiting moderation). */
-export async function createReview(input: ReviewInput): Promise<void> {
+export async function createReview(
+  input: ReviewInput,
+  tenantId: string = "tenant-anks"
+): Promise<void> {
   const doc = await serverClient.create({
     _type: "review",
+    tenantId,
     product: { _type: "reference", _ref: input.productId },
     rating: input.rating,
     title: (input.title || "").trim(),
@@ -66,10 +70,13 @@ export type ReviewDoc = {
 };
 
 /** Fetch APPROVED reviews for a product (storefront-facing). */
-export async function getApprovedReviews(productId: string): Promise<ReviewDoc[]> {
+export async function getApprovedReviews(
+  productId: string,
+  tenantId: string = "tenant-anks"
+): Promise<ReviewDoc[]> {
   return serverClient.fetch(
-    `*[_type == "review" && product._ref == $productId && status == "approved"] | order(createdAt desc)`,
-    { productId }
+    `*[_type == "review" && product._ref == $productId && status == "approved" && (!defined(tenantId) || tenantId == $tenantId)] | order(createdAt desc)`,
+    { productId, tenantId }
   );
 }
 

@@ -43,6 +43,7 @@ async function fulfilOrder(
   const orderEmail = customerEmailFromStripe || order.customer_email;
   await linkCustomerToOrder({
     orderDocId: order._id,
+    tenantId: order.tenantId,
     email: orderEmail || '',
     orderTotal: order.total || 0,
   });
@@ -80,7 +81,7 @@ async function fulfilOrder(
   // 4. Bump the discount code's usage counter now that the order is paid.
   if (order.discount_code) {
     try {
-      await incrementDiscountUsage(order.discount_code);
+      await incrementDiscountUsage(order.discount_code, order.tenantId);
     } catch (err: any) {
       console.error('Failed to increment discount usage:', err.message);
     }
@@ -90,7 +91,7 @@ async function fulfilOrder(
   const points = pointsEarned(order.total || 0);
   if (points > 0 && orderEmail) {
     try {
-      await addLoyaltyPoints(orderEmail, points);
+      await addLoyaltyPoints(orderEmail, points, order.tenantId);
     } catch (err: any) {
       console.error('Failed to award loyalty points:', err.message);
     }

@@ -20,10 +20,12 @@ export type BundleDoc = {
   active?: boolean;
 };
 
-/** Fetch active bundles with their products expanded. */
-export async function getActiveBundles(): Promise<BundleDoc[]> {
+/** Fetch active bundles with their products expanded. P4-03 — tenant-scoped. */
+export async function getActiveBundles(
+  tenantId: string = "tenant-anks"
+): Promise<BundleDoc[]> {
   return serverClient.fetch(
-    `*[_type == "bundle" && active != false]{
+    `*[_type == "bundle" && active != false && (!defined(tenantId) || tenantId == $tenantId)]{
       _id,
       name,
       description,

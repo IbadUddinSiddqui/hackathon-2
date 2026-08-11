@@ -6,7 +6,12 @@ export default defineType({
   title: 'User',
   type: 'document',
   fields: [
-
+    defineField({
+      name: 'tenantId',
+      title: 'Tenant',
+      description: 'Owning tenant (SaaS). Leave empty for the default tenant.',
+      type: 'string',
+    }),
 
     defineField({
       name: 'role',

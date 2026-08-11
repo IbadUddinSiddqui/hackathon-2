@@ -1,23 +1,22 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
 import { serverClient } from "@/sanity/lib/server-client";
 import {
-  discountCodeGuard,
   validateDiscountCodeInput,
 } from "@/lib/discount-code-admin";
 import { logAdminAction } from "@/lib/audit";
+import { getTenantContext, tenantFilter } from "@/lib/tenants";
 
 /**
  * Admin-only: update a discount code (e.g. edit value, toggle active,
- * change max uses).
+ * change max uses). P4-03 — tenant-scoped.
  */
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const unauthorized = await discountCodeGuard();
-  if (unauthorized) return unauthorized;
-  const session = await auth();
+  const ctx = await getTenantContext();
+  if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { session, tenantId } = ctx;
 
   const { id } = await params;
 
@@ -35,8 +34,8 @@ export async function PATCH(
 
   try {
     const existing = await serverClient.fetch(
-      `*[_id == $id][0]{_id, code}`,
-      { id }
+      `*[_id == $id && ${tenantFilter()}][0]{_id, code}`,
+      { id, tenantId }
     );
     if (!existing) {
       return NextResponse.json({ error: "Discount code not found" }, { status: 404 });
@@ -46,8 +45,8 @@ export async function PATCH(
     const newCode = String(body.code).trim().toUpperCase();
     if (newCode !== existing.code) {
       const collision = await serverClient.fetch(
-        `*[_type == "discountCode" && code == $code && _id != $id][0]{_id}`,
-        { code: newCode, id }
+        `*[_type == "discountCode" && code == $code && _id != $id && ${tenantFilter()}][0]{_id}`,
+        { code: newCode, id, tenantId }
       );
       if (collision) {
         return NextResponse.json(
@@ -71,6 +70,7 @@ export async function PATCH(
 
     logAdminAction({
       adminEmail: session?.user?.email,
+      tenantId,
       action: "update",
       targetType: "discountCode",
       targetId: id,
@@ -85,22 +85,22 @@ export async function PATCH(
 }
 
 /**
- * Admin-only: delete a discount code.
+ * Admin-only: delete a discount code. P4-03 — tenant-scoped.
  */
 export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const unauthorized = await discountCodeGuard();
-  if (unauthorized) return unauthorized;
-  const session = await auth();
+  const ctx = await getTenantContext();
+  if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { session, tenantId } = ctx;
 
   const { id } = await params;
 
   try {
     const existing = await serverClient.fetch(
-      `*[_id == $id][0]{_id, code}`,
-      { id }
+      `*[_id == $id && ${tenantFilter()}][0]{_id, code}`,
+      { id, tenantId }
     );
     if (!existing) {
       return NextResponse.json({ error: "Discount code not found" }, { status: 404 });
@@ -110,6 +110,7 @@ export async function DELETE(
 
     logAdminAction({
       adminEmail: session?.user?.email,
+      tenantId,
       action: "delete",
       targetType: "discountCode",
       targetId: id,

@@ -59,6 +59,7 @@ describe("upsertCustomerFromOrder", () => {
     expect(id).toBe("cust_1");
     expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining("email == $email"), {
       email: "a@b.com",
+      tenantId: "tenant-anks",
     });
     expect(serverClient.patch).toHaveBeenCalledWith("cust_1");
     expect(chain.inc).toHaveBeenCalledWith({ orderCount: 1, totalSpent: 250 });

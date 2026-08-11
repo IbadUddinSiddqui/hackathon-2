@@ -5,11 +5,14 @@
 
 import { serverClient } from "@/sanity/lib/server-client";
 
-/** Find a product id by exact name, or null. */
-export async function findProductByName(name: string): Promise<string | null> {
+/** Find a product id by exact name, or null. P4-03 — scoped to a tenant. */
+export async function findProductByName(
+  name: string,
+  tenantId: string = "tenant-anks"
+): Promise<string | null> {
   const doc = await serverClient.fetch(
-    `*[_type == "product" && name == $name][0]{_id}`,
-    { name }
+    `*[_type == "product" && name == $name && (!defined(tenantId) || tenantId == $tenantId)][0]{_id}`,
+    { name, tenantId }
   );
   return doc?._id ?? null;
 }
