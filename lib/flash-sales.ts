@@ -50,7 +50,8 @@ export async function getActiveFlashSales(
       startsAt,
       endsAt,
       "products": products[]{_ref}
-    }`
+    }`,
+    { tenantId }
   );
 }
 

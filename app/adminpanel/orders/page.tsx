@@ -40,7 +40,8 @@ async function getOrders(tenantId: string): Promise<Order[]> {
       currency,
       created_at,
       items[] { name, price, quantity }
-    }`
+    }`,
+    { tenantId }
   );
 }
 
@@ -72,7 +73,7 @@ export default async function OrdersPage() {
         <div>
           <h1 className="text-2xl font-bold text-black dark:text-white">Orders</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-bodydark2">
-            All customer orders recorded via the Stripe webhook. Click a row for details.
+            All customer orders recorded via the payment webhooks (Stripe/Safepay). Click a row for details.
           </p>
         </div>
 

@@ -50,7 +50,7 @@ export type TypesenseProduct = {
   created_at: number;
 };
 
-const PRODUCT_PROJECTION = (tenantId: string) =>
+const PRODUCT_PROJECTION = () =>
   `*[_type == "product" && ${tenantFilter()}]{
   _id,
   tenantId,
@@ -216,7 +216,7 @@ export async function syncAllProducts(
 ): Promise<{ synced: number; skipped: number }> {
   await ensureProductsCollection();
   const products = await serverClient.fetch<SanityProductDoc[]>(
-    PRODUCT_PROJECTION(tenantId),
+    PRODUCT_PROJECTION(),
     { tenantId }
   );
 

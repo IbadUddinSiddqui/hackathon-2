@@ -52,7 +52,7 @@ export default function HeaderSearch() {
         searchResults = await client.collections('products').documents().search(
           buildSearchParams(searchQuery, tenantId, 12)
         );
-      } catch (hybridErr) {
+      } catch {
         // Hybrid can fail when the collection was created before the embedder
         // was configured — retry with plain text search (the fallback).
         searchResults = await client.collections('products').documents().search(textParams);

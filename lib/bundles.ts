@@ -35,7 +35,8 @@ export async function getActiveBundles(
         quantity,
         "product": product->{_id, name, price}
       }
-    }`
+    }`,
+    { tenantId }
   );
 }
 

@@ -62,7 +62,7 @@ async function getOrderById(id: string, tenantId: string): Promise<Order | null>
         "product": product->{ _id, category_slug }
       }
     }`,
-    { id }
+    { id, tenantId }
   );
 }
 

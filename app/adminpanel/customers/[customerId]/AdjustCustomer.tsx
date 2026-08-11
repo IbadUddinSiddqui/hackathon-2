@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Coins, Plus, Minus } from "lucide-react";
+import { Coins, Plus } from "lucide-react";
 
 export default function AdjustCustomer({ customerId }: { customerId: string }) {
   const router = useRouter();
