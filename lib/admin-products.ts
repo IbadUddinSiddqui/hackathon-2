@@ -68,9 +68,13 @@ export function buildProductListGroq(query: ProductListQuery): {
   ].join(" && ");
 
   const offset = (query.page - 1) * query.limit;
+  // Optional filters must be `null`, never `undefined`: the Sanity client
+  // serializes `undefined` as the literal string "undefined", which GROQ
+  // rejects ("Unable to parse value of \"$category=undefined\"") and the
+  // route's catch block turns into a 500. `!defined($category)` matches null.
   const params: Record<string, unknown> = {
-    category: query.category,
-    search: query.search ? `${query.search}*` : undefined,
+    category: query.category ?? null,
+    search: query.search ? `${query.search}*` : null,
     offset,
     limit: query.limit,
   };

@@ -47,10 +47,19 @@ describe("buildProductListGroq", () => {
     expect(params).toMatchObject({ offset: 50, limit: 25, search: "tee*", category: "shirts" });
   });
 
-  it("leaves optional filters undefined", () => {
+  it("uses null for absent optional filters (never undefined — GROQ rejects the literal string 'undefined')", () => {
     const { params } = buildProductListGroq({ page: 1, limit: 20 });
-    expect(params.search).toBeUndefined();
-    expect(params.category).toBeUndefined();
+    expect(params.search).toBeNull();
+    expect(params.category).toBeNull();
+    expect(params.offset).toBe(0);
+    expect(params.limit).toBe(20);
+  });
+
+  it("uses null for absent optional filters when only page/limit provided via parseListQuery defaults", () => {
+    const q = parseListQuery(new URL("http://localhost/api/admin/products"));
+    const { params } = buildProductListGroq(q);
+    expect(params.search).toBeNull();
+    expect(params.category).toBeNull();
   });
 
   it("produces list and count queries referencing the same filters", () => {

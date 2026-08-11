@@ -341,7 +341,7 @@
 ## PHASE 2 — Important (epics only — expand each into a node sub-graph, same format as Phase 1, once Phase 1 is done or explicitly deferred)
 
 - [x] **P2-EPIC-01** Product management admin UI (replace reliance on raw Sanity Studio) — EXPANDED 2026-08-10 into P2-01..P2-07 below
-- [ ] **P2-EPIC-02** One local courier integration (Leopards or PostEx first) — BLOCKED-ON-MERCHANT: needs a courier business account (Leopards/PostEx) + API credentials before any code can be written. Owner to sign up; see P2-EPIC-02 note below.
+- [ ] **P2-EPIC-02** One local courier integration (Leopards or PostEx first) — BLOCKED-ON-MERCHANT: needs a courier business account (Leopards/PostEx) + API credentials before any code can be written. Owner to sign up; see P2-EPIC-02 note below. 2026-08-11 — OWNER APPLIED for a courier account; awaiting API credentials to unblock the build.
 - [ ] **P2-EPIC-03** WhatsApp + SMS order notifications — BLOCKED-ON-MERCHANT: needs WhatsApp Business API (Meta) + an SMS gateway account (e.g. Twilio/Infobip) before code can be written. Owner to sign up; see P2-EPIC-03 note below.
 - [x] **P2-EPIC-04** SEO pass — metadata, Product structured data, sitemap, OG images — EXPANDED + COMPLETED 2026-08-10 (P2-SEO-01..05)
 - [x] **P2-EPIC-05** Rate limiting across auth/discount/payment endpoints — EXPANDED + COMPLETED 2026-08-10 (P2-RL-01..03)
@@ -359,6 +359,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - done_when: GET /api/admin/products (admin-only) returns `{ items, total, page, pages }` of product summaries (name, price, stock, category, category_slug, brand, size, mainImage URL, created_at) and supports `?page=`, `?limit=`, `?search=`, `?category=`; unauthenticated requests get 401.
 - verify: `npm test -- admin-products` passes; `curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/api/admin/products` returns 401 unauthenticated
 - notes: VERIFIED 2026-08-10 — lib/admin-products.ts (pure: parseListQuery with null-safe param defaults — Number(null)==0 bug caught by test, buildProductListGroq, toProductSummary, validateProductInput); app/api/admin/products/route.ts (isAdmin guard → 401, Promise.all list+count, {items,total,page,pages,limit}). npm test -- admin-products 11/11 PASS; curl unauth = 401; tsc clean.
+- notes: 2026-08-11 — **BUGFIX (owner reported 500 in production)**: GET /api/admin/products returned 500 "Failed to list products". Root cause: buildProductListGroq passed `undefined` for absent optional GROQ params (category/search) — the Sanity client serializes `undefined` as the literal string `"undefined"`, GROQ rejects it (`Unable to parse value of "$category=undefined"`), and the route's catch turned that 400 into 500. Unit tests missed it because they mocked the client AND asserted `toBeUndefined()` — the test enshrined the bug. Fix: params now use `?? null` (GROQ `!defined()` treats null as absent); test updated to assert null + new regression case (defaults via parseListQuery). Verified: probe with the exact fixed query against live Sanity → FETCH OK (20 docs, total 61); unauth GET now 401 (not 500); `npm test -- admin-products` 24/24; full suite 79/79; tsc clean.
 
 ### [P2-02] Admin API — create product
 - status: done
@@ -523,6 +524,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - done_when: a Lighthouse run (performance/seo/accessibility/best-practices) records baseline scores + top failures into this node's notes.
 - verify: lighthouse JSON output captured with scores
 - notes: VERIFIED 2026-08-10 (dev server, Lighthouse 13.4.1) — BASELINE: performance 32 / seo 92 / accessibility 86 / best-practices 96. Performance failures are dev-mode artifacts (unminified JS, missing source maps, slow dev SSR, unused code). A11y: icon-only testimonial arrows (no name), icon-only footer social links (no name), contrast (FLASH SALE red-500, shadcn outline buttons). BP: console errors (no actionable snippet — dev noise), missing source maps (dev-only). FULL AUDIT MUST BE RE-RUN POST-DEPLOY against the production build.
+- notes: 2026-08-11 — **PRODUCTION AUDIT PASSED** (owner ran Lighthouse against the live Vercel deploy; JSONs saved at repo root: Lighthouse_mobile_rport.json + lighthouse_dekstop_report.json). MOBILE: performance 74 / accessibility 96 / best-practices 100 / seo 100. DESKTOP: performance 89 / accessibility 92 / best-practices 100 / seo 100. Zero failing weighty audits in either. Site confirmed live on Vercel (hackathon-2-ashy-mu.vercel.app).
 
 ### [P2-LH-02] Fix actionable audit findings
 - status: done
