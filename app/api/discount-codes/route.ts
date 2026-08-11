@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { serverClient } from "@/sanity/lib/server-client";
 import {
   discountCodeGuard,
   validateDiscountCodeInput,
   type DiscountCodeInput,
 } from "@/lib/discount-code-admin";
+import { logAdminAction } from "@/lib/audit";
 
 export async function GET() {
   const unauthorized = await discountCodeGuard();
@@ -29,6 +31,7 @@ export async function GET() {
 export async function POST(request: Request) {
   const unauthorized = await discountCodeGuard();
   if (unauthorized) return unauthorized;
+  const session = await auth();
 
   let body: DiscountCodeInput;
   try {
@@ -64,6 +67,14 @@ export async function POST(request: Request) {
       maxUses: body.maxUses ?? 100,
       usedCount: 0,
       expiresAt: body.expiresAt || undefined,
+    });
+
+    logAdminAction({
+      adminEmail: session?.user?.email,
+      action: "create",
+      targetType: "discountCode",
+      targetId: doc._id,
+      targetLabel: String(body.code).trim().toUpperCase(),
     });
 
     return NextResponse.json({ code: doc }, { status: 201 });

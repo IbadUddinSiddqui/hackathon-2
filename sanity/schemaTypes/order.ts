@@ -52,6 +52,32 @@ export default defineType({
       type: 'string',
     }),
     defineField({
+      name: 'customer',
+      title: 'Customer',
+      type: 'reference',
+      to: [{ type: 'customer' }],
+    }),
+    defineField({
+      name: 'credit_applied',
+      title: 'Store Credit Applied',
+      type: 'number',
+    }),
+    defineField({
+      name: 'gift_card_code',
+      title: 'Gift Card Code',
+      type: 'string',
+    }),
+    defineField({
+      name: 'gift_card_applied',
+      title: 'Gift Card Applied',
+      type: 'number',
+    }),
+    defineField({
+      name: 'points_earned',
+      title: 'Loyalty Points Earned',
+      type: 'number',
+    }),
+    defineField({
       name: 'items',
       title: 'Items',
       type: 'array',

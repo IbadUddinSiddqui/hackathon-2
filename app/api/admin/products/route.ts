@@ -18,6 +18,7 @@ import {
   type ProductSummary,
 } from "@/lib/admin-products";
 import { findProductByName, uploadImages } from "@/lib/product-images";
+import { logAdminAction } from "@/lib/audit";
 
 export async function GET(request: Request) {
   const session = await auth();
@@ -99,6 +100,14 @@ export async function POST(request: Request) {
       brand: input.brand || "",
       tags: input.tags,
       images,
+    });
+
+    logAdminAction({
+      adminEmail: session?.user?.email,
+      action: "create",
+      targetType: "product",
+      targetId: doc._id,
+      targetLabel: name,
     });
 
     return NextResponse.json({ product: { _id: doc._id, name } }, { status: 201 });

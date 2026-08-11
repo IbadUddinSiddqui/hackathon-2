@@ -5,9 +5,12 @@ import { SanityProduct } from '@/lib/sanity/product';
 import { motion } from 'framer-motion';
 import { ShoppingCart, PackageCheck, Info } from 'lucide-react';
 import { cn } from '@/lib/utils'; // Assume you have a cn utility
+import { useLocale } from '@/lib/locale-provider';
+import { t } from '@/lib/i18n';
 
 export default function AddToCartButton({ product }: { product: SanityProduct }) {
   const { addItem, items } = useCartStore();
+  const { locale } = useLocale();
   const cartItem = items.find(item => item._id === product._id);
   const availableStock = product.stock - (cartItem?.quantity || 0);
 
@@ -27,7 +30,7 @@ export default function AddToCartButton({ product }: { product: SanityProduct })
       >
         <div className="flex items-center justify-center gap-2">
           <ShoppingCart className="w-5 h-5" />
-          {availableStock > 0 ? 'Add to Cart' : 'Out of Stock'}
+          {availableStock > 0 ? t(locale, 'product.addToCart') : t(locale, 'product.outOfStock')}
         </div>
         
         {/* Animated quantity indicator */}

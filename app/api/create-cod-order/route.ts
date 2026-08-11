@@ -1,14 +1,16 @@
 import { NextResponse } from 'next/server';
-import { createPendingOrder, fetchProductsByIds } from '@/lib/orders';
-import { validateDiscountCode } from '@/lib/discounts';
-import { DELIVERY_FEE } from '@/lib/constants';
+import { createPendingOrder } from '@/lib/orders';
+import { priceCheckout } from '@/lib/checkout-pricing';
 import { enforceRateLimit } from '@/lib/rate-limit';
+import { linkCustomerToOrder } from '@/lib/customers';
+import { markCartCompleted } from '@/lib/abandoned-cart';
 
 /**
  * Cash-on-Delivery checkout: mirrors the card flows' server-side pricing
- * (real Sanity prices + validated discount + DELIVERY_FEE) but NEVER touches
- * Stripe. The order is stored as `status: pending`, `payment_method: cod` and
- * an admin marks it paid/refunded from the admin panel after delivery.
+ * (real Sanity prices + validated discount + gift card + store credit +
+ * DELIVERY_FEE) but NEVER touches Stripe. The order is stored as
+ * `status: pending`, `payment_method: cod` and an admin marks it paid/refunded
+ * from the admin panel after delivery.
  */
 export async function POST(request: Request) {
   const limited = enforceRateLimit(request, { key: 'create-cod-order', limit: 10, windowMs: 60_000 });
@@ -23,58 +25,45 @@ export async function POST(request: Request) {
       : [];
     const customerEmail = typeof body?.customerEmail === 'string' ? body.customerEmail : '';
     const discountCode = typeof body?.discountCode === 'string' ? body.discountCode : '';
+    const giftCardCode = typeof body?.giftCardCode === 'string' ? body.giftCardCode : '';
+    const creditAmount =
+      typeof body?.creditAmount === 'number' && Number.isFinite(body.creditAmount)
+        ? Math.max(0, body.creditAmount)
+        : 0;
 
-    if (items.length === 0) {
-      return NextResponse.json({ error: 'Cart is empty' }, { status: 400 });
-    }
-
-    // Never trust client-sent prices: fetch the real products from Sanity.
-    const products = await fetchProductsByIds(items.map((i) => i.id));
-    const productMap = new Map(products.map((p) => [p._id, p]));
-
-    const orderItems: { id: string; name: string; price: number; quantity: number; size?: string[] }[] = [];
-    let subtotal = 0;
-    for (const item of items) {
-      const product = productMap.get(item.id);
-      if (!product) {
-        return NextResponse.json(
-          { error: `Product no longer available: ${item.id}` },
-          { status: 400 }
-        );
-      }
-      const price = product.price;
-      const quantity = Math.max(1, Math.min(item.quantity, product.stock || 0));
-      subtotal += price * quantity;
-      orderItems.push({
-        id: product._id,
-        name: product.name,
-        price,
-        quantity,
-        size: Array.isArray(item.size) ? item.size : undefined,
-      });
-    }
-
-    const discountResult = discountCode
-      ? await validateDiscountCode(discountCode, subtotal)
-      : { valid: true as const, discountAmount: 0, code: '' };
-
-    if (!discountResult.valid) {
-      return NextResponse.json({ error: discountResult.message }, { status: 400 });
-    }
-
-    const total = subtotal - discountResult.discountAmount + DELIVERY_FEE;
-
-    const { orderId } = await createPendingOrder({
-      items: orderItems,
-      subtotal,
-      total,
+    // Server-side pricing: real Sanity prices, validated discount/gift card,
+    // store credit capped at the balance, delivery fee added last.
+    const priced = await priceCheckout({
+      items,
       customerEmail,
-      discountCode: discountResult.code || undefined,
-      discountAmount: discountResult.discountAmount,
+      discountCode,
+      giftCardCode,
+      creditAmount,
+    });
+    if ('error' in priced) {
+      return NextResponse.json({ error: priced.error }, { status: 400 });
+    }
+
+    const { orderId, docId } = await createPendingOrder({
+      items: priced.items,
+      subtotal: priced.subtotal,
+      total: priced.total,
+      customerEmail,
+      discountCode: priced.discountCode,
+      discountAmount: priced.discountAmount,
+      giftCardCode: priced.giftCardCode,
+      giftCardApplied: priced.giftCardApplied,
+      creditApplied: priced.creditApplied,
+      pointsEarned: priced.pointsEarned,
       paymentMethod: 'cod',
     });
 
-    return NextResponse.json({ success: true, orderId, total });
+    // P3-01: upsert the customer doc (by email) + attach the reference.
+    await linkCustomerToOrder({ orderDocId: docId, email: customerEmail, orderTotal: priced.total });
+    // P3-06: this email just ordered — their abandoned cart is recovered.
+    await markCartCompleted(customerEmail);
+
+    return NextResponse.json({ success: true, orderId, total: priced.total });
   } catch (err: any) {
     console.error('COD order error:', err);
     return NextResponse.json({ error: err.message }, { status: 500 });

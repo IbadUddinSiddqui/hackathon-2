@@ -4,6 +4,7 @@ import { client } from "@/sanity/lib/client";
 import { urlFor } from "@/sanity/lib/image";
 import ProductDetailClient, { type ProductDetail } from "./ProductDetailClient";
 import { SITE_NAME } from "@/lib/site";
+import { getActiveFlashSales, isSaleActive } from "@/lib/flash-sales";
 
 const PRODUCT_QUERY = `*[_type == "product" && (_id == $id || slug.current == $id)][0]{
   _id,
@@ -73,6 +74,23 @@ export default async function ProductDetailPage({
     notFound();
   }
 
+  // P3-13 — find an active flash sale covering this product (server-truth).
+  let flashSale: { salePrice: number; endsAt: string } | undefined;
+  try {
+    const sales = await getActiveFlashSales();
+    for (const sale of sales) {
+      const inSale = (sale.products || []).some(
+        (ref: any) => (ref?._ref || ref?._id) === product._id
+      );
+      if (inSale && isSaleActive(sale)) {
+        flashSale = { salePrice: sale.salePrice, endsAt: sale.endsAt };
+        break;
+      }
+    }
+  } catch {
+    // flash-sale lookup is best-effort — never break the product page
+  }
+
   // Product structured data for rich results.
   const jsonLd = {
     "@context": "https://schema.org",
@@ -84,7 +102,7 @@ export default async function ProductDetailPage({
     offers: {
       "@type": "Offer",
       priceCurrency: "PKR",
-      price: product.price,
+      price: flashSale ? flashSale.salePrice : product.price,
       availability:
         product.stock > 0
           ? "https://schema.org/InStock"
@@ -99,7 +117,7 @@ export default async function ProductDetailPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <ProductDetailClient product={product} />
+      <ProductDetailClient product={product} flashSale={flashSale} />
     </>
   );
 }

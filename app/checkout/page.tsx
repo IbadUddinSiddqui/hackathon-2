@@ -9,6 +9,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { SafepayPayment, type CheckoutItem } from '../components/CheckOut/SafepayPayment';
 import { DELIVERY_FEE, CURRENCY_SYMBOL } from '@/lib/constants';
+import { useLocale } from '@/lib/locale-provider';
+import { t } from '@/lib/i18n';
+
+/** P3-06 — fire-and-forget: persist the cart server-side for recovery. */
+async function captureCart(items: CheckoutItem[], email: string) {
+  if (!email || items.length === 0) return;
+  try {
+    await fetch('/api/cart-capture', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, items, checkoutUrl: '/checkout' }),
+    });
+  } catch {
+    // capture is best-effort — never block checkout
+  }
+}
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -21,23 +37,35 @@ function CodCheckoutForm({
   discountCode?: string;
 }) {
   const router = useRouter();
+  const { locale } = useLocale();
   const [email, setEmail] = useState('');
+  // P3-10/P3-11 — optional store credit + gift card inputs.
+  const [giftCardCode, setGiftCardCode] = useState('');
+  const [creditAmount, setCreditAmount] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const placeOrder = async (e: FormEvent) => {
     e.preventDefault();
     if (!EMAIL_RE.test(email)) {
-      setError('Enter a valid email so we can confirm your order.');
+      setError(t(locale, 'checkout.validEmail'));
       return;
     }
     setLoading(true);
     setError(null);
+    // P3-06: capture before submitting so an abandoned session is recoverable.
+    await captureCart(items, email);
     try {
       const res = await fetch('/api/create-cod-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items, customerEmail: email, discountCode }),
+        body: JSON.stringify({
+          items,
+          customerEmail: email,
+          discountCode,
+          giftCardCode: giftCardCode.trim() || undefined,
+          creditAmount: creditAmount ? Number(creditAmount) : 0,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to place order');
@@ -57,22 +85,62 @@ function CodCheckoutForm({
             htmlFor="cod-email"
             className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200"
           >
-            Email for order confirmation
+            {t(locale, 'checkout.email')}
           </label>
           <input
             id="cod-email"
             type="email"
             required
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              // P3-06: persist on blur so the cart is captured even if they leave.
+              if (EMAIL_RE.test(e.target.value)) captureCart(items, e.target.value);
+            }}
+            onBlur={(e) => EMAIL_RE.test(e.target.value) && captureCart(items, e.target.value)}
             placeholder="you@example.com"
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
           />
         </div>
 
+        <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
+            <label
+              htmlFor="cod-giftcard"
+              className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200"
+            >
+              {t(locale, 'checkout.giftCard')}
+            </label>
+            <input
+              id="cod-giftcard"
+              type="text"
+              value={giftCardCode}
+              onChange={(e) => setGiftCardCode(e.target.value)}
+              placeholder="GIFT-1234"
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="cod-credit"
+              className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200"
+            >
+              {t(locale, 'checkout.credit')}
+            </label>
+            <input
+              id="cod-credit"
+              type="number"
+              min="0"
+              value={creditAmount}
+              onChange={(e) => setCreditAmount(e.target.value)}
+              placeholder="0"
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+            />
+          </div>
+        </div>
+
         <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-          Pay <span className="font-semibold">cash on delivery</span>. Our courier
-          will collect the total when your order arrives.
+          {t(locale, 'checkout.codNote')}
         </p>
 
         <button
@@ -80,7 +148,7 @@ function CodCheckoutForm({
           disabled={loading || items.length === 0}
           className="w-full bg-gray-900 text-white py-2 px-4 rounded-md hover:bg-gray-700 disabled:bg-gray-400 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
         >
-          {loading ? 'Placing order...' : 'Place Order — Cash on Delivery'}
+          {loading ? t(locale, 'checkout.placing') : t(locale, 'checkout.placeCod')}
         </button>
 
         {error && (
@@ -94,6 +162,7 @@ function CodCheckoutForm({
 }
 
 const CheckoutPage = () => {
+  const { locale } = useLocale();
   const { items, discountCode, discountAmount } = useCartStore();
 
   // Safepay is behind a feature flag until it's live: set
@@ -123,25 +192,25 @@ const CheckoutPage = () => {
       <Header />
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
         <div className="max-w-screen-xl mx-auto px-4">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">Checkout</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">{t(locale, 'checkout.title')}</h1>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Order Summary Section */}
             <Card className="bg-white dark:bg-gray-800 shadow">
               <CardHeader className="bg-gray-100 dark:bg-gray-700 p-4">
                 <CardTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                  Order Summary
+                  {t(locale, 'cart.orderSummary')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="flex justify-between mb-4">
-                  <span className="text-gray-600 dark:text-gray-400">Subtotal</span>
+                  <span className="text-gray-600 dark:text-gray-400">{t(locale, 'cart.subtotal')}</span>
                   <span className="font-bold text-gray-900 dark:text-gray-100">
                     {CURRENCY_SYMBOL} {subtotal.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between mb-4">
                   <span className="text-gray-600 dark:text-gray-400">
-                    Discount{discountCode ? ` (${discountCode})` : ''}
+                    {t(locale, 'cart.discount')}{discountCode ? ` (${discountCode})` : ''}
                   </span>
                   <span className="font-bold text-red-500">
                     {discount > 0
@@ -150,14 +219,14 @@ const CheckoutPage = () => {
                   </span>
                 </div>
                 <div className="flex justify-between mb-4">
-                  <span className="text-gray-600 dark:text-gray-400">Delivery Fee</span>
+                  <span className="text-gray-600 dark:text-gray-400">{t(locale, 'cart.delivery')}</span>
                   <span className="font-bold text-gray-900 dark:text-gray-100">
                     {CURRENCY_SYMBOL} {deliveryFee.toFixed(2)}
                   </span>
                 </div>
                 <Separator className="my-4 dark:bg-gray-700" />
                 <div className="flex justify-between font-semibold">
-                  <span className="text-gray-600 dark:text-gray-400">Total</span>
+                  <span className="text-gray-600 dark:text-gray-400">{t(locale, 'cart.total')}</span>
                   <span className="text-xl text-gray-900 dark:text-gray-100">
                     {CURRENCY_SYMBOL} {total.toFixed(2)}
                   </span>
@@ -165,7 +234,7 @@ const CheckoutPage = () => {
 
                 <div className="mt-6">
                   <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">
-                    Payment method
+                    {t(locale, 'checkout.paymentMethod')}
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     {safepayEnabled && (
@@ -180,10 +249,10 @@ const CheckoutPage = () => {
                         }`}
                       >
                         <span className="block font-semibold text-gray-900 dark:text-gray-100">
-                          Card (Safepay)
+                          {t(locale, 'checkout.cardSafepay')}
                         </span>
                         <span className="text-xs text-gray-500 dark:text-gray-400">
-                          Pay with local cards (PK)
+                          {t(locale, 'checkout.cardSub')}
                         </span>
                       </button>
                     )}
@@ -198,10 +267,10 @@ const CheckoutPage = () => {
                       }`}
                     >
                       <span className="block font-semibold text-gray-900 dark:text-gray-100">
-                        Cash on Delivery
+                        {t(locale, 'checkout.cod')}
                       </span>
                       <span className="text-xs text-gray-500 dark:text-gray-400">
-                        Pay when it arrives
+                        {t(locale, 'checkout.codSub')}
                       </span>
                     </button>
                   </div>
@@ -215,6 +284,8 @@ const CheckoutPage = () => {
                 <SafepayPayment
                   items={checkoutItems}
                   discountCode={discountCode || undefined}
+                  giftCardCode={undefined}
+                  creditAmount={undefined}
                 />
               ) : (
                 <CodCheckoutForm items={checkoutItems} discountCode={discountCode || undefined} />

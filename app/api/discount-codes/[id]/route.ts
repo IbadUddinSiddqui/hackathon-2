@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { serverClient } from "@/sanity/lib/server-client";
 import {
   discountCodeGuard,
   validateDiscountCodeInput,
 } from "@/lib/discount-code-admin";
+import { logAdminAction } from "@/lib/audit";
 
 /**
  * Admin-only: update a discount code (e.g. edit value, toggle active,
@@ -15,6 +17,7 @@ export async function PATCH(
 ) {
   const unauthorized = await discountCodeGuard();
   if (unauthorized) return unauthorized;
+  const session = await auth();
 
   const { id } = await params;
 
@@ -66,6 +69,14 @@ export async function PATCH(
       })
       .commit();
 
+    logAdminAction({
+      adminEmail: session?.user?.email,
+      action: "update",
+      targetType: "discountCode",
+      targetId: id,
+      targetLabel: newCode,
+    });
+
     return NextResponse.json({ code: updated });
   } catch (err: any) {
     console.error("Failed to update discount code:", err);
@@ -82,12 +93,13 @@ export async function DELETE(
 ) {
   const unauthorized = await discountCodeGuard();
   if (unauthorized) return unauthorized;
+  const session = await auth();
 
   const { id } = await params;
 
   try {
     const existing = await serverClient.fetch(
-      `*[_id == $id][0]{_id}`,
+      `*[_id == $id][0]{_id, code}`,
       { id }
     );
     if (!existing) {
@@ -95,6 +107,14 @@ export async function DELETE(
     }
 
     await serverClient.delete(id);
+
+    logAdminAction({
+      adminEmail: session?.user?.email,
+      action: "delete",
+      targetType: "discountCode",
+      targetId: id,
+      targetLabel: existing.code || id,
+    });
 
     return NextResponse.json({ success: true });
   } catch (err: any) {

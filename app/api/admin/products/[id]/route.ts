@@ -15,6 +15,7 @@ import {
   toProductSummary,
 } from "@/lib/admin-products";
 import { findProductByName } from "@/lib/product-images";
+import { logAdminAction } from "@/lib/audit";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -94,6 +95,15 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
+    logAdminAction({
+      adminEmail: session?.user?.email,
+      action: "update",
+      targetType: "product",
+      targetId: id,
+      targetLabel: String(full.name || id),
+      details: `updated: ${Object.keys(patch).join(", ")}`,
+    });
+
     return NextResponse.json({
       product: toProductSummary(full as Parameters<typeof toProductSummary>[0]),
     });
@@ -116,7 +126,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
 
   try {
     const existing = await serverClient.fetch(
-      `*[_type == "product" && _id == $id][0]{_id}`,
+      `*[_type == "product" && _id == $id][0]{_id, name}`,
       { id }
     );
     if (!existing) {
@@ -124,6 +134,15 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
     }
 
     await serverClient.delete(id);
+
+    logAdminAction({
+      adminEmail: session?.user?.email,
+      action: "delete",
+      targetType: "product",
+      targetId: id,
+      targetLabel: String(existing.name || id),
+    });
+
     return NextResponse.json({ deleted: true, id });
   } catch (error: any) {
     console.error("Failed to delete product:", error);

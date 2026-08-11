@@ -10,6 +10,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import ProductSearch from "../ProductSearch/ProductSearch";
 import { useCartStore } from "@/lib/stores/cartStore";
 import { useWishlistStore } from "@/lib/stores/wishlistStore";
+import { useLocale } from "@/lib/locale-provider";
+import { t } from "@/lib/i18n";
+import LanguageSwitcher from "../LanguageSwitcher/LanguageSwitcher";
 
 const Header = () => {
   const { items } = useCartStore();
@@ -18,6 +21,7 @@ const Header = () => {
   const wishItemCount = wishlist.items.length;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const { locale } = useLocale();
 
   return (
     <div className="sticky top-0 z-50">
@@ -28,10 +32,10 @@ const Header = () => {
         transition={{ duration: 0.5 }}
         className="bg-gradient-to-r from-black to-gray-900 h-8 flex justify-center items-center"
       >
-        <p className="text-white text-center text-sm sm:text-base font-medium">
-          🎉 Sign Up and get 20% off on your first order.{" "}
+        <p className="text-white text-center text-sm sm:text-base font-medium" dir="auto">
+          {t(locale, "header.banner")}{" "}
           <Link href="/register" className="underline hover:text-yellow-400 transition-colors">
-            Claim Offer
+            {t(locale, "header.claim")}
           </Link>
         </p>
       </motion.div>
@@ -73,7 +77,7 @@ const Header = () => {
                 
                 className="relative group text-lg font-medium text-gray-700 hover:text-black transition-colors"
               >
-                Dashboard
+                {t(locale, "header.dashboard")}
                 <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
               </Link>
               <Link
@@ -81,7 +85,7 @@ const Header = () => {
                 
                 className="relative group text-lg font-medium text-gray-700 hover:text-black transition-colors"
               >
-                Login
+                {t(locale, "header.login")}
                 <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
               </Link>
             </nav>
@@ -93,6 +97,7 @@ const Header = () => {
 
           {/* Action Buttons */}
           <div className=" lg:flex hidden  items-center space-x-6">
+            <LanguageSwitcher />
            
             
             <Link
@@ -229,7 +234,7 @@ const Header = () => {
                 
                 className="relative group text-lg font-medium text-gray-700 hover:text-black transition-colors"
               >
-                Dashboard
+                {t(locale, "header.dashboard")}
                 <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
               </Link>
               <Link
@@ -237,10 +242,13 @@ const Header = () => {
                 
                 className="relative group text-lg font-medium text-gray-700 hover:text-black transition-colors"
               >
-                Login
+                {t(locale, "header.login")}
                 <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
               </Link>
                 </nav>
+                <div className="mb-6">
+                  <LanguageSwitcher />
+                </div>
                 <div className="flex items-center space-x-6">
            
             

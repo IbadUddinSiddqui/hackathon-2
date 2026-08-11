@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { isAdmin } from "@/lib/admin";
 import { serverClient } from "@/sanity/lib/server-client";
 import { refundOrder } from "@/lib/orders";
+import { logAdminAction } from "@/lib/audit";
 
 const VALID_STATUSES = ["pending", "paid", "failed", "refunded"];
 
@@ -49,6 +50,14 @@ export async function PATCH(
           { status: notFound ? 404 : 400 }
         );
       }
+      logAdminAction({
+        adminEmail: session?.user?.email,
+        action: "status_change",
+        targetType: "order",
+        targetId: orderId,
+        targetLabel: orderId.slice(0, 8).toUpperCase(),
+        details: "status → refunded",
+      });
       return NextResponse.json({ success: true, status: "refunded" });
     }
 
@@ -62,6 +71,15 @@ export async function PATCH(
     }
 
     await serverClient.patch(order._id).set({ status }).commit();
+
+    logAdminAction({
+      adminEmail: session?.user?.email,
+      action: "status_change",
+      targetType: "order",
+      targetId: orderId,
+      targetLabel: orderId.slice(0, 8).toUpperCase(),
+      details: `status → ${status}`,
+    });
 
     return NextResponse.json({ success: true, status });
   } catch (error: any) {

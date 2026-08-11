@@ -10,9 +10,12 @@ import { Input } from "@/components/ui/input";
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
 import { DELIVERY_FEE, CURRENCY_SYMBOL } from '@/lib/constants';
+import { useLocale } from '@/lib/locale-provider';
+import { t } from '@/lib/i18n';
 
 const CartPage = () => {
   const router = useRouter();
+  const { locale } = useLocale();
   const { items, updateQuantity, removeItem, discountCode, discountAmount, setDiscount, clearDiscount } = useCartStore();
   const [codeInput, setCodeInput] = useState('');
   const [applyingCode, setApplyingCode] = useState(false);
@@ -72,13 +75,13 @@ const CartPage = () => {
           {/* Cart Section */}
           <section className="col-span-2 w-full">
             <h3 className="text-left text-4xl font-extrabold mb-4 text-gray-900 dark:text-gray-100">
-              YOUR CART
+              {t(locale, 'cart.title')}
             </h3>
             <div className="mx-auto max-w-3xl">
               <div className="mt-8 shadow-lg rounded-xl bg-white dark:bg-gray-800">
                 {items.length === 0 ? (
                   <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    Your cart is empty
+                    {t(locale, 'cart.empty')}
                   </div>
                 ) : (
                   <ul className="space-y-4">
@@ -102,14 +105,14 @@ const CartPage = () => {
                           </h3>
                           <dl className="mt-0.5 space-y-px text-xs text-gray-600 dark:text-gray-400">
                             <div>
-                              <dt className="inline">Price:</dt>
+                              <dt className="inline">{t(locale, 'cart.price')}</dt>
                               <dd className="inline">
                                 {CURRENCY_SYMBOL} {item.price.toLocaleString('en-US', { maximumFractionDigits: 2 })}
                               </dd>
                             </div>
                             <div>
-                              <dt className="inline">Stock:</dt>
-                              <dd className="inline">{item.stock} available</dd>
+                              <dt className="inline">{t(locale, 'cart.stock')}</dt>
+                              <dd className="inline">{item.stock} {t(locale, 'cart.available')}</dd>
                             </div>
                           </dl>
                         </div>
@@ -162,20 +165,20 @@ const CartPage = () => {
             <Card className="overflow-hidden bg-white dark:bg-gray-800">
               <CardHeader className="bg-muted/50 p-4 dark:bg-gray-700">
                 <CardTitle className="text-lg font-semibold dark:text-gray-100">
-                  Order Summary
+                  {t(locale, 'cart.orderSummary')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="grid gap-4">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground dark:text-gray-400">Subtotal</span>
+                    <span className="text-muted-foreground dark:text-gray-400">{t(locale, 'cart.subtotal')}</span>
                     <span className="text-xl font-extrabold dark:text-gray-100">
                       {CURRENCY_SYMBOL} {subtotal.toLocaleString('en-US', { maximumFractionDigits: 2 })}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground dark:text-gray-400">
-                      Discount{discountCode ? ` (${discountCode})` : ''}
+                      {t(locale, 'cart.discount')}{discountCode ? ` (${discountCode})` : ''}
                     </span>
                     <span className="text-red-500 text-xl font-extrabold">
                       {discount > 0
@@ -184,13 +187,13 @@ const CartPage = () => {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground dark:text-gray-400">Delivery Fee</span>
+                    <span className="text-muted-foreground dark:text-gray-400">{t(locale, 'cart.delivery')}</span>
                     <span className="text-xl font-extrabold dark:text-gray-100">
                       {CURRENCY_SYMBOL} {deliveryFee.toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between font-semibold">
-                    <span className="text-muted-foreground dark:text-gray-400">Total</span>
+                    <span className="text-muted-foreground dark:text-gray-400">{t(locale, 'cart.total')}</span>
                     <span className="text-xl font-extrabold dark:text-gray-100">
                       {CURRENCY_SYMBOL} {total.toLocaleString('en-US', { maximumFractionDigits: 2 })}
                     </span>
@@ -199,7 +202,7 @@ const CartPage = () => {
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
                       <Input
-                        placeholder="Enter discount code"
+                        placeholder={t(locale, 'cart.enterCode')}
                         value={codeInput}
                         onChange={(e) => {
                           setCodeInput(e.target.value);
@@ -213,7 +216,7 @@ const CartPage = () => {
                           onClick={removeDiscountCode}
                           className="h-8 dark:bg-gray-700 dark:text-gray-100"
                         >
-                          Remove
+                          {t(locale, 'cart.remove')}
                         </Button>
                       ) : (
                         <Button
@@ -222,7 +225,7 @@ const CartPage = () => {
                           disabled={applyingCode}
                           className="h-8 dark:bg-gray-700 dark:text-gray-100"
                         >
-                          {applyingCode ? '...' : 'Apply'}
+                          {applyingCode ? '...' : t(locale, 'cart.apply')}
                         </Button>
                       )}
                     </div>
@@ -233,7 +236,7 @@ const CartPage = () => {
                     )}
                     {discountCode && !codeError && (
                       <p className="text-xs text-green-600 dark:text-green-400">
-                        {discountCode} applied — save {CURRENCY_SYMBOL} {discount.toFixed(2)}
+                        {discountCode} {t(locale, 'cart.appliedSave')} {CURRENCY_SYMBOL} {discount.toFixed(2)}
                       </p>
                     )}
                   </div>
@@ -245,7 +248,7 @@ const CartPage = () => {
           className="w-full md:w-auto dark:bg-gray-700 dark:text-gray-100"
           disabled={items.length === 0}
         >
-          Proceed to Checkout
+          {t(locale, 'cart.proceed')}
         </Button>
       </CardFooter>
             </Card>

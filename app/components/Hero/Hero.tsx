@@ -5,9 +5,12 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useLocale } from '@/lib/locale-provider';
+import { t } from '@/lib/i18n';
 
 export default function FashionHero() {
   const [timeLeft, setTimeLeft] = useState({ days: 2, hours: 5, minutes: 30 });
+  const { locale } = useLocale();
   const { scrollYProgress } = useScroll();
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.2]);
 
@@ -51,7 +54,7 @@ export default function FashionHero() {
             >
               <FlashSaleIcon />
               <div className="flex gap-2 font-medium text-gray-800">
-                <span className="text-red-600">FLASH SALE:</span>
+                <span className="text-red-600">{t(locale, 'hero.sale')}:</span>
                 <span>{timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m</span>
               </div>
             </motion.div>
@@ -61,8 +64,8 @@ export default function FashionHero() {
               animate={{ y: 0, opacity: 1 }}
               className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white"
             >
-              Elevate Your<br />
-              <span className="text-pink-500">Everyday Style</span>
+              {t(locale, 'hero.title1')}<br />
+              <span className="text-pink-500">{t(locale, 'hero.title2')}</span>
             </motion.h1>
 
             <motion.p
@@ -70,7 +73,7 @@ export default function FashionHero() {
               animate={{ opacity: 1 }}
               className="text-xl text-gray-600 max-w-xl dark:text-white"
             >
-              Discover premium quality apparel crafted for comfort and designed for confidence.
+              {t(locale, 'hero.subtitle')}
             </motion.p>
 
             {/* Category Selector */}
@@ -104,13 +107,13 @@ export default function FashionHero() {
                 whileHover={{ scale: 1.05 }}
                 className="bg-gray-900 text-white px-8 py-4 rounded-full font-medium"
               >
-                Shop New Arrivals
+                {t(locale, 'hero.shopNew')}
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 className="bg-white border-2 border-gray-900 text-gray-900 px-8 py-4 rounded-full font-medium"
               >
-                Explore Collections
+                {t(locale, 'hero.explore')}
               </motion.button>
             </motion.div>
 
@@ -121,10 +124,10 @@ export default function FashionHero() {
               animate={{ opacity: 1 }}
             >
               {[
-                { icon: <FreeReturnsIcon />, text: 'Free Returns' },
-                { icon: <EcoFriendlyIcon />, text: 'Eco-Friendly' },
-                { icon: <QualityIcon />, text: 'Premium Quality' },
-                { icon: <SupportIcon />, text: '24/7 Support' },
+                { icon: <FreeReturnsIcon />, text: t(locale, 'hero.freeReturns') },
+                { icon: <EcoFriendlyIcon />, text: t(locale, 'hero.eco') },
+                { icon: <QualityIcon />, text: t(locale, 'hero.quality') },
+                { icon: <SupportIcon />, text: t(locale, 'hero.support') },
               ].map((item, index) => (
                
                 <motion.div
@@ -164,7 +167,7 @@ export default function FashionHero() {
                   className="object-cover"
                 />
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 p-4">
-                  <span className="text-white font-medium">Womens Clothing</span>
+                  <span className="text-white font-medium">{t(locale, 'hero.womens')}</span>
                 </div></Link>
               </motion.div>
               <motion.div
@@ -178,7 +181,7 @@ export default function FashionHero() {
                   className="object-cover"
                 />
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 p-4">
-                  <span className="text-white font-medium">Mens Clothing</span>
+                  <span className="text-white font-medium">{t(locale, 'hero.mens')}</span>
                 </div></Link>
               </motion.div>
               <motion.div
@@ -192,7 +195,7 @@ export default function FashionHero() {
                   className="object-cover"
                 />
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 p-4">
-                  <span className="text-white font-medium">Wearables</span>
+                  <span className="text-white font-medium">{t(locale, 'hero.wearables')}</span>
                 </div></Link>
               </motion.div>
               <motion.div
@@ -206,7 +209,7 @@ export default function FashionHero() {
                   className="object-cover"
                 />
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 p-4">
-                  <span className="text-white font-medium">Chlidren</span>
+                  <span className="text-white font-medium">{t(locale, 'hero.children')}</span>
                 </div></Link>
               </motion.div>
               

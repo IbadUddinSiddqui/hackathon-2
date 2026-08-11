@@ -71,6 +71,11 @@ export async function createPendingOrder(input: {
   discountAmount?: number;
   paymentMethod?: 'card' | 'cod' | 'safepay';
   currency?: string;
+  // P3-10/P3-11/P3-14 — credit/gift-card/loyalty fields.
+  creditApplied?: number;
+  giftCardCode?: string;
+  giftCardApplied?: number;
+  pointsEarned?: number;
 }): Promise<{ orderId: string; docId: string }> {
   const orderId = uuidv4();
   const doc = await serverClient.create({
@@ -91,6 +96,10 @@ export async function createPendingOrder(input: {
     subtotal: input.subtotal,
     discount_code: input.discountCode || '',
     discount_amount: input.discountAmount || 0,
+    credit_applied: input.creditApplied || 0,
+    gift_card_code: input.giftCardCode || '',
+    gift_card_applied: input.giftCardApplied || 0,
+    points_earned: input.pointsEarned || 0,
     total: input.total,
     currency: input.currency || CURRENCY,
     created_at: new Date().toISOString(),

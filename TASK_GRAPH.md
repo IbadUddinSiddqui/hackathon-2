@@ -555,7 +555,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 ### P3-EPIC-01 — expanded nodes (Customer management + audit log)
 
 ### [P3-01] Customer data model + capture on order
-- status: todo
+- status: done
 - depends_on: []
 - human_required: false
 - touches: [sanity/schemaTypes/customer.ts (new), lib/orders.ts, app/api/webhook/route.ts, app/api/create-cod-order/route.ts]
@@ -564,7 +564,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes:
 
 ### [P3-02] Admin API — list + search customers
-- status: todo
+- status: done
 - depends_on: [P3-01]
 - human_required: false
 - touches: [app/api/admin/customers/route.ts (new), lib/admin-customers.ts (new), lib/admin-customers.test.ts (new)]
@@ -573,7 +573,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes:
 
 ### [P3-03] Admin customers page + detail
-- status: todo
+- status: done
 - depends_on: [P3-02]
 - human_required: false
 - touches: [app/adminpanel/customers/page.tsx (new), app/adminpanel/customers/[customerId]/page.tsx (new), app/components/Sidebar/index.tsx]
@@ -582,7 +582,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes:
 
 ### [P3-04] Admin audit log — record admin actions
-- status: todo
+- status: done
 - depends_on: []
 - human_required: false
 - touches: [sanity/schemaTypes/auditLog.ts (new), lib/audit.ts (new), app/api/admin/products/route.ts, app/api/admin/products/[id]/route.ts, app/api/discount-codes/route.ts, app/api/orders/[orderId]/status/route.ts]
@@ -591,7 +591,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes:
 
 ### [P3-05] Admin audit log page
-- status: todo
+- status: done
 - depends_on: [P3-04]
 - human_required: false
 - touches: [app/adminpanel/audit/page.tsx (new), app/api/admin/audit/route.ts (new), app/components/Sidebar/index.tsx]
@@ -602,7 +602,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 ### P3-EPIC-02 — expanded nodes (Abandoned cart recovery)
 
 ### [P3-06] Cart capture with contact info
-- status: todo
+- status: done
 - depends_on: []
 - human_required: false
 - touches: [app/checkout/page.tsx, app/api/cart-capture/route.ts (new), sanity/schemaTypes/abandonedCart.ts (new)]
@@ -611,7 +611,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes:
 
 ### [P3-07] Abandonment detection + recovery email
-- status: todo
+- status: done
 - depends_on: [P3-06]
 - human_required: false
 - touches: [app/api/cron/abandoned-cart/route.ts (new), lib/abandoned-cart.ts (new), lib/email.ts]
@@ -620,7 +620,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes:
 
 ### [P3-08] Admin abandoned-cart view
-- status: todo
+- status: done
 - depends_on: [P3-07]
 - human_required: false
 - touches: [app/adminpanel/abandoned/page.tsx (new), app/api/admin/abandoned/route.ts (new), app/components/Sidebar/index.tsx]
@@ -640,7 +640,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 ### P3-EPIC-03 — expanded nodes (Loyalty / store credit / gift cards / bundles / flash sales)
 
 ### [P3-10] Store credit — balance + apply at checkout
-- status: todo
+- status: done
 - depends_on: [P3-01]
 - human_required: false
 - touches: [sanity/schemaTypes/customer.ts (creditBalance), lib/credit.ts (new), app/api/create-cod-order/route.ts, app/api/create-safepay-order/route.ts]
@@ -649,7 +649,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes:
 
 ### [P3-11] Gift cards
-- status: todo
+- status: done
 - depends_on: [P3-10]
 - human_required: false
 - touches: [sanity/schemaTypes/giftCard.ts (new), lib/gift-cards.ts (new), app/checkout/page.tsx]
@@ -658,7 +658,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes:
 
 ### [P3-12] Bundles
-- status: todo
+- status: done
 - depends_on: []
 - human_required: false
 - touches: [sanity/schemaTypes/bundle.ts (new), lib/bundles.ts (new), app/products/[category]/page.tsx]
@@ -667,7 +667,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes:
 
 ### [P3-13] Flash sales
-- status: todo
+- status: done
 - depends_on: []
 - human_required: false
 - touches: [sanity/schemaTypes/flashSale.ts (new), lib/flash-sales.ts (new), app/components/Hero/Hero.tsx]
@@ -676,7 +676,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes:
 
 ### [P3-14] Loyalty points
-- status: todo
+- status: done
 - depends_on: [P3-01]
 - human_required: false
 - touches: [sanity/schemaTypes/customer.ts (points), lib/loyalty.ts (new), app/checkout/page.tsx]
@@ -687,7 +687,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 ### P3-EPIC-04 — expanded nodes (Reviews + pixels + feeds)
 
 ### [P3-15] Product reviews — schema + submission
-- status: todo
+- status: done
 - depends_on: []
 - human_required: false
 - touches: [sanity/schemaTypes/review.ts (new), app/api/reviews/route.ts (new), app/products/[category]/[productId]/ProductDetailClient.tsx]
@@ -696,7 +696,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes:
 
 ### [P3-16] Review moderation in admin
-- status: todo
+- status: done
 - depends_on: [P3-15]
 - human_required: false
 - touches: [app/adminpanel/reviews/page.tsx (new), app/api/admin/reviews/route.ts (new), app/components/Sidebar/index.tsx]
@@ -723,7 +723,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes: blocked on owner providing measurement ID
 
 ### [P3-19] Google Merchant Center feed
-- status: todo
+- status: done
 - depends_on: []
 - human_required: false
 - touches: [app/api/merchant-feed/route.ts (new), lib/merchant-feed.ts (new)]
@@ -734,7 +734,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 ### P3-EPIC-05 — expanded nodes (Urdu localization)
 
 ### [P3-20] i18n framework + language switcher
-- status: todo
+- status: done
 - depends_on: []
 - human_required: false
 - touches: [package.json, lib/i18n.ts (new), app/layout.tsx]
@@ -743,7 +743,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes:
 
 ### [P3-21] Translate storefront pages
-- status: todo
+- status: done
 - depends_on: [P3-20]
 - human_required: false
 - touches: [app/page.tsx, app/components/Hero/Hero.tsx, app/components/Footer/Footer.tsx, app/cart/page.tsx, app/checkout/page.tsx]
@@ -752,13 +752,13 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes:
 
 ### [P3-22] Urdu RTL support + fonts
-- status: todo
+- status: done
 - depends_on: [P3-21]
 - human_required: false
 - touches: [app/layout.tsx, app/globals.css]
 - done_when: Urdu locale sets dir="rtl" and loads an Urdu-capable font; layout adapts for RTL.
 - verify: tsc clean; Urdu locale renders RTL correctly in a browser
-- notes:
+- notes: 2026-08-11 — PHASE 3 CODE COMPLETE. All 19 buildable nodes done (P3-01..P3-08, P3-10..P3-16, P3-19..P3-22). Only human nodes remain: P3-09 (Vercel Cron schedule — handler exists at app/api/cron/abandoned-cart/route.ts, guarded by CRON_SECRET), P3-17 (Meta/TikTok pixel IDs), P3-18 (GA4 measurement ID). Verified: 143/143 tests, tsc clean. Scope notes: P3-21 translated the core storefront (Header, Hero, Footer, Cart, Checkout, ProductDetail, Reviews, AddToCartButton) — wishlist, search, products grid, home sections, auth pages remain English-only (follow-up). Root layout reads cookies() so pages render dynamically for locale; admin panel also flips RTL when Urdu is active (accepted).
 
 ## PHASE 4 — Enterprise (epics only — P4-EPIC-01 only applies if P1-14 decided "SaaS")
 

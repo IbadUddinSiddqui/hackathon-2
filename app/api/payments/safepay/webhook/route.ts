@@ -27,6 +27,8 @@ import {
 } from '@/lib/orders';
 import { sendOrderReceipt } from '@/lib/email';
 import { incrementDiscountUsage } from '@/lib/discounts';
+import { addLoyaltyPoints } from '@/lib/customers';
+import { pointsEarned } from '@/lib/loyalty';
 import { serverClient } from '@/sanity/lib/server-client';
 
 const LOG_BODY_LIMIT = 8000;
@@ -136,6 +138,17 @@ async function fulfilOrder(
       await incrementDiscountUsage(order.discount_code);
     } catch (err: any) {
       console.error('Failed to increment discount usage:', err.message);
+    }
+  }
+
+  // 6. P3-14 — credit loyalty points (1 per Rs 100 of the paid total).
+  const recipient = customerEmailFromPayload || order.customer_email;
+  const points = pointsEarned(order.total || 0);
+  if (points > 0 && recipient) {
+    try {
+      await addLoyaltyPoints(recipient, points);
+    } catch (err: any) {
+      console.error('Failed to award loyalty points:', err.message);
     }
   }
 }

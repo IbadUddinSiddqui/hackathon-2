@@ -5,12 +5,13 @@
 // pending order is persisted BEFORE the customer is redirected to Safepay's
 // hosted checkout page.
 import { NextResponse } from 'next/server';
-import { createPendingOrder, fetchProductsByIds } from '@/lib/orders';
-import { validateDiscountCode } from '@/lib/discounts';
-import { DELIVERY_FEE } from '@/lib/constants';
+import { createPendingOrder } from '@/lib/orders';
+import { priceCheckout } from '@/lib/checkout-pricing';
 import { createSafepayCheckout, isSafepayConfigured } from '@/lib/safepay';
 import { serverClient } from '@/sanity/lib/server-client';
 import { enforceRateLimit } from '@/lib/rate-limit';
+import { linkCustomerToOrder } from '@/lib/customers';
+import { markCartCompleted } from '@/lib/abandoned-cart';
 
 export async function POST(request: Request) {
   const limited = enforceRateLimit(request, { key: 'create-safepay-order', limit: 10, windowMs: 60_000 });
@@ -24,62 +25,52 @@ export async function POST(request: Request) {
       );
     }
 
-    const { items, customerEmail, discountCode } = await request.json();
+    const { items, customerEmail, discountCode, giftCardCode, creditAmount } = await request.json();
     const customerEmailValue = typeof customerEmail === 'string' ? customerEmail : '';
     const discountCodeValue = typeof discountCode === 'string' ? discountCode : '';
+    const giftCardCodeValue = typeof giftCardCode === 'string' ? giftCardCode : '';
+    const creditAmountValue =
+      typeof creditAmount === 'number' && Number.isFinite(creditAmount)
+        ? Math.max(0, creditAmount)
+        : 0;
 
-    if (!Array.isArray(items) || items.length === 0) {
-      return NextResponse.json({ error: 'Cart is empty' }, { status: 400 });
+    // Server-side pricing: real Sanity prices (flash-sale aware), validated
+    // discount + gift card, store credit capped at balance, delivery fee last.
+    const priced = await priceCheckout({
+      items,
+      customerEmail: customerEmailValue,
+      discountCode: discountCodeValue,
+      giftCardCode: giftCardCodeValue,
+      creditAmount: creditAmountValue,
+    });
+    if ('error' in priced) {
+      return NextResponse.json({ error: priced.error }, { status: 400 });
     }
-
-    // Never trust client-sent prices: fetch the real products from Sanity.
-    const products = await fetchProductsByIds(items.map((item: any) => item.id));
-    const productMap = new Map(products.map((p) => [p._id, p]));
-
-    const orderItems = [];
-    let subtotal = 0;
-    for (const item of items) {
-      const product = productMap.get(item.id);
-      if (!product) {
-        return NextResponse.json(
-          { error: `Product no longer available: ${item.id}` },
-          { status: 400 }
-        );
-      }
-      const price = product.price;
-      const quantity = Math.max(1, Math.min(item.quantity, product.stock || 0));
-      subtotal += price * quantity;
-      orderItems.push({
-        id: product._id,
-        name: product.name,
-        price,
-        quantity,
-        size: Array.isArray(item.size) ? item.size : undefined,
-      });
-    }
-
-    // Validate the discount code server-side.
-    const discountResult = discountCodeValue
-      ? await validateDiscountCode(discountCodeValue, subtotal)
-      : { valid: true as const, discountAmount: 0, code: '' };
-
-    if (!discountResult.valid) {
-      return NextResponse.json({ error: discountResult.message }, { status: 400 });
-    }
-
-    const total = subtotal - discountResult.discountAmount + DELIVERY_FEE;
 
     // Persist a pending order in Sanity BEFORE redirecting to Safepay, so the
     // webhook can find it by order_id and mark it paid.
     const { orderId, docId } = await createPendingOrder({
-      items: orderItems,
-      subtotal,
-      total,
+      items: priced.items,
+      subtotal: priced.subtotal,
+      total: priced.total,
       customerEmail: customerEmailValue,
-      discountCode: discountResult.code || undefined,
-      discountAmount: discountResult.discountAmount,
+      discountCode: priced.discountCode,
+      discountAmount: priced.discountAmount,
+      giftCardCode: priced.giftCardCode,
+      giftCardApplied: priced.giftCardApplied,
+      creditApplied: priced.creditApplied,
+      pointsEarned: priced.pointsEarned,
       paymentMethod: 'safepay',
     });
+
+    // P3-01: upsert the customer doc (by email) + attach the reference.
+    await linkCustomerToOrder({
+      orderDocId: docId,
+      email: customerEmailValue,
+      orderTotal: priced.total,
+    });
+    // P3-06: this email just started paying — mark their abandoned cart recovered.
+    await markCartCompleted(customerEmailValue);
 
     // PUBLIC_BASE_URL lets us hand Safepay a reachable server-to-server URL
     // during local dev (e.g. the ngrok tunnel). Without it, `origin` is
@@ -92,7 +83,7 @@ export async function POST(request: Request) {
       // VERIFIED 2026-08-09 live: Safepay treats `amount` as the MAJOR unit
       // (rupees). amount=21999 appeared in their dashboard as "PKR 21,999.00"
       // — NOT "PKR 219.99". So pass the rupee total (2dp), never paisa.
-      amount: Math.round(total * 100) / 100,
+      amount: Math.round(priced.total * 100) / 100,
       redirectUrl: `${baseUrl}/checkout/success?method=safepay&order_id=${orderId}`,
       cancelUrl: `${baseUrl}/cart`,
       webhookUrl: `${baseUrl}/api/payments/safepay/webhook`,

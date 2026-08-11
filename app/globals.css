@@ -6,6 +6,16 @@
 body {
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* P3-22 — Urdu (RTL) typography: Nastaliq needs a taller line-height. */
+html[lang="ur"] body,
+html[lang="ur"] button,
+html[lang="ur"] input,
+html[lang="ur"] select,
+html[lang="ur"] textarea {
+  font-family: "Noto Nastaliq Urdu", "Gulzar", Arial, sans-serif;
+  line-height: 1.9;
+}
 @keyframes scroll {
   from {
     transform: translateX(0%);

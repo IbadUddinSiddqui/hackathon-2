@@ -14,6 +14,8 @@ export type CheckoutItem = {
 interface SafepayPaymentProps {
   items: CheckoutItem[];
   discountCode?: string;
+  giftCardCode?: string;
+  creditAmount?: number;
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -24,7 +26,12 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  * browser to Safepay's hosted payment page. No card data ever touches this
  * app — Safepay handles it on their page, exactly like Stripe Checkout.
  */
-export const SafepayPayment: React.FC<SafepayPaymentProps> = ({ items, discountCode }) => {
+export const SafepayPayment: React.FC<SafepayPaymentProps> = ({
+  items,
+  discountCode,
+  giftCardCode,
+  creditAmount,
+}) => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +57,13 @@ export const SafepayPayment: React.FC<SafepayPaymentProps> = ({ items, discountC
       const response = await fetch('/api/create-safepay-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items, customerEmail: email, discountCode }),
+        body: JSON.stringify({
+          items,
+          customerEmail: email,
+          discountCode,
+          giftCardCode,
+          creditAmount,
+        }),
       });
 
       const data = await response.json().catch(() => null);

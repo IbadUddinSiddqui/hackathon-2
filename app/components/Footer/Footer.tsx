@@ -1,30 +1,34 @@
+"use client"
+
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 import { Button } from '@/components/ui/button'
+import { useLocale } from '@/lib/locale-provider'
+import { t } from '@/lib/i18n'
 import { BsGithub } from "react-icons/bs";
 import { LuInstagram } from "react-icons/lu";
 import { FaFacebook } from "react-icons/fa";
 import { TiSocialTwitter } from "react-icons/ti";
 
 function Footer() {
+  const { locale } = useLocale();
   return (
     <>
     <div className='w-full min-w-full mt-44 '>
         <div className='flex justify-center  min-w-screen max-w-screen'>
         <div className=' w-[80%] h-80 lg:h-48 bg-black-2 items-center justify-center lg:justify-between flex flex-col md:flex-row  top-16 right-4 rounded-lg relative   z-50'>
-            <div className='w-[100%] md:w-[60%] lg:w-[50%]'>
-                <p className='text-white mt-3 font-extrabold text-4xl  text-center'>STAY UPTO DATE ABOUT OUR LATEST OFFERS</p>
+            <div className='w-[100%] md:w-[60%] lg:w-[50%]'>                <p className='text-white mt-3 font-extrabold text-4xl  text-center'>{t(locale, 'footer.newsletterHead')}</p>
             </div>
             <div>
                 <form >
                     <div className='flex- flex-col items-center justify-center'>
                     <input 
     type="email" 
-    placeholder="Enter your email address" 
+    placeholder={t(locale, 'footer.emailPlaceholder')} 
     className=" pl-12 py-2 border border-gray-300 rounded-full text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 bg-white bg-[url('/email.svg')] bg-no-repeat bg-left"
   /> </div> </form> 
-  <Button variant={'outline'} className='py-2 px-12 rounded-full mt-1'>Subscribe To Newsletter</Button> 
+  <Button variant={'outline'} className='py-2 px-12 rounded-full mt-1'>{t(locale, 'footer.subscribe')}</Button> 
   </div></div></div>
     <div className='w-full max-w-full  border-b-2 border-black   md:flex-row overflow-hidden  bg-[#F0F0F0]  py-16'>
      
@@ -32,7 +36,7 @@ function Footer() {
       <div className='grid grid-cols-2 md:grid-cols-5 lg:grid-cols-5 gap-4 p-4 '>
       <div className='flex flex-col col-span-2 md:col-span-1 items-center md:items-left text-center md:text-left text-black'>
           <div className=''><Image width={150} height={50} src='/logo-full-black.svg' alt='logo '  /></div>
-          <p className='mt-2 text-base text-gray-500'>We have clothes that suits your style and which youre proud to wear. From women to men.</p>
+          <p className='mt-2 text-base text-gray-500'>{t(locale, 'footer.tagline')}</p>
           <div className='flex mt-4 gap-2'>
             <Link href='/' className='my-2' aria-label='Twitter'><TiSocialTwitter /></Link>
             <Link href='/' className='my-2' aria-label='Facebook'><FaFacebook /></Link>
@@ -41,31 +45,31 @@ function Footer() {
           </div>
       </div>
         <div className='flex flex-col  text-center md:text-left text-black '>
-            <h4 className='font-semibold my-3  '>COMPANY</h4>
-            <Link href='/' className='my-2  '>About</Link>
-            <Link href='/' className='my-2'>Features</Link>
-            <Link href='/'className='my-2'>Works</Link>
-            <Link href='/' className='my-2'>Carrer</Link>
+            <h4 className='font-semibold my-3  '>{t(locale, 'footer.company')}</h4>
+            <Link href='/' className='my-2  '>{t(locale, 'footer.about')}</Link>
+            <Link href='/' className='my-2'>{t(locale, 'footer.features')}</Link>
+            <Link href='/'className='my-2'>{t(locale, 'footer.works')}</Link>
+            <Link href='/' className='my-2'>{t(locale, 'footer.career')}</Link>
             
         </div>
         <div className='flex flex-col  text-center md:text-left text-black '>
-            <h4 className='font-semibold my-3'>HELP</h4>
-            <Link href='/' className='my-2'>Customer Support</Link>
-            <Link href='/' className='my-2'>Delivery Details</Link>
-            <Link href='/returns' className='my-2'>Returns & Exchanges</Link>
-            <Link href='/terms' className='my-2'>Terms & Conditions</Link>
-            <Link href='/privacy' className='my-2'>Privacy Policy</Link>
+            <h4 className='font-semibold my-3'>{t(locale, 'footer.help')}</h4>
+            <Link href='/' className='my-2'>{t(locale, 'footer.customerSupport')}</Link>
+            <Link href='/' className='my-2'>{t(locale, 'footer.deliveryDetails')}</Link>
+            <Link href='/returns' className='my-2'>{t(locale, 'footer.returns')}</Link>
+            <Link href='/terms' className='my-2'>{t(locale, 'footer.terms')}</Link>
+            <Link href='/privacy' className='my-2'>{t(locale, 'footer.privacy')}</Link>
         </div>
         <div className='flex flex-col  text-center md:text-left text-black '>
-            <h4 className='font-semibold my-3'>FAQ</h4>
-            <Link href='/' className='my-2'>Account</Link>
-            <Link href='/' className='my-2'>Manage Deliveries</Link>
-            <Link href='/'className='my-2'>Orders</Link>
-            <Link href='/' className='my-2'>Payemnts</Link>
+            <h4 className='font-semibold my-3'>{t(locale, 'footer.faq')}</h4>
+            <Link href='/' className='my-2'>{t(locale, 'footer.account')}</Link>
+            <Link href='/' className='my-2'>{t(locale, 'footer.manageDeliveries')}</Link>
+            <Link href='/'className='my-2'>{t(locale, 'footer.orders')}</Link>
+            <Link href='/' className='my-2'>{t(locale, 'footer.payments')}</Link>
            
         </div>
         <div className='flex flex-col  text-center md:text-left text-black '>
-            <h4 className='font-semibold my-3'>Resources</h4>
+            <h4 className='font-semibold my-3'>{t(locale, 'footer.resources')}</h4>
             <Link href='/' className='my-2'>Free Ebooks</Link>
             <Link href='/' className='my-2'>Development Tutorials</Link>
             <Link href='/'className='my-2'>How-To-Blog</Link>

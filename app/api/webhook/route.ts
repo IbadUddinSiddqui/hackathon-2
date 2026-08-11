@@ -9,6 +9,8 @@ import {
 } from '@/lib/orders';
 import { sendOrderReceipt } from '@/lib/email';
 import { incrementDiscountUsage } from '@/lib/discounts';
+import { linkCustomerToOrder, addLoyaltyPoints } from '@/lib/customers';
+import { pointsEarned } from '@/lib/loyalty';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: '2025-01-27.acacia',
@@ -36,6 +38,14 @@ async function fulfilOrder(
   if (customerEmailFromStripe) {
     await persistCustomerEmail(order.order_id, customerEmailFromStripe);
   }
+
+  // P3-01: upsert the customer doc (by email) + attach the reference.
+  const orderEmail = customerEmailFromStripe || order.customer_email;
+  await linkCustomerToOrder({
+    orderDocId: order._id,
+    email: orderEmail || '',
+    orderTotal: order.total || 0,
+  });
 
   // 1. Decrement stock (throws → webhook 500 → Stripe retries).
   const orderItems = order.items.map((item) => ({
@@ -73,6 +83,16 @@ async function fulfilOrder(
       await incrementDiscountUsage(order.discount_code);
     } catch (err: any) {
       console.error('Failed to increment discount usage:', err.message);
+    }
+  }
+
+  // 5. P3-14 — credit loyalty points (1 per Rs 100 of the paid total).
+  const points = pointsEarned(order.total || 0);
+  if (points > 0 && orderEmail) {
+    try {
+      await addLoyaltyPoints(orderEmail, points);
+    } catch (err: any) {
+      console.error('Failed to award loyalty points:', err.message);
     }
   }
 }
