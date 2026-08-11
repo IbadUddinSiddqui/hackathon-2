@@ -115,6 +115,12 @@ const CartPage = () => {
                               <dt className="inline">{t(locale, 'cart.stock')}</dt>
                               <dd className="inline">{item.stock} {t(locale, 'cart.available')}</dd>
                             </div>
+                            {item.color && (
+                              <div>
+                                <dt className="inline">{t(locale, 'cart.color')}: </dt>
+                                <dd className="inline font-medium">{item.color}</dd>
+                              </div>
+                            )}
                           </dl>
                         </div>
                         <div className="flex flex-1 items-center justify-end gap-2">

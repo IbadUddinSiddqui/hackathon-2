@@ -6,6 +6,7 @@ import StatusChanger from "../StatusChanger";
 import { serverClient } from "@/sanity/lib/server-client";
 import { requireTenantAdmin, tenantFilter } from "@/lib/tenants";
 import { formatDate, formatOrderId, formatTotal } from "@/lib/orders-ui";
+import { isHexColor } from "@/lib/is-hex-color";
 
 export const metadata: Metadata = {
   title: "Order Details | AnK's Admin",
@@ -18,6 +19,7 @@ type OrderItem = {
   price?: number;
   quantity?: number;
   size?: string[];
+  color?: string;
   product?: {
     _id: string;
     category_slug?: string;
@@ -59,6 +61,7 @@ async function getOrderById(id: string, tenantId: string): Promise<Order | null>
         price,
         quantity,
         size,
+        color,
         "product": product->{ _id, category_slug }
       }
     }`,
@@ -179,6 +182,7 @@ export default async function OrderDetailPage({
               <thead>
                 <tr className="border-b border-stroke bg-gray-50 text-gray-500 dark:border-strokedark dark:bg-meta-4 dark:text-bodydark2">
                   <th className="px-6 py-3 font-medium">Product</th>
+                  <th className="px-6 py-3 font-medium">Color</th>
                   <th className="px-6 py-3 font-medium">Size</th>
                   <th className="px-6 py-3 font-medium">Unit Price</th>
                   <th className="px-6 py-3 font-medium">Qty</th>
@@ -188,7 +192,7 @@ export default async function OrderDetailPage({
               <tbody>
                 {(order.items || []).length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-gray-400 dark:text-bodydark2">
+                    <td colSpan={6} className="px-6 py-12 text-center text-gray-400 dark:text-bodydark2">
                       No line items recorded for this order.
                     </td>
                   </tr>
@@ -240,6 +244,21 @@ export default async function OrderDetailPage({
                             </div>
                           ) : (
                             <span className="font-medium text-black dark:text-white">—</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-gray-600 dark:text-bodydark2">
+                          {item.color ? (
+                            <span className="inline-flex items-center gap-1.5">
+                              {isHexColor(item.color) && (
+                                <span
+                                  className="inline-block h-3 w-3 rounded-full border border-black/10"
+                                  style={{ backgroundColor: item.color }}
+                                />
+                              )}
+                              {item.color}
+                            </span>
+                          ) : (
+                            "—"
                           )}
                         </td>
                         <td className="px-6 py-4 text-gray-600 dark:text-bodydark2">

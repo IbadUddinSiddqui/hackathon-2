@@ -9,6 +9,7 @@ export type OrderItemInput = {
   price: number; // rupees (PKR)
   quantity: number;
   size?: string[];
+  color?: string;
 };
 
 export type OrderDocument = {
@@ -27,6 +28,7 @@ export type OrderDocument = {
     price: number;
     quantity: number;
     size?: string[];
+    color?: string;
   }[];
   subtotal?: number;
   discount_code?: string;
@@ -44,6 +46,7 @@ export type SanityProductRef = {
   price: number;
   stock: number;
   size?: string[];
+  color?: string;
 };
 
 /**
@@ -56,7 +59,7 @@ export async function fetchProductsByIds(
 ): Promise<SanityProductRef[]> {
   if (ids.length === 0) return [];
   return serverClient.fetch(
-    `*[_id in $ids && (!defined(tenantId) || tenantId == $tenantId)]{_id, name, price, stock, size}`,
+    `*[_id in $ids && (!defined(tenantId) || tenantId == $tenantId)]{_id, name, price, stock, size, color}`,
     { ids, tenantId }
   );
 }
@@ -98,6 +101,7 @@ export async function createPendingOrder(input: {
       price: i.price,
       quantity: i.quantity,
       size: i.size || [],
+      color: i.color || '',
     })),
     subtotal: input.subtotal,
     discount_code: input.discountCode || '',

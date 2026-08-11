@@ -72,6 +72,12 @@ export const product = defineType({
       type: 'string',
     }),
     defineField({
+      name: 'color',
+      title: 'Color',
+      description: 'Product color/variant (e.g. Blue). Shown on the product page and carried onto the order so the right color is delivered. Leave empty if not applicable.',
+      type: 'string',
+    }),
+    defineField({
       name: 'tags',
       title: 'Tags',
       type: 'array',

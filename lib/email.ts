@@ -5,6 +5,7 @@ export type ReceiptItem = {
   price: number;
   quantity: number;
   size?: string[];
+  color?: string;
 };
 
 /**
@@ -42,7 +43,7 @@ export async function sendOrderReceipt(input: {
     .map(
       (item) => `
       <tr>
-        <td style="padding:8px;border-bottom:1px solid #eee;">${item.name}${item.size?.length ? ` (${item.size.join(', ')})` : ''}</td>
+        <td style="padding:8px;border-bottom:1px solid #eee;">${item.name}${item.color ? ` — <strong>${item.color}</strong>` : ''}${item.size?.length ? ` (${item.size.join(', ')})` : ''}</td>
         <td style="padding:8px;border-bottom:1px solid #eee;text-align:center;">${item.quantity}</td>
         <td style="padding:8px;border-bottom:1px solid #eee;text-align:right;">Rs {(item.price * item.quantity).toFixed(2)}</td>
       </tr>`

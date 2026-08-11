@@ -15,6 +15,7 @@ export type SanityProduct = {
   size: string[];
   qcom_availability: boolean;
   brand: string;
+  color?: string;
   tags: string[];
   created_at: string;
 };
@@ -35,6 +36,7 @@ export async function getSanityProducts(category?: string): Promise<SanityProduc
       size,
       qcom_availability,
       brand,
+      color,
       tags,
       created_at
     }`,

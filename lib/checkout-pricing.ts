@@ -22,6 +22,7 @@ export type CheckoutLineItem = {
   price: number;
   quantity: number;
   size?: string[];
+  color?: string;
 };
 
 export type PricedOrder = {
@@ -41,7 +42,9 @@ export type PricingError = { error: string };
 
 export async function priceCheckout(input: {
   tenantId?: string; // P4-03 — isolate pricing to the active SaaS tenant
-  items: { id: string; quantity: number; size?: string[] }[];
+  // NOTE: `color` is accepted but deliberately IGNORED — the order's color
+  // always comes from the Sanity product (server-truth), never the browser.
+  items: { id: string; quantity: number; size?: string[]; color?: string }[];
   customerEmail?: string;
   discountCode?: string;
   giftCardCode?: string;
@@ -77,6 +80,9 @@ export async function priceCheckout(input: {
       price,
       quantity,
       size: Array.isArray(item.size) ? item.size : undefined,
+      // Server-truth: the color comes from Sanity, never from the browser, so
+      // the right color variant is always recorded on the order.
+      color: product.color || undefined,
     });
   }
 

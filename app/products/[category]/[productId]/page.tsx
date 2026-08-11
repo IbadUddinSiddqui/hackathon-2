@@ -19,6 +19,7 @@ const PRODUCT_QUERY = `*[_type == "product" && (_id == $id || slug.current == $i
   size,
   qcom_availability,
   brand,
+  color,
   tags,
   created_at
 }`;

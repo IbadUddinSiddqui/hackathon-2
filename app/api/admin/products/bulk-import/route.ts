@@ -52,13 +52,17 @@ function isImageName(name: string): boolean {
 /** Load the store's live categories + brands for the template dropdowns. */
 async function fetchTemplateOptions(): Promise<TemplateOptions | undefined> {
   try {
-    const [catRows, brandRows] = await Promise.all([
+    const [catRows, brandRows, colorRows] = await Promise.all([
       serverClient.fetch<{ category: string; category_slug: string }[]>(
         `*[_type == "product" && defined(category) && defined(category_slug) && (!defined(tenantId) || tenantId == $tenantId)] | order(category asc) { category, category_slug }`,
         { tenantId: "tenant-anks" }
       ),
       serverClient.fetch<{ brand: string }[]>(
         `*[_type == "product" && defined(brand) && brand != "" && (!defined(tenantId) || tenantId == $tenantId)] | order(brand asc) { brand }`,
+        { tenantId: "tenant-anks" }
+      ),
+      serverClient.fetch<{ color: string }[]>(
+        `*[_type == "product" && defined(color) && color != "" && (!defined(tenantId) || tenantId == $tenantId)]{ color }`,
         { tenantId: "tenant-anks" }
       ),
     ]);
@@ -75,9 +79,15 @@ async function fetchTemplateOptions(): Promise<TemplateOptions | undefined> {
       brandSeen.add(b);
       return true;
     });
+    const colorSeen = new Set<string>();
+    const colors = colorRows.map((r) => r.color).filter((c) => {
+      if (!c || colorSeen.has(c.toLowerCase())) return false;
+      colorSeen.add(c.toLowerCase());
+      return true;
+    });
 
-    if (categories.length === 0 && brands.length === 0) return undefined;
-    return { categories, brands };
+    if (categories.length === 0 && brands.length === 0 && colors.length === 0) return undefined;
+    return { categories, brands, colors };
   } catch {
     return undefined;
   }
@@ -278,6 +288,7 @@ export async function POST(request: Request) {
             category_slug: product.category_slug,
             size: product.size,
             brand: product.brand || "",
+            color: product.color || "",
             tags: product.tags,
             images,
           })
@@ -295,6 +306,7 @@ export async function POST(request: Request) {
           category_slug: product.category_slug,
           size: product.size,
           brand: product.brand || "",
+          color: product.color || "",
           tags: product.tags,
           images,
         });

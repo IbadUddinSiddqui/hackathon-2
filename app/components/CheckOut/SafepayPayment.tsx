@@ -9,6 +9,7 @@ export type CheckoutItem = {
   price: number;
   quantity: number;
   size?: string[];
+  color?: string;
 };
 
 interface SafepayPaymentProps {

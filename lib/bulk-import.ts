@@ -17,6 +17,7 @@ export type ImportRow = {
   category_slug?: string; // optional — derived from category when missing
   size?: string; // comma-separated, e.g. "S,M,L,XL"
   brand?: string;
+  color?: string;
   tags?: string; // comma-separated
   image_urls?: string; // comma-separated http(s) URLs
   image_files?: string; // comma-separated filenames found in the uploaded ZIP
@@ -33,6 +34,7 @@ export type ProductPayload = {
   category_slug: string; // always set — derived from category when the row omits it
   size: string[];
   brand?: string;
+  color?: string;
   tags: string[];
   imageUrls: string[];
   imageFiles: string[]; // filenames to look up inside the uploaded ZIP
@@ -148,6 +150,7 @@ export function validateRow(row: ImportRow): RowValidation {
       category_slug: categorySlug,
       size,
       brand: asString(row.brand),
+      color: asString(row.color),
       tags: splitList(row.tags),
       imageUrls,
       imageFiles,
@@ -168,6 +171,7 @@ const TEMPLATE_HEADERS = [
   "category_slug",
   "size",
   "brand",
+  "color",
   "tags",
   "image_urls",
   "image_files",
@@ -176,7 +180,25 @@ const TEMPLATE_HEADERS = [
 export type TemplateOptions = {
   categories?: { category: string; category_slug: string }[];
   brands?: string[];
+  colors?: string[];
 };
+
+const DEFAULT_COLORS = [
+  "Blue",
+  "Red",
+  "White",
+  "Black",
+  "Green",
+  "Yellow",
+  "Pink",
+  "Navy",
+  "Grey",
+  "Brown",
+  "Beige",
+  "Maroon",
+  "Purple",
+  "Orange",
+];
 
 const DEFAULT_OPTIONS: TemplateOptions = {
   categories: [
@@ -187,6 +209,7 @@ const DEFAULT_OPTIONS: TemplateOptions = {
     { category: "Children", category_slug: "children" },
   ],
   brands: ["AnK's"],
+  colors: DEFAULT_COLORS,
 };
 
 const EXAMPLE_ROW = [
@@ -198,6 +221,7 @@ const EXAMPLE_ROW = [
   "t-shirts",
   "S,M,L,XL",
   "AnK's",
+  "Blue",
   "new,summer",
   "https://example.com/tee-front.jpg, https://example.com/tee-back.jpg",
   "tee-front.jpg, tee-back.jpg",
@@ -212,6 +236,7 @@ const TEMPLATE_COL_WIDTHS = [
   { wch: 18 },
   { wch: 14 },
   { wch: 12 },
+  { wch: 14 },
   { wch: 18 },
   { wch: 52 },
   { wch: 28 },
@@ -226,6 +251,7 @@ export function buildTemplate(options: TemplateOptions = {}): ArrayBuffer {
   const opts: TemplateOptions = { ...DEFAULT_OPTIONS, ...options };
   const cats = opts.categories && opts.categories.length > 0 ? opts.categories : DEFAULT_OPTIONS.categories!;
   const brands = opts.brands && opts.brands.length > 0 ? opts.brands : DEFAULT_OPTIONS.brands!;
+  const colors = opts.colors && opts.colors.length > 0 ? opts.colors : DEFAULT_OPTIONS.colors!;
 
   const ws = XLSX.utils.aoa_to_sheet([TEMPLATE_HEADERS, EXAMPLE_ROW]);
   ws["!cols"] = TEMPLATE_COL_WIDTHS;
@@ -246,14 +272,17 @@ export function buildTemplate(options: TemplateOptions = {}): ArrayBuffer {
   // Visible Lists sheet: dropdowns reference these ranges, so editing a list
   // here updates the dropdowns. Range refs avoid Excel's 255-char limit on
   // inline lists (matters once a store has many brands/categories).
+  const listLen = Math.max(cats.length, brands.length, colors.length);
   const listsSheet = XLSX.utils.aoa_to_sheet([
-    ["Category (dropdown)", "Category slug (dropdown)", "Brand (dropdown)"],
-    ...cats.map((c, i) => [c.category, c.category_slug, brands[i] ?? ""]),
-    ...(brands.length > cats.length
-      ? brands.slice(cats.length).map((b) => ["", "", b])
-      : []),
+    ["Category (dropdown)", "Category slug (dropdown)", "Brand (dropdown)", "Color (dropdown)"],
+    ...Array.from({ length: listLen }, (_, i) => [
+      cats[i]?.category ?? "",
+      cats[i]?.category_slug ?? "",
+      brands[i] ?? "",
+      colors[i] ?? "",
+    ]),
   ]);
-  listsSheet["!cols"] = [{ wch: 20 }, { wch: 20 }, { wch: 16 }];
+  listsSheet["!cols"] = [{ wch: 20 }, { wch: 20 }, { wch: 16 }, { wch: 14 }];
 
   // Short how-to so the in-app download is self-explanatory.
   const instructions = XLSX.utils.aoa_to_sheet([
@@ -262,7 +291,7 @@ export function buildTemplate(options: TemplateOptions = {}): ArrayBuffer {
     ["1. Fill one product per row in the Products sheet (delete the example row)."],
     ["2. Photos WITHOUT URLs: upload a .zip together with this file. List filenames in the image_files column, or put each product's photos in a folder named exactly like the product (slugified folder names also match)."],
     ["3. Photos WITH URLs: paste public https:// URLs in the image_urls column."],
-    ["4. category / category_slug / brand have dropdowns — edit the Lists sheet to add or rename values. Leave category_slug blank to auto-generate it from category."],
+    ["4. category / category_slug / brand / color have dropdowns — edit the Lists sheet to add or rename values. Leave category_slug blank to auto-generate it from category. Color is optional and any value is accepted (shown on the product page and recorded on orders)."],
     ["5. Upload at Admin Panel → Products → Bulk import. Invalid rows are skipped and listed; the rest still import."],
     ["6. Rows with an existing product name UPDATE it, new names CREATE one. Max 2000 rows / 10 MB per file."],
   ]);
@@ -279,6 +308,8 @@ export function buildTemplate(options: TemplateOptions = {}): ArrayBuffer {
     { sqref: "E2:E500", ref: `Lists!$A$2:$A$${cats.length + 1}` },
     { sqref: "F2:F500", ref: `Lists!$B$2:$B$${cats.length + 1}` },
     { sqref: "H2:H500", ref: `Lists!$C$2:$C$${brands.length + 1}` },
+    // Color is lenient — new colors must be typeable without an error dialog.
+    { sqref: "I2:I500", ref: `Lists!$D$2:$D$${colors.length + 1}`, lenient: true },
   ];
 
   return injectDataValidations(
@@ -287,7 +318,7 @@ export function buildTemplate(options: TemplateOptions = {}): ArrayBuffer {
   );
 }
 
-type Validation = { sqref: string; ref: string };
+type Validation = { sqref: string; ref: string; lenient?: boolean };
 
 /**
  * Post-process a serialized .xlsx and inject <dataValidations> (Excel
@@ -307,7 +338,7 @@ export function injectDataValidations(buf: Buffer, validations: Validation[]): A
     const blocks = validations
       .map(
         (v) =>
-          `<dataValidation type="list" allowBlank="1"><formula1>${v.ref}</formula1><sqref>${v.sqref}</sqref></dataValidation>`
+          `<dataValidation type="list" allowBlank="1"${v.lenient ? ' showErrorMessage="0"' : ""}><formula1>${v.ref}</formula1><sqref>${v.sqref}</sqref></dataValidation>`
       )
       .join("");
 

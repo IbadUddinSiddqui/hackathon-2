@@ -36,23 +36,28 @@ describe("buildTemplate dropdowns", () => {
     const zip = new AdmZip(Buffer.from(buf as ArrayBuffer));
     const xml = zip.getEntry("xl/worksheets/sheet1.xml")!.getData().toString("utf8");
 
-    expect(xml).toContain('<dataValidations count="3">');
-    // Defaults: 5 categories (rows 2-6), 1 brand (row 2)
+    expect(xml).toContain('<dataValidations count="4">');
+    // Defaults: 5 categories (rows 2-6), 1 brand (row 2), 14 colors (rows 2-15)
     expect(xml).toContain('<formula1>Lists!$A$2:$A$6</formula1>');
     expect(xml).toContain('<formula1>Lists!$B$2:$B$6</formula1>');
     expect(xml).toContain('<formula1>Lists!$C$2:$C$2</formula1>');
+    expect(xml).toContain('<formula1>Lists!$D$2:$D$15</formula1>');
     expect(xml).toContain('<sqref>E2:E500</sqref>');
     expect(xml).toContain('<sqref>F2:F500</sqref>');
     expect(xml).toContain('<sqref>H2:H500</sqref>');
+    expect(xml).toContain('<sqref>I2:I500</sqref>');
+    // Color dropdown must be lenient (no error dialog for custom values).
+    expect(xml).toContain('showErrorMessage="0"');
   });
 
-  it("scales ranges with custom category/brand lists", () => {
+  it("scales ranges with custom category/brand/color lists", () => {
     const buf = buildTemplate({
       categories: [
         { category: "A", category_slug: "a" },
         { category: "B", category_slug: "b" },
       ],
       brands: ["X", "Y", "Z"],
+      colors: ["Teal", "Coral"],
     });
     const zip = new AdmZip(Buffer.from(buf as ArrayBuffer));
     const xml = zip.getEntry("xl/worksheets/sheet1.xml")!.getData().toString("utf8");
@@ -60,6 +65,7 @@ describe("buildTemplate dropdowns", () => {
     expect(xml).toContain('<formula1>Lists!$A$2:$A$3</formula1>');
     expect(xml).toContain('<formula1>Lists!$B$2:$B$3</formula1>');
     expect(xml).toContain('<formula1>Lists!$C$2:$C$4</formula1>');
+    expect(xml).toContain('<formula1>Lists!$D$2:$D$3</formula1>');
   });
 });
 
@@ -140,5 +146,21 @@ describe("validateRow", () => {
     );
     expect(result.ok).toBe(true);
     if (result.ok) expect(result.product.category_slug).toBe("custom-slug");
+  });
+
+  it("carries an optional color onto the payload", () => {
+    const result = validateRow(row({ color: "Blue" }));
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.product.color).toBe("Blue");
+
+    const noColor = validateRow(row({ color: undefined }));
+    expect(noColor.ok).toBe(true);
+    if (noColor.ok) expect(noColor.product.color).toBeUndefined();
+  });
+
+  it("round-trips the color column from the template", () => {
+    const buf = buildTemplate();
+    const rows = parseWorkbook(buf as ArrayBuffer);
+    expect(rows[0].color).toBe("Blue");
   });
 });

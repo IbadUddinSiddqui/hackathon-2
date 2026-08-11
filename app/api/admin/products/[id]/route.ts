@@ -84,6 +84,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
         category,
         category_slug,
         brand,
+        color,
         size,
         tags,
         created_at,

@@ -23,6 +23,7 @@ export type ProductSummary = {
   category: string;
   category_slug: string;
   brand?: string;
+  color?: string;
   size: string[];
   tags: string[];
   mainImage?: string;
@@ -203,6 +204,7 @@ export default function ProductListManager() {
                           </Link>
                           <p className="truncate text-xs text-gray-400 dark:text-bodydark2">
                             {p.brand ? `${p.brand} · ` : ""}
+                            {p.color ? `${p.color} · ` : ""}
                             {p.size.join(", ")}
                           </p>
                         </div>

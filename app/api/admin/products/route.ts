@@ -120,6 +120,7 @@ export async function POST(request: Request) {
       category_slug: input.category_slug,
       size: input.size,
       brand: input.brand || "",
+      color: input.color || "",
       tags: input.tags,
       images,
     });

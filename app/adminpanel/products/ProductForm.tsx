@@ -21,6 +21,7 @@ export default function ProductForm({ product }: { product?: ProductSummary | nu
     category_slug: product?.category_slug ?? "",
     size: (product?.size ?? []).join(", "),
     brand: product?.brand ?? "",
+    color: product?.color ?? "",
     tags: (product?.tags ?? []).join(", "),
     imageUrls: "",
   });
@@ -50,6 +51,7 @@ export default function ProductForm({ product }: { product?: ProductSummary | nu
       category_slug: form.category_slug.trim(),
       size: splitList(form.size),
       brand: form.brand.trim(),
+      color: form.color.trim(),
       tags: splitList(form.tags),
     };
     if (!editing) payload.imageUrls = splitList(form.imageUrls);
@@ -205,6 +207,23 @@ export default function ProductForm({ product }: { product?: ProductSummary | nu
             placeholder="S, M, L, XL"
             className={inputClass}
           />
+        </div>
+
+        <div>
+          <label htmlFor="pf-color" className="mb-1.5 block text-sm font-medium text-gray-600 dark:text-bodydark2">
+            Color <span className="font-normal text-gray-400">(e.g. Blue or #3498db)</span>
+          </label>
+          <input
+            id="pf-color"
+            type="text"
+            value={form.color}
+            onChange={(e) => update("color", e.target.value)}
+            placeholder="Blue"
+            className={inputClass}
+          />
+          <p className="mt-1 text-xs text-gray-400 dark:text-bodydark2">
+            Shown on the product page and recorded on every order so the right color is delivered.
+          </p>
         </div>
 
         <div>

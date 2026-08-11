@@ -119,6 +119,11 @@ export default defineType({
               type: 'array',
               of: [{ type: 'string' }],
             }),
+            defineField({
+              name: 'color',
+              title: 'Color',
+              type: 'string',
+            }),
           ],
         },
       ],

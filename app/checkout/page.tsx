@@ -185,6 +185,7 @@ const CheckoutPage = () => {
     price: item.price,
     quantity: item.quantity,
     size: item.size,
+    color: item.color,
   }));
 
   return (

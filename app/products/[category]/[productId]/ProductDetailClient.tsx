@@ -15,6 +15,7 @@ import { motion } from "framer-motion";
 import { Star, Timer } from "lucide-react";
 import { useLocale } from "@/lib/locale-provider";
 import { t } from "@/lib/i18n";
+import { isHexColor } from "@/lib/is-hex-color";
 
 // P3-13 — live countdown to the flash-sale end.
 function FlashSaleCountdown({ endsAt }: { endsAt: string }) {
@@ -48,6 +49,7 @@ export type ProductDetail = {
   size: string[];
   qcom_availability: boolean;
   brand: string;
+  color?: string;
   tags: string[];
   created_at: string;
 };
@@ -133,15 +135,23 @@ const ProductDetailClient = ({
               </motion.div>
 
               <motion.div className="space-y-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-medium">Select Color</h3>
-                  {/* Add your ColorPicker component */}
-                </div>
-
-                <div className="space-y-2">
-                  <h3 className="text-lg font-medium">Choose Size</h3>
-                  {/* Add your Size component */}
-                </div>
+                {/* When the product has a color set, show it — the customer picks
+                    the color by choosing this listing, so it just needs to be visible.
+                    Nothing renders when no color is set (flat-gallery products). */}
+                {product?.color ? (
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-lg font-medium">{t(locale, "product.color")}</h3>
+                    <span className="inline-flex items-center gap-2 rounded-full border border-stroke px-3 py-1 text-sm font-medium dark:border-strokedark">
+                      {isHexColor(product.color) && (
+                        <span
+                          className="inline-block h-3.5 w-3.5 rounded-full border border-black/10"
+                          style={{ backgroundColor: product.color }}
+                        />
+                      )}
+                      {product.color}
+                    </span>
+                  </div>
+                ) : null}
 
                 {/* P4-14 — measurement-based size recommendation. */}
                 <SizeQuiz availableSizes={product?.size || []} />

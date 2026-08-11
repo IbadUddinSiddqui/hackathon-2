@@ -19,6 +19,7 @@ export type ProductSummary = {
   category: string;
   category_slug: string;
   brand?: string;
+  color?: string;
   size: string[];
   tags: string[];
   mainImage?: string;
@@ -96,6 +97,7 @@ export function buildProductListGroq(
       category,
       category_slug,
       brand,
+      color,
       size,
       tags,
       created_at,
@@ -115,6 +117,7 @@ type RawProductDoc = {
   category: string;
   category_slug: string;
   brand?: string;
+  color?: string;
   size?: string[];
   tags?: string[];
   created_at?: string;
@@ -132,6 +135,7 @@ export function toProductSummary(doc: RawProductDoc): ProductSummary {
     category: doc.category,
     category_slug: doc.category_slug,
     brand: doc.brand,
+    color: doc.color,
     size: doc.size ?? [],
     tags: doc.tags ?? [],
     mainImage: doc.images?.[0]?.asset?.url,
@@ -149,6 +153,7 @@ export type ProductInput = {
   category_slug: string;
   size: string[];
   brand?: string;
+  color?: string;
   tags: string[];
   imageUrls: string[];
 };
@@ -185,6 +190,7 @@ export function normalizeCreateInput(raw: Record<string, unknown>): Partial<Prod
     category_slug: toOptionalString(raw.category_slug),
     size: toStringArray(raw.size),
     brand: toOptionalString(raw.brand),
+    color: toOptionalString(raw.color),
     tags: toStringArray(raw.tags),
     imageUrls: toStringArray(raw.imageUrls).filter((u) => /^https?:\/\//i.test(u)),
   };
@@ -199,6 +205,7 @@ const UPDATEABLE_FIELDS = [
   "category_slug",
   "size",
   "brand",
+  "color",
   "tags",
 ] as const;
 
@@ -212,6 +219,7 @@ export function normalizeUpdateInput(raw: Record<string, unknown>): Partial<Prod
   // so an explicit null never becomes the literal string "null" in the doc.
   if (raw.description != null) input.description = String(raw.description).trim();
   if (raw.brand != null) input.brand = String(raw.brand).trim();
+  if (raw.color != null) input.color = String(raw.color).trim();
   return input;
 }
 

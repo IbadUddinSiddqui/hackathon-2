@@ -106,6 +106,7 @@ async function fulfilOrder(
         price: item.price,
         quantity: item.quantity,
         size: item.size,
+        color: item.color,
       })),
       total: order.total || 0,
     }).catch((err) => console.error('Receipt email failed:', err.message));
