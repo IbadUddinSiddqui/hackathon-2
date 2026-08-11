@@ -760,11 +760,168 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - verify: tsc clean; Urdu locale renders RTL correctly in a browser
 - notes: 2026-08-11 — PHASE 3 CODE COMPLETE. All 19 buildable nodes done (P3-01..P3-08, P3-10..P3-16, P3-19..P3-22). Only human nodes remain: P3-09 (Vercel Cron schedule — handler exists at app/api/cron/abandoned-cart/route.ts, guarded by CRON_SECRET), P3-17 (Meta/TikTok pixel IDs), P3-18 (GA4 measurement ID). Verified: 143/143 tests, tsc clean. Scope notes: P3-21 translated the core storefront (Header, Hero, Footer, Cart, Checkout, ProductDetail, Reviews, AddToCartButton) — wishlist, search, products grid, home sections, auth pages remain English-only (follow-up). Root layout reads cookies() so pages render dynamically for locale; admin panel also flips RTL when Urdu is active (accepted).
 
-## PHASE 4 — Enterprise (epics only — P4-EPIC-01 only applies if P1-14 decided "SaaS")
+## PHASE 4 — Enterprise (P1-14 decided SaaS — P4-EPIC-01 ACTIVATED and expanded into P4-01..P4-10 below)
 
-- [ ] **P4-EPIC-01** True multi-tenancy (data isolation, custom domains, per-tenant payment config, platform billing)
-- [ ] **P4-EPIC-02** AI recommendations / AI search / size recommendation / support chatbot
+- [ ] **P4-EPIC-01** True multi-tenancy (data isolation, custom domains, per-tenant payment config, platform billing) — EXPANDED 2026-08-11 into P4-01..P4-10 below (ACTIVATED by P1-14 SaaS decision)
+- [ ] **P4-EPIC-02** AI recommendations / AI search / size recommendation / support chatbot — EXPANDED 2026-08-11 into P4-11..P4-17 below
 - [ ] **P4-EPIC-03** Affiliate/referral program, ERP/accounting integration
 - [ ] **P4-EPIC-04** Formal load testing at claimed scale
+
+### P4-EPIC-01 — expanded nodes (True multi-tenancy)
+
+### [P4-01] Tenant data model + tenantId isolation on collections
+- status: todo
+- depends_on: []
+- human_required: false
+- touches: [sanity/schemaTypes/tenant.ts (new), sanity/schemaTypes/{product,order,customer,discountCode,abandonedCart,review,giftCard,bundle,flashSale,auditLog}.ts, sanity/schemaTypes/index.ts]
+- done_when: a `tenant` Sanity type exists (name, slug, domain, plan, billingStatus, branding); every tenant-scoped collection gains a tenantId field; the default/seed tenant covers existing data.
+- verify: tsc clean; unit tests pass; Studio shows the tenant type
+- notes: P1-14 = SaaS, so this is now a real epic, not optional. Decisions here drive every other P4 node.
+
+### [P4-02] Tenant-scoped auth (NextAuth session carries tenantId)
+- status: todo
+- depends_on: [P4-01]
+- human_required: false
+- touches: [auth.ts, auth.config.ts, app/api/auth/[...nextauth]/route.ts, lib/admin.ts]
+- done_when: users belong to a tenant; the session token carries tenantId; the admin guard resolves tenant from the session and rejects cross-tenant access.
+- verify: unit test that a user of tenant A cannot act on tenant B docs; tsc clean
+- notes: platform super-admin role also introduced here.
+
+### [P4-03] Central tenant query scoping in every API route + admin page
+- status: todo
+- depends_on: [P4-02]
+- human_required: false
+- touches: [lib/tenant.ts (new), app/api/admin/**/*, app/adminpanel/**/*, lib/{admin-products,admin-customers,admin-discounts,orders,abandoned-cart,reviews}.ts]
+- done_when: one `withTenantScope()` helper wraps every Sanity fetch/create/patch so no route can leak another tenant's data; all admin pages read scope from the session.
+- verify: grep audit — no un-scoped `serverClient.fetch` remains; tsc clean; tests pass
+- notes:
+
+### [P4-04] Storefront domain routing (Host header -> tenant)
+- status: todo
+- depends_on: [P4-01]
+- human_required: false
+- touches: [middleware.ts (new), lib/tenant-resolver.ts (new), app/layout.tsx, next.config.ts]
+- done_when: middleware resolves the Host header to a tenant (custom domain or subdomain); unknown hosts get a branded onboarding/404 page; the tenant doc is available to all server components.
+- verify: curl with a test Host header renders that tenant's data; tsc clean
+- notes:
+
+### [P4-05] Per-tenant branding + content (name, logo, colors, hero, footer)
+- status: todo
+- depends_on: [P4-04]
+- human_required: false
+- touches: [app/components/Header/Header.tsx, app/components/Footer/Footer.tsx, app/components/Hero/Hero.tsx, app/layout.tsx, lib/site.ts]
+- done_when: storefront header/hero/footer/metadata read name, logo, colors, and contact from the active tenant doc instead of constants.
+- verify: two tenants with different branding render differently; tsc clean
+- notes:
+
+### [P4-06] Per-tenant payment config (Safepay/Stripe keys + webhook secrets per tenant)
+- status: todo
+- depends_on: [P4-01, P4-03]
+- human_required: false
+- touches: [app/api/create-safepay-order/route.ts, app/api/payments/safepay/webhook/route.ts, app/api/webhook/route.ts, app/checkout/page.tsx, lib/safepay.ts, lib/get-stripe.js]
+- done_when: each tenant stores its own payment keys + webhook signing secrets; checkout initializes the tenant's gateway and webhooks verify against the tenant's secret; per-tenant fulfillment (stock, orders, emails) is isolated.
+- verify: sandbox checkout for two tenants uses each tenant's keys; webhook rejects a mismatched secret; tests pass
+- notes:
+
+### [P4-07] Platform billing — plans + subscription + usage metering
+- status: todo
+- depends_on: [P4-01, P4-09]
+- human_required: false
+- touches: [lib/billing.ts (new), app/api/billing/** (new), sanity/schemaTypes/tenant.ts]
+- done_when: tenants have a plan, billing status, and monthly usage metering (orders, bandwidth proxy); plan limits are enforced server-side; over-limit tenants are flagged.
+- verify: unit tests for plan limits and metering; tsc clean
+- notes: gateway/provider choice is the human node P4-09.
+
+### [P4-08] Admin platform console (tenants, plans, billing status, feature flags)
+- status: todo
+- depends_on: [P4-03, P4-07]
+- human_required: false
+- touches: [app/adminpanel/tenants/ (new), app/api/admin/tenants/route.ts (new), app/components/Sidebar/index.tsx]
+- done_when: platform admins list/search tenants, view plan + usage, toggle feature flags, and pause/activate tenants; the existing admin panel gains a Platform section.
+- verify: tsc clean; page loads real tenant data from Sanity
+- notes:
+
+### [P4-09] HUMAN: SaaS pricing + billing gateway decision (Stripe Billing vs local PK provider)
+- status: todo
+- depends_on: []
+- human_required: true
+- touches: [n/a — business decision]
+- done_when: written pricing (free/trial/pro tiers in PKR), a billing gateway choice, and where platform fees are collected.
+- verify: manual — decision documented in notes
+- notes: owner picks plan tiers + gateway; then P4-07 builds against it.
+
+### [P4-10] HUMAN: Tenant onboarding + DNS/custom-domain setup per client
+- status: todo
+- depends_on: [P4-04]
+- human_required: true
+- touches: [n/a — ops task per client]
+- done_when: a documented onboarding checklist (create tenant, point domain CNAME/A, verify SSL, seed catalog) exists and is followed for the first client.
+- verify: manual — first real tenant goes live on their own domain
+- notes:
+
+### P4-EPIC-02 — expanded nodes (AI recommendations / search / size / chatbot)
+
+### [P4-11] AI product recommendations engine (co-purchase rules first, LLM optional)
+- status: todo
+- depends_on: [P3-01]
+- human_required: false
+- touches: [lib/recommendations.ts (new), lib/recommendations.test.ts (new), app/api/recommendations/route.ts (new)]
+- done_when: a server-side engine returns product recommendations from order co-purchase data + category affinity, cached in Sanity/Redis; an LLM embedding path can be switched on behind the same interface.
+- verify: unit tests with seeded orders; endpoint returns ranked product ids
+- notes: keep the current "You May Also Like" category fallback as the no-data path.
+
+### [P4-12] Storefront recommendations UI (product detail, cart, home)
+- status: todo
+- depends_on: [P4-11]
+- human_required: false
+- touches: [app/products/[category]/[productId]/ProductDetailClient.tsx, app/cart/page.tsx, app/page.tsx]
+- done_when: AI recommendations replace/augment the category fallback on product detail, cart page, and homepage with loading + error fallback.
+- verify: tsc clean; three surfaces render recommendations from the API
+- notes:
+
+### [P4-13] Semantic search (Typesense hybrid/vector, text fallback)
+- status: todo
+- depends_on: [P4-16]
+- human_required: false
+- touches: [lib/typesense.ts, app/api/search/route.ts, app/search/page.tsx, app/components/ProductSearch/ProductSearch.tsx]
+- done_when: search index gains embeddings and hybrid ranking; existing text search remains the fallback when embeddings/key are unavailable.
+- verify: a query returns relevant results with and without the embeddings key; tests pass
+- notes: depends on the AI provider/embedding model decision in P4-16.
+
+### [P4-14] Size recommendation quiz (measurements -> size)
+- status: todo
+- depends_on: []
+- human_required: false
+- touches: [lib/size-guide.ts (new), lib/size-guide.test.ts (new), app/size-guide/ (new), app/components/Size/Size.tsx]
+- done_when: a measurement-based quiz maps body measurements to the product's size chart and surfaces it on the product page with the store's PK sizes.
+- verify: unit tests for the mapping; quiz renders and picks a size
+- notes:
+
+### [P4-15] Support chatbot (FAQ knowledge base, rule-based, WhatsApp escalation)
+- status: todo
+- depends_on: [P4-17]
+- human_required: false
+- touches: [lib/chatbot.ts (new), app/api/chatbot/route.ts (new), app/components/ChatWidget/ (new)]
+- done_when: a storefront chat widget answers FAQ/order-status/shipping questions from a curated knowledge base with a clear "talk to a human" path to WhatsApp/email; no external LLM cost.
+- verify: widget answers seeded FAQs; escalation link renders; tsc clean
+- notes: LLM-backed answers can replace the rule engine later (P4-16).
+
+### [P4-16] HUMAN: AI provider + API keys decision (OpenAI / Gemini / local models)
+- status: todo
+- depends_on: []
+- human_required: true
+- touches: [n/a — decision + env vars]
+- done_when: provider chosen, keys provisioned, and any monthly cost approved.
+- verify: manual — owner confirms provider + budget
+- notes: gates P4-13 embeddings and optional LLM paths.
+
+### [P4-17] HUMAN: FAQ / training content from the client
+- status: todo
+- depends_on: []
+- human_required: true
+- touches: [n/a — content]
+- done_when: the client supplies ~20 real FAQ Q&As (shipping, returns, sizing, payment) for P4-15 and recommendation tuning.
+- verify: manual — content received and loaded into the knowledge base
+- notes:
 
 **Rule for Phase 2–4:** do not let the agent attempt an EPIC directly — it's too coarse for the verify-gated loop. When Phase 1 is clear, the next agent session's job is to expand exactly one epic into properly-scoped nodes (same schema as Phase 1 above) before any implementation starts on it.
