@@ -4,6 +4,7 @@
 // everything here is deterministic and unit-testable.
 
 import * as XLSX from "xlsx";
+import AdmZip from "adm-zip";
 
 /** Normalized import row (column headers are lowercased, spaces → underscores). */
 export type ImportRow = {
@@ -13,11 +14,12 @@ export type ImportRow = {
   price?: number;
   stock?: number;
   category?: string;
-  category_slug?: string;
+  category_slug?: string; // optional — derived from category when missing
   size?: string; // comma-separated, e.g. "S,M,L,XL"
   brand?: string;
   tags?: string; // comma-separated
   image_urls?: string; // comma-separated http(s) URLs
+  image_files?: string; // comma-separated filenames found in the uploaded ZIP
   [key: string]: unknown;
 };
 
@@ -28,18 +30,32 @@ export type ProductPayload = {
   price: number;
   stock: number;
   category: string;
-  category_slug: string;
+  category_slug: string; // always set — derived from category when the row omits it
   size: string[];
   brand?: string;
   tags: string[];
   imageUrls: string[];
+  imageFiles: string[]; // filenames to look up inside the uploaded ZIP
 };
 
 export type RowValidation =
   | { ok: true; product: ProductPayload }
   | { ok: false; errors: string[] };
 
-const REQUIRED_TEXT = ["name", "category", "category_slug"] as const;
+const REQUIRED_TEXT = ["name", "category"] as const;
+
+/**
+ * Lowercase, drop apostrophes (men's → mens), collapse other
+ * spaces/punctuation to hyphens, trim edge hyphens.
+ * Used to auto-derive category_slug (and by the template instructions).
+ */
+export function slugify(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/'/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
 
 /** Parse an uploaded workbook/CSV buffer into normalized rows. */
 export function parseWorkbook(buf: ArrayBuffer): ImportRow[] {
@@ -82,7 +98,11 @@ function splitList(v: unknown): string[] {
     .filter(Boolean);
 }
 
-/** Validate a single row; returns either a payload or the list of errors. */
+/**
+ * Validate a single row; returns either a payload or the list of errors.
+ * Images may come from image_urls (downloaded) and/or image_files (from the
+ * ZIP the admin also uploads) — at least one declared source is required.
+ */
 export function validateRow(row: ImportRow): RowValidation {
   const errors: string[] = [];
 
@@ -99,10 +119,20 @@ export function validateRow(row: ImportRow): RowValidation {
   const size = splitList(row.size);
   if (size.length === 0) errors.push("size is required (comma-separated, e.g. S,M,L,XL)");
 
+  // category_slug is optional: derive it from the category display name.
+  const categorySlug =
+    asString(row.category_slug) ?? slugify(asString(row.category) ?? "");
+  if (!categorySlug) errors.push("category_slug is required (or leave it blank to auto-generate)");
+
   // Images are schema-required (min 1) and the storefront renders images[0],
-  // so a row without any image URL must be skipped to avoid broken cards.
+  // so a row without any image source must be skipped to avoid broken cards.
   const imageUrls = splitList(row.image_urls).filter((u) => /^https?:\/\//i.test(u));
-  if (imageUrls.length === 0) errors.push("image_urls required (comma-separated https URLs)");
+  const imageFiles = splitList(row.image_files);
+  if (imageUrls.length === 0 && imageFiles.length === 0) {
+    errors.push(
+      "image_urls or image_files required (comma-separated https URLs and/or filenames inside the uploaded ZIP)"
+    );
+  }
 
   if (errors.length > 0) return { ok: false, errors };
 
@@ -115,45 +145,181 @@ export function validateRow(row: ImportRow): RowValidation {
       price: price!,
       stock: stock!,
       category: asString(row.category)!,
-      category_slug: asString(row.category_slug)!,
+      category_slug: categorySlug,
       size,
       brand: asString(row.brand),
       tags: splitList(row.tags),
       imageUrls,
+      imageFiles,
     },
   };
 }
 
-/** Build the example .xlsx template the admin page offers for download. */
-export function buildTemplate(): ArrayBuffer {
-  const ws = XLSX.utils.aoa_to_sheet([
-    [
-      "name",
-      "description",
-      "price",
-      "stock",
-      "category",
-      "category_slug",
-      "size",
-      "brand",
-      "tags",
-      "image_urls",
-    ],
-    [
-      "Classic Cotton Tee",
-      "Soft 100% cotton, regular fit",
-      1499,
-      50,
-      "T-Shirts",
-      "t-shirts",
-      "S,M,L,XL",
-      "AnK's",
-      "new,summer",
-      "https://example.com/tee-front.jpg, https://example.com/tee-back.jpg",
-    ],
+// ---------------------------------------------------------------------------
+// Template (.xlsx) building
+// ---------------------------------------------------------------------------
+
+const TEMPLATE_HEADERS = [
+  "name",
+  "description",
+  "price",
+  "stock",
+  "category",
+  "category_slug",
+  "size",
+  "brand",
+  "tags",
+  "image_urls",
+  "image_files",
+];
+
+export type TemplateOptions = {
+  categories?: { category: string; category_slug: string }[];
+  brands?: string[];
+};
+
+const DEFAULT_OPTIONS: TemplateOptions = {
+  categories: [
+    { category: "T-Shirts", category_slug: "t-shirts" },
+    { category: "Women's Clothing", category_slug: "womens-clothing" },
+    { category: "Men's Clothing", category_slug: "mens-clothings" },
+    { category: "Footwear", category_slug: "footwear" },
+    { category: "Children", category_slug: "children" },
+  ],
+  brands: ["AnK's"],
+};
+
+const EXAMPLE_ROW = [
+  "Classic Cotton Tee",
+  "Soft 100% cotton, regular fit",
+  1499,
+  50,
+  "T-Shirts",
+  "t-shirts",
+  "S,M,L,XL",
+  "AnK's",
+  "new,summer",
+  "https://example.com/tee-front.jpg, https://example.com/tee-back.jpg",
+  "tee-front.jpg, tee-back.jpg",
+];
+
+const TEMPLATE_COL_WIDTHS = [
+  { wch: 22 },
+  { wch: 40 },
+  { wch: 8 },
+  { wch: 8 },
+  { wch: 18 },
+  { wch: 18 },
+  { wch: 14 },
+  { wch: 12 },
+  { wch: 18 },
+  { wch: 52 },
+  { wch: 28 },
+];
+
+/**
+ * Build the example .xlsx template the admin page offers for download.
+ * Columns E (category), F (category_slug) and H (brand) get real dropdowns
+ * (data validation) with the store's live categories/brands when provided.
+ */
+export function buildTemplate(options: TemplateOptions = {}): ArrayBuffer {
+  const opts: TemplateOptions = { ...DEFAULT_OPTIONS, ...options };
+  const cats = opts.categories && opts.categories.length > 0 ? opts.categories : DEFAULT_OPTIONS.categories!;
+  const brands = opts.brands && opts.brands.length > 0 ? opts.brands : DEFAULT_OPTIONS.brands!;
+
+  const ws = XLSX.utils.aoa_to_sheet([TEMPLATE_HEADERS, EXAMPLE_ROW]);
+  ws["!cols"] = TEMPLATE_COL_WIDTHS;
+
+  // Styled header: bold white on dark fill.
+  TEMPLATE_HEADERS.forEach((_, c) => {
+    const addr = XLSX.utils.encode_cell({ r: 0, c });
+    if (ws[addr]) {
+      ws[addr].s = {
+        font: { bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "111827" } },
+        alignment: { vertical: "center" },
+      };
+    }
+  });
+  ws["!freeze"] = { xSplit: 0, ySplit: 1 };
+
+  // Visible Lists sheet: dropdowns reference these ranges, so editing a list
+  // here updates the dropdowns. Range refs avoid Excel's 255-char limit on
+  // inline lists (matters once a store has many brands/categories).
+  const listsSheet = XLSX.utils.aoa_to_sheet([
+    ["Category (dropdown)", "Category slug (dropdown)", "Brand (dropdown)"],
+    ...cats.map((c, i) => [c.category, c.category_slug, brands[i] ?? ""]),
+    ...(brands.length > cats.length
+      ? brands.slice(cats.length).map((b) => ["", "", b])
+      : []),
   ]);
-  ws["!cols"] = [{ wch: 22 }, { wch: 40 }, { wch: 8 }, { wch: 8 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 10 }, { wch: 18 }, { wch: 60 }];
+  listsSheet["!cols"] = [{ wch: 20 }, { wch: 20 }, { wch: 16 }];
+
+  // Short how-to so the in-app download is self-explanatory.
+  const instructions = XLSX.utils.aoa_to_sheet([
+    ["BULK IMPORT — HOW TO USE"],
+    [],
+    ["1. Fill one product per row in the Products sheet (delete the example row)."],
+    ["2. Photos WITHOUT URLs: upload a .zip together with this file. List filenames in the image_files column, or put each product's photos in a folder named exactly like the product (slugified folder names also match)."],
+    ["3. Photos WITH URLs: paste public https:// URLs in the image_urls column."],
+    ["4. category / category_slug / brand have dropdowns — edit the Lists sheet to add or rename values. Leave category_slug blank to auto-generate it from category."],
+    ["5. Upload at Admin Panel → Products → Bulk import. Invalid rows are skipped and listed; the rest still import."],
+    ["6. Rows with an existing product name UPDATE it, new names CREATE one. Max 2000 rows / 10 MB per file."],
+  ]);
+  instructions["!cols"] = [{ wch: 120 }];
+
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Products");
-  return XLSX.write(wb, { bookType: "xlsx", type: "array" }) as ArrayBuffer;
+  XLSX.utils.book_append_sheet(wb, listsSheet, "Lists");
+  XLSX.utils.book_append_sheet(wb, instructions, "Instructions");
+
+  // Dropdowns can't be written by SheetJS CE, so we inject the dataValidation
+  // XML directly into the Products sheet after SheetJS has serialized it.
+  const validations = [
+    { sqref: "E2:E500", ref: `Lists!$A$2:$A$${cats.length + 1}` },
+    { sqref: "F2:F500", ref: `Lists!$B$2:$B$${cats.length + 1}` },
+    { sqref: "H2:H500", ref: `Lists!$C$2:$C$${brands.length + 1}` },
+  ];
+
+  return injectDataValidations(
+    XLSX.write(wb, { bookType: "xlsx", type: "buffer" }) as Buffer,
+    validations
+  );
+}
+
+type Validation = { sqref: string; ref: string };
+
+/**
+ * Post-process a serialized .xlsx and inject <dataValidations> (Excel
+ * dropdown lists) into the first worksheet. SheetJS CE can't write them, so
+ * we do the XML surgery directly — the result opens cleanly in Excel,
+ * LibreOffice and Google Sheets. Lists reference the "Lists" sheet ranges.
+ */
+export function injectDataValidations(buf: Buffer, validations: Validation[]): ArrayBuffer {
+  if (validations.length === 0) return buf as unknown as ArrayBuffer;
+
+  try {
+    const zip = new AdmZip(buf);
+    const sheetEntry = zip.getEntry("xl/worksheets/sheet1.xml");
+    if (!sheetEntry) return buf as unknown as ArrayBuffer;
+
+    let xml = sheetEntry.getData().toString("utf8");
+    const blocks = validations
+      .map(
+        (v) =>
+          `<dataValidation type="list" allowBlank="1"><formula1>${v.ref}</formula1><sqref>${v.sqref}</sqref></dataValidation>`
+      )
+      .join("");
+
+    const injection = `<dataValidations count="${validations.length}">${blocks}</dataValidations>`;
+    if (!xml.includes("<dataValidations")) {
+      // Must appear after sheetData (and before pageMargins/pageSetup).
+      xml = xml.replace("</sheetData>", `</sheetData>${injection}`);
+    }
+    zip.updateFile("xl/worksheets/sheet1.xml", Buffer.from(xml, "utf8"));
+    return zip.toBuffer() as unknown as ArrayBuffer;
+  } catch {
+    // Never break template download over a formatting nicety.
+    return buf as unknown as ArrayBuffer;
+  }
 }

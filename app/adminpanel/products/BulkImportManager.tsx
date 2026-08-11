@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { UploadCloud, FileSpreadsheet, Download, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
+import { UploadCloud, FileSpreadsheet, Download, CheckCircle2, XCircle, AlertTriangle, FolderArchive } from "lucide-react";
 import Link from "next/link";
 
 type RowResult = {
@@ -25,7 +25,9 @@ const STATUS_STYLES: Record<RowResult["status"], string> = {
 
 export default function BulkImportManager() {
   const inputRef = useRef<HTMLInputElement>(null);
+  const zipInputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [zipName, setZipName] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState<ImportResponse | null>(null);
@@ -44,6 +46,17 @@ export default function BulkImportManager() {
     setFileName(file.name);
   }, []);
 
+  const onZip = useCallback((file: File | null | undefined) => {
+    if (!file) return;
+    setError(null);
+    if (!/\.zip$/i.test(file.name)) {
+      setError("Images must be a single .zip file.");
+      setZipName(null);
+      return;
+    }
+    setZipName(file.name);
+  }, []);
+
   const handleUpload = async () => {
     const file = inputRef.current?.files?.[0];
     if (!file) {
@@ -58,6 +71,8 @@ export default function BulkImportManager() {
     try {
       const formData = new FormData();
       formData.append("file", file);
+      const zipFile = zipInputRef.current?.files?.[0];
+      if (zipFile) formData.append("images", zipFile);
 
       const res = await fetch("/api/admin/products/bulk-import", {
         method: "POST",
@@ -123,6 +138,47 @@ export default function BulkImportManager() {
             </>
           )}
         </div>
+      </div>
+
+      {/* Optional images ZIP */}
+      <div
+        onClick={() => zipInputRef.current?.click()}
+        className={`flex cursor-pointer items-center justify-between rounded-lg border border-dashed px-5 py-4 transition-colors ${
+          zipName
+            ? "border-green-300 bg-green-50 dark:border-green-800 dark:bg-green-900/20"
+            : "border-stroke bg-white hover:border-primary/60 dark:border-strokedark dark:bg-boxdark"
+        }`}
+      >
+        <input
+          ref={zipInputRef}
+          type="file"
+          accept=".zip"
+          className="hidden"
+          onChange={(e) => onZip(e.target.files?.[0])}
+        />
+        <div className="flex items-center gap-3">
+          <FolderArchive className="h-5 w-5 text-gray-400" />
+          <div>
+            <p className="text-sm font-semibold text-black dark:text-white">
+              {zipName ? zipName : "Add a ZIP of product images (optional)"}
+            </p>
+            <p className="text-xs text-gray-500">
+              No URLs needed — name each file in the <code className="rounded bg-gray-100 px-1 dark:bg-gray-800">image_files</code> column, or put photos for each product in a folder named exactly like the product.
+            </p>
+          </div>
+        </div>
+        {zipName && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (zipInputRef.current) zipInputRef.current.value = "";
+              setZipName(null);
+            }}
+            className="text-xs font-medium text-red-500 hover:text-red-600"
+          >
+            Remove
+          </button>
+        )}
       </div>
 
       {/* Actions */}

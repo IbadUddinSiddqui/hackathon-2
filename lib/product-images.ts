@@ -22,6 +22,36 @@ export type SanityImage = {
   asset: { _type: "reference"; _ref: string };
 };
 
+const CONTENT_TYPES: Record<string, string> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+  gif: "image/gif",
+  avif: "image/avif",
+};
+
+function extFromContentType(contentType: string): string {
+  if (contentType.includes("png")) return "png";
+  if (contentType.includes("webp")) return "webp";
+  if (contentType.includes("gif")) return "gif";
+  if (contentType.includes("avif")) return "avif";
+  return "jpg";
+}
+
+/** Upload a single raw image buffer as a Sanity image asset. */
+async function uploadBuffer(
+  buffer: Buffer,
+  contentType: string,
+  filename: string
+): Promise<{ _id: string }> {
+  return serverClient.assets.upload("image", buffer, { contentType, filename });
+}
+
+function toAsset(asset: { _id: string }): SanityImage {
+  return { _type: "image", asset: { _type: "reference", _ref: asset._id } };
+}
+
 /** Download each image URL and store it as a Sanity image asset. */
 export async function uploadImages(
   urls: string[],
@@ -35,22 +65,48 @@ export async function uploadImages(
       if (!res.ok) continue;
 
       const contentType = res.headers.get("content-type") || "image/jpeg";
-      const ext = contentType.includes("png") ? "png" : contentType.includes("webp") ? "webp" : "jpg";
       const body = await res.arrayBuffer();
       if (body.byteLength === 0) continue;
 
-      const asset = await serverClient.assets.upload(
-        "image",
+      const asset = await uploadBuffer(
         Buffer.from(body),
-        {
-          contentType,
-          filename: `${slugify(productName)}-${assets.length + 1}.${ext}`,
-        }
+        contentType,
+        `${slugify(productName)}-${assets.length + 1}.${extFromContentType(contentType)}`
       );
-
-      assets.push({ _type: "image", asset: { _type: "reference", _ref: asset._id } });
+      assets.push(toAsset(asset));
     } catch {
       // Skip unreachable/broken image URLs silently — the product still saves.
+    }
+  }
+
+  return assets;
+}
+
+/**
+ * Upload locally-provided image buffers (e.g. files extracted from the ZIP the
+ * admin uploads alongside the bulk-import Excel) as Sanity image assets.
+ * The extension on `name` decides the content type.
+ */
+export async function uploadImageBuffers(
+  files: { name: string; data: Buffer }[],
+  productName: string
+): Promise<SanityImage[]> {
+  const assets: SanityImage[] = [];
+
+  for (const file of files.slice(0, 8)) {
+    try {
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const contentType = CONTENT_TYPES[ext] ?? "image/jpeg";
+      const safeExt = ext === "jpeg" ? "jpg" : ext;
+
+      const asset = await uploadBuffer(
+        file.data,
+        contentType,
+        `${slugify(productName)}-${assets.length + 1}.${safeExt}`
+      );
+      assets.push(toAsset(asset));
+    } catch {
+      // Skip corrupt/oversized files silently — the product still saves.
     }
   }
 
