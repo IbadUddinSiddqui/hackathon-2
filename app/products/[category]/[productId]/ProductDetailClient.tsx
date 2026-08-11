@@ -12,10 +12,12 @@ import { Button } from "@/components/ui/button";
 import Header from "@/app/components/Header/Header";
 import Footer from "@/app/components/Footer/Footer";
 import { motion } from "framer-motion";
-import { Star, Timer } from "lucide-react";
+import { Star, Timer, Check } from "lucide-react";
+import Link from "next/link";
 import { useLocale } from "@/lib/locale-provider";
 import { t } from "@/lib/i18n";
 import { isHexColor } from "@/lib/is-hex-color";
+import type { ColorSibling } from "@/lib/product-colors";
 
 // P3-13 — live countdown to the flash-sale end.
 function FlashSaleCountdown({ endsAt }: { endsAt: string }) {
@@ -57,9 +59,11 @@ export type ProductDetail = {
 const ProductDetailClient = ({
   product,
   flashSale,
+  colorSiblings = [],
 }: {
   product: ProductDetail;
   flashSale?: { salePrice: number; endsAt: string };
+  colorSiblings?: ColorSibling[];
 }) => {
   const { addToWishlist, items: wishlistItems } = useWishlistStore();
   const { locale } = useLocale();
@@ -135,21 +139,56 @@ const ProductDetailClient = ({
               </motion.div>
 
               <motion.div className="space-y-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                {/* When the product has a color set, show it — the customer picks
-                    the color by choosing this listing, so it just needs to be visible.
+                {/* Color picker: the current product's color plus a swatch per
+                    sibling listing (same family, different color). Picking a
+                    color navigates to that listing, whose color is then recorded
+                    on the order (server-truth) — so the right color ships. When
+                    there are no siblings, just show the single read-only chip.
                     Nothing renders when no color is set (flat-gallery products). */}
                 {product?.color ? (
-                  <div className="flex items-center gap-3">
+                  <div className="space-y-2">
                     <h3 className="text-lg font-medium">{t(locale, "product.color")}</h3>
-                    <span className="inline-flex items-center gap-2 rounded-full border border-stroke px-3 py-1 text-sm font-medium dark:border-strokedark">
-                      {isHexColor(product.color) && (
-                        <span
-                          className="inline-block h-3.5 w-3.5 rounded-full border border-black/10"
-                          style={{ backgroundColor: product.color }}
-                        />
-                      )}
-                      {product.color}
-                    </span>
+                    {colorSiblings.length >= 1 ? (
+                      <div className="flex flex-wrap items-center gap-2">
+                        {[
+                          colorSwatch({
+                            _id: product._id,
+                            name: product.name,
+                            color: product.color,
+                            category_slug: product.category_slug,
+                          }),
+                          ...colorSiblings.map((s) => colorSwatch(s)),
+                        ].map((sw) =>
+                          sw.id === product._id ? (
+                            <span
+                              key={sw.id}
+                              title={sw.color}
+                              aria-current="page"
+                              className="inline-flex cursor-default items-center gap-1.5 rounded-full border-2 border-black px-3 py-1.5 text-sm font-semibold dark:border-white"
+                            >
+                              <SwatchDot color={sw.color} />
+                              {sw.color}
+                              <Check className="h-3.5 w-3.5" />
+                            </span>
+                          ) : (
+                            <Link
+                              key={sw.id}
+                              href={`/products/${sw.categorySlug}/${sw.id}`}
+                              title={`${sw.color} — ${sw.name}`}
+                              className="inline-flex items-center gap-1.5 rounded-full border border-stroke px-3 py-1.5 text-sm text-gray-600 transition-colors hover:border-black hover:text-black dark:border-strokedark dark:text-bodydark2 dark:hover:border-white dark:hover:text-white"
+                            >
+                              <SwatchDot color={sw.color} />
+                              {sw.color}
+                            </Link>
+                          )
+                        )}
+                      </div>
+                    ) : (
+                      <span className="inline-flex items-center gap-2 rounded-full border border-stroke px-3 py-1 text-sm font-medium dark:border-strokedark">
+                        <SwatchDot color={product.color} />
+                        {product.color}
+                      </span>
+                    )}
                   </div>
                 ) : null}
 
@@ -194,6 +233,26 @@ const ProductDetailClient = ({
     </>
   );
 };
+
+/** A hex swatch dot, or a plain-text fallback for non-hex color names. */
+function SwatchDot({ color }: { color: string }) {
+  return isHexColor(color) ? (
+    <span
+      className="inline-block h-3.5 w-3.5 shrink-0 rounded-full border border-black/10"
+      style={{ backgroundColor: color }}
+    />
+  ) : null;
+}
+
+/** Normalize a current product or sibling into the swatch shape. */
+function colorSwatch(p: { _id: string; name: string; color: string; category_slug?: string }) {
+  return {
+    id: p._id,
+    name: p.name,
+    color: p.color,
+    categorySlug: p.category_slug || "all",
+  };
+}
 
 // Add this icon component
 const HeartIcon = ({ className }: { className?: string }) => (

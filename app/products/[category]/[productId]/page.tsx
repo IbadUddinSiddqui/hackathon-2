@@ -6,6 +6,7 @@ import ProductDetailClient, { type ProductDetail } from "./ProductDetailClient";
 import { SITE_NAME } from "@/lib/site";
 import { getActiveFlashSales, isSaleActive } from "@/lib/flash-sales";
 import { getActiveTenantId } from "@/lib/tenants";
+import { stripColorSuffix, selectColorSiblings, type ColorSibling } from "@/lib/product-colors";
 
 const PRODUCT_QUERY = `*[_type == "product" && (_id == $id || slug.current == $id) && (!defined(tenantId) || tenantId == $tenantId)][0]{
   _id,
@@ -34,6 +35,33 @@ async function getProduct(id: string, tenantId: string): Promise<ProductDetail |
       urlFor(img).url()
     ),
   };
+}
+
+/**
+ * Fetch the other color listings of the same product family, so the product
+ * page can render a color picker. Family = products whose base name (name
+ * minus its own trailing " - <color>" suffix) matches. Best-effort: any error
+ * just yields no siblings (the page still renders the single color chip).
+ */
+async function getColorSiblings(
+  product: ProductDetail,
+  tenantId: string
+): Promise<ColorSibling[]> {
+  if (!product.color) return [];
+  const base = stripColorSuffix(product.name, product.color);
+  if (!base) return [];
+
+  try {
+    const candidates = await client.fetch<
+      { _id: string; name: string; color?: string; category_slug?: string }[]
+    >(
+      `*[_type == "product" && name match $prefix && defined(color) && color != "" && (!defined(tenantId) || tenantId == $tenantId)] { _id, name, color, category_slug }`,
+      { prefix: `${base}*`, tenantId }
+    );
+    return selectColorSiblings(product, candidates).slice(0, 6);
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({
@@ -114,13 +142,19 @@ export default async function ProductDetailPage({
     },
   };
 
+  const colorSiblings = await getColorSiblings(product, tenantId);
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <ProductDetailClient product={product} flashSale={flashSale} />
+      <ProductDetailClient
+        product={product}
+        flashSale={flashSale}
+        colorSiblings={colorSiblings}
+      />
     </>
   );
 }
