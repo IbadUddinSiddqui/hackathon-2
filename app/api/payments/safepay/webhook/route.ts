@@ -196,8 +196,8 @@ export async function POST(request: Request) {
   // look up the order and retry with the tenant's own webhook secret — so
   // unauthenticated requests can't trigger Sanity reads. If no secret exists
   // at all, stay in RECON MODE (accept + log) while we learn the real payload.
-  let webhookSecret = process.env.SAFEPAY_WEBHOOK_SECRET;
-  let valid =
+  const webhookSecret = process.env.SAFEPAY_WEBHOOK_SECRET;
+  let  valid =
     Boolean(webhookSecret) &&
     verifySafepaySignature({ rawBody, signature, timestamp, webhookSecret });
 
