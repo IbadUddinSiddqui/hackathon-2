@@ -1,6 +1,7 @@
 // app/api/create-safepay-order/route.ts
-// Mirror of app/api/create-checkout-session/route.ts, but for Safepay (the
-// Pakistan-viable gateway). Same safety rules: prices come from Sanity server-
+// Creates a Safepay checkout session for a pending order (the Pakistan-viable
+// gateway; the legacy Stripe routes were removed). Same safety rules: prices
+// come from Sanity server-
 // side, discounts are validated server-side, DELIVERY_FEE is included, and the
 // pending order is persisted BEFORE the customer is redirected to Safepay's
 // hosted checkout page.

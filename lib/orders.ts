@@ -250,11 +250,14 @@ export async function restoreProductStock(
 }
 
 /**
- * Refund a paid order: issue a real Stripe refund on its payment intent,
- * restore the decremented stock, then mark the order `refunded`. Returns a
- * result object instead of throwing so the API route can map it to a clean
- * HTTP response. Idempotent at the Stripe level: if the intent is already
- * refunded, stock is still restored and the status is still updated.
+ * Refund a paid order: issue a real Stripe refund when the order has a Stripe
+ * payment intent (legacy), restore the decremented stock, then mark the order
+ * `refunded`. Safepay/COD orders carry no Stripe intent — the money is refunded
+ * manually (Safepay dashboard / on delivery) — but stock is STILL restored and
+ * the order IS marked refunded so the admin flow completes and never blocks.
+ * Returns a result object instead of throwing so the API route can map it to a
+ * clean HTTP response. Idempotent: an already-refunded Stripe error still
+ * restores stock and updates the status.
  */
 export async function refundOrder(
   orderDocId: string
@@ -268,24 +271,22 @@ export async function refundOrder(
   if (order.status !== 'paid') {
     return { refunded: false, message: 'Only paid orders can be refunded' };
   }
+
   const paymentIntentId = order.stripe_payment_intent_id;
-  if (!paymentIntentId) {
-    return { refunded: false, message: 'This order has no Stripe payment intent to refund' };
-  }
-
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2025-01-27.acacia',
-  });
-
-  try {
-    await stripe.refunds.create({
-      payment_intent: paymentIntentId,
-      reason: 'requested_by_customer',
+  if (paymentIntentId) {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: '2025-01-27.acacia',
     });
-  } catch (err: any) {
-    // Already refunded → treat as success so a retry still restores stock.
-    if (err?.code !== 'charge_already_refunded') {
-      throw err;
+    try {
+      await stripe.refunds.create({
+        payment_intent: paymentIntentId,
+        reason: 'requested_by_customer',
+      });
+    } catch (err: any) {
+      // Already refunded → treat as success so a retry still restores stock.
+      if (err?.code !== 'charge_already_refunded') {
+        throw err;
+      }
     }
   }
 
@@ -299,5 +300,11 @@ export async function refundOrder(
   );
 
   await serverClient.patch(order._id).set({ status: 'refunded' }).commit();
-  return { refunded: true };
+  return paymentIntentId
+    ? { refunded: true }
+    : {
+        refunded: true,
+        message:
+          'Order marked refunded — gateway refund handled manually (Safepay dashboard / on delivery).',
+      };
 }

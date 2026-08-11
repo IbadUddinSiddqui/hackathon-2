@@ -82,8 +82,21 @@ const Header = () => {
            
              
               <Link
+                href={`/about`}
+                className="relative group text-lg font-medium text-gray-700 hover:text-black transition-colors"
+              >
+                {t(locale, "header.about")}
+                <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+              <Link
+                href={`/contact`}
+                className="relative group text-lg font-medium text-gray-700 hover:text-black transition-colors"
+              >
+                {t(locale, "header.contact")}
+                <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+              <Link
                 href={`/dashboard`}
-                
                 className="relative group text-lg font-medium text-gray-700 hover:text-black transition-colors"
               >
                 {t(locale, "header.dashboard")}
@@ -239,8 +252,21 @@ const Header = () => {
                 {/* Navigation Links */}
                 <nav className="space-y-4 flex flex-col">
                 <Link
+                href={`/about`}
+                className="relative group text-lg font-medium text-gray-700 hover:text-black transition-colors"
+              >
+                {t(locale, "header.about")}
+                <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+              <Link
+                href={`/contact`}
+                className="relative group text-lg font-medium text-gray-700 hover:text-black transition-colors"
+              >
+                {t(locale, "header.contact")}
+                <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+              <Link
                 href={`/dashboard`}
-                
                 className="relative group text-lg font-medium text-gray-700 hover:text-black transition-colors"
               >
                 {t(locale, "header.dashboard")}

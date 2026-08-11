@@ -58,7 +58,9 @@ export async function PATCH(
         targetLabel: orderId.slice(0, 8).toUpperCase(),
         details: "status → refunded",
       });
-      return NextResponse.json({ success: true, status: "refunded" });
+      // Surfacing the message matters for Safepay/COD orders: the gateway
+      // refund itself is done manually, and the admin should see that note.
+      return NextResponse.json({ success: true, status: "refunded", message: result.message });
     }
 
     const order = await serverClient.fetch(

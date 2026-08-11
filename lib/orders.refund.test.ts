@@ -116,6 +116,42 @@ describe('refundOrder', () => {
     if (!result.refunded) expect(result.message).toContain('paid');
   });
 
+  it('marks Safepay/COD orders refunded (no Stripe intent) and restores stock', async () => {
+    const codOrder = { ...paidOrder, stripe_payment_intent_id: undefined };
+    mockFetch
+      .mockResolvedValueOnce(codOrder)
+      .mockResolvedValueOnce([
+        { _id: 'p1', stock: 8 },
+        { _id: 'p2', stock: 4 },
+      ]);
+
+    const txPatch = vi.fn();
+    const txCommit = vi.fn().mockResolvedValue(undefined);
+    vi.mocked(serverClient.transaction).mockReturnValue({
+      patch: txPatch,
+      commit: txCommit,
+    } as any);
+
+    const patchChain = {
+      set: vi.fn(() => patchChain),
+      commit: vi.fn().mockResolvedValue({}),
+    };
+    vi.mocked(serverClient.patch).mockReturnValue(patchChain as any);
+
+    const result = await refundOrder('order_1');
+
+    // No Stripe call for a non-Stripe order.
+    expect(mockStripeInstance.refunds.create).not.toHaveBeenCalled();
+    // Stock still restored: 8+2=10 and 4+1=5.
+    expect(txPatch).toHaveBeenCalledWith('p1', { set: { stock: 10 } });
+    expect(txPatch).toHaveBeenCalledWith('p2', { set: { stock: 5 } });
+    expect(txCommit).toHaveBeenCalledTimes(1);
+    // Order marked refunded, with a manual-handling note.
+    expect(patchChain.set).toHaveBeenCalledWith({ status: 'refunded' });
+    expect(result.refunded).toBe(true);
+    if (result.refunded) expect(result.message).toContain('manual');
+  });
+
   it('treats an already-refunded Stripe error as success so retries still restore stock', async () => {
     mockFetch
       .mockResolvedValueOnce(paidOrder)
