@@ -126,15 +126,13 @@ export function validateRow(row: ImportRow): RowValidation {
     asString(row.category_slug) ?? slugify(asString(row.category) ?? "");
   if (!categorySlug) errors.push("category_slug is required (or leave it blank to auto-generate)");
 
-  // Images are schema-required (min 1) and the storefront renders images[0],
-  // so a row without any image source must be skipped to avoid broken cards.
+  // Image sources are NOT validated at row level: a row may legally have no
+  // image_urls and no image_files and still get images via the ZIP folder trick
+  // (a folder named exactly like the product). The route resolves images per
+  // row and skips any row that ends up with ZERO loadable images (clear reason,
+  // never a broken card).
   const imageUrls = splitList(row.image_urls).filter((u) => /^https?:\/\//i.test(u));
   const imageFiles = splitList(row.image_files);
-  if (imageUrls.length === 0 && imageFiles.length === 0) {
-    errors.push(
-      "image_urls or image_files required (comma-separated https URLs and/or filenames inside the uploaded ZIP)"
-    );
-  }
 
   if (errors.length > 0) return { ok: false, errors };
 

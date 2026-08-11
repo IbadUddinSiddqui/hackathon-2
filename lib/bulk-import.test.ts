@@ -113,10 +113,16 @@ describe("validateRow", () => {
     if (!result.ok) expect(result.errors.join(",")).toContain("size");
   });
 
-  it("rejects a row with no image source at all", () => {
+  it("allows a row with no declared image source (folder-trick rows)", () => {
+    // No image_urls and no image_files is legal: the ZIP folder trick supplies
+    // the images at import time. Rows that resolve to zero images are skipped
+    // by the route with a clear reason.
     const result = validateRow(row({ image_urls: undefined, image_files: undefined }));
-    expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.errors.join(",")).toContain("image_urls or image_files");
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.product.imageUrls).toEqual([]);
+      expect(result.product.imageFiles).toEqual([]);
+    }
   });
 
   it("drops non-http image URLs", () => {
