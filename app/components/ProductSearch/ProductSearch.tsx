@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { FaSearch } from 'react-icons/fa';
 import Image from 'next/image';
 import { clientTenantId } from '@/lib/tenant-client';
+import { buildSearchParams } from '@/lib/search';
 
 // 1. Configure Typesense Client (values come from env vars, see .env.local)
 const client = new Typesense.Client({
@@ -36,14 +37,26 @@ export default function HeaderSearch() {
     try {
       setLoading(true);
       // P4-03 — only show the active tenant's products in search results.
+      // P4-13 — hybrid (vector) ranking when an embedder is configured, plain
+      // text otherwise (the fallback).
       const tenantId = clientTenantId();
-      const searchResults = await client.collections('products').documents().search({
+      const textParams = {
         q: searchQuery,
         query_by: 'name,description,brand,category,tags',
         filter_by: `tenant_id:=${tenantId}`,
         sort_by: 'ratings:desc,created_at:desc',
-        per_page: 12
-      });
+        per_page: 12,
+      };
+      let searchResults;
+      try {
+        searchResults = await client.collections('products').documents().search(
+          buildSearchParams(searchQuery, tenantId, 12)
+        );
+      } catch (hybridErr) {
+        // Hybrid can fail when the collection was created before the embedder
+        // was configured — retry with plain text search (the fallback).
+        searchResults = await client.collections('products').documents().search(textParams);
+      }
       setResults(searchResults.hits || []);
       setIsOpen(true); // Open dropdown with results
     } catch {

@@ -9,6 +9,7 @@ import { localeFromCookie, localeDir, LOCALE_COOKIE } from "@/lib/i18n";
 import { LocaleProvider } from "@/lib/locale-provider";
 import { getActiveTenant, ensureDefaultTenant } from "@/lib/tenants";
 import { TenantProvider, type TenantBranding } from "@/lib/tenant-provider";
+import ChatWidget from "@/app/components/ChatWidget/ChatWidget";
 
 // Load custom fonts
 const geistSans = localFont({
@@ -108,6 +109,8 @@ export default async function RootLayout({
             <LocaleProvider locale={locale}>
               <TenantProvider tenant={tenantBranding}>
                 {children}
+                {/* P4-15 — storefront FAQ chat (tenant-branded WhatsApp/email). */}
+                <ChatWidget />
               </TenantProvider>
             </LocaleProvider>
           </SessionProvider>

@@ -4,8 +4,9 @@ import React from "react";
 import { Badge } from "@/components/ui/badge";
 import ProductGallery from "@/app/components/ProductImages/ProductGallery";
 import AddToCartButton from "@/app/components/AddToCartButton/AddToCartButton";
-import ProductsGrid from "@/app/components/ProductsGrid/ProductsGrid";
+import Recommendations from "@/app/components/Recommendations/Recommendations";
 import ReviewSection from "@/app/components/Reviews/ReviewSection";
+import SizeQuiz from "@/app/components/SizeQuiz/SizeQuiz";
 import { useWishlistStore } from "@/lib/stores/wishlistStore";
 import { Button } from "@/components/ui/button";
 import Header from "@/app/components/Header/Header";
@@ -141,6 +142,9 @@ const ProductDetailClient = ({
                   <h3 className="text-lg font-medium">Choose Size</h3>
                   {/* Add your Size component */}
                 </div>
+
+                {/* P4-14 — measurement-based size recommendation. */}
+                <SizeQuiz availableSizes={product?.size || []} />
               </motion.div>
 
               <motion.div
@@ -165,14 +169,12 @@ const ProductDetailClient = ({
           </div>
         </motion.div>
 
-        <motion.section
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="py-12 px-6 max-w-7xl mx-auto"
-        >
-          <h2 className="text-3xl font-bold text-center mb-8">{t(locale, "product.youMayAlsoLike")}</h2>
-          <ProductsGrid category={product?.category_slug} />
-        </motion.section>
+        {/* P4-12 — AI/rule-based recommendations (co-purchase), with the old
+            category grid as the automatic fallback. */}
+        <Recommendations
+          productId={product?._id}
+          categorySlug={product?.category_slug}
+        />
 
         <div className="mx-auto max-w-7xl px-6 pb-16">
           <ReviewSection productId={product?._id} />

@@ -11,13 +11,27 @@ export type PlanLimits = {
   productLimit: number;
   monthlyOrderLimit: number;
   bandwidthGB: number;
+  // P4-09 (human decision) — PKR pricing. Defaults are DRAFT figures; the
+  // owner confirms final numbers before platform billing goes live.
+  pricePkr: number;
+  billingPeriod: "monthly" | "yearly";
 };
 
 export const PLANS: Record<TenantPlan, PlanLimits> = {
-  free: { productLimit: 20, monthlyOrderLimit: 50, bandwidthGB: 5 },
-  trial: { productLimit: 50, monthlyOrderLimit: 200, bandwidthGB: 15 },
-  pro: { productLimit: 2000, monthlyOrderLimit: 10000, bandwidthGB: 200 },
+  free: { productLimit: 20, monthlyOrderLimit: 50, bandwidthGB: 5, pricePkr: 0, billingPeriod: "monthly" },
+  trial: { productLimit: 50, monthlyOrderLimit: 200, bandwidthGB: 15, pricePkr: 0, billingPeriod: "monthly" },
+  pro: { productLimit: 2000, monthlyOrderLimit: 10000, bandwidthGB: 200, pricePkr: 4999, billingPeriod: "monthly" },
 };
+
+/** Human-readable plan summary (used by the platform console later). */
+export function planSummary(plan: TenantPlan | string): {
+  plan: TenantPlan;
+  limits: PlanLimits;
+  label: string;
+} {
+  const p = plan === "free" || plan === "trial" || plan === "pro" ? plan : "free";
+  return { plan: p, limits: PLANS[p], label: p === "free" ? "Free" : p === "trial" ? "Trial" : "Pro" };
+}
 
 export function planLimits(plan?: string | null): PlanLimits {
   if (plan === "free" || plan === "trial" || plan === "pro") return PLANS[plan];

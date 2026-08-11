@@ -9,6 +9,7 @@ import Browse from "./components/Browse/Browse";
 import TestimonialCard from "./components/Testiomnials/Tetimonials";
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
+import HomeRecommendations from "./components/Recommendations/HomeRecommendations";
 
 export const metadata: Metadata = {
   title: "AnK's — Shop the Latest Pakistani Fashion",
@@ -25,6 +26,7 @@ export default function Home() {
         <SponsorSection/>
         <NewArrivals/>
         <TopSale/>
+        <HomeRecommendations/>
         <Browse/>
         <TestimonialCard/>
         <Footer></Footer>

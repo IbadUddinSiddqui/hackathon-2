@@ -862,7 +862,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 ### P4-EPIC-02 — expanded nodes (AI recommendations / search / size / chatbot)
 
 ### [P4-11] AI product recommendations engine (co-purchase rules first, LLM optional)
-- status: todo
+- status: done
 - depends_on: [P3-01]
 - human_required: false
 - touches: [lib/recommendations.ts (new), lib/recommendations.test.ts (new), app/api/recommendations/route.ts (new)]
@@ -871,7 +871,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes: keep the current "You May Also Like" category fallback as the no-data path.
 
 ### [P4-12] Storefront recommendations UI (product detail, cart, home)
-- status: todo
+- status: done
 - depends_on: [P4-11]
 - human_required: false
 - touches: [app/products/[category]/[productId]/ProductDetailClient.tsx, app/cart/page.tsx, app/page.tsx]
@@ -880,7 +880,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes:
 
 ### [P4-13] Semantic search (Typesense hybrid/vector, text fallback)
-- status: todo
+- status: done
 - depends_on: [P4-16]
 - human_required: false
 - touches: [lib/typesense.ts, app/api/search/route.ts, app/search/page.tsx, app/components/ProductSearch/ProductSearch.tsx]
@@ -889,7 +889,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes: depends on the AI provider/embedding model decision in P4-16.
 
 ### [P4-14] Size recommendation quiz (measurements -> size)
-- status: todo
+- status: done
 - depends_on: []
 - human_required: false
 - touches: [lib/size-guide.ts (new), lib/size-guide.test.ts (new), app/size-guide/ (new), app/components/Size/Size.tsx]
@@ -898,7 +898,7 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes:
 
 ### [P4-15] Support chatbot (FAQ knowledge base, rule-based, WhatsApp escalation)
-- status: todo
+- status: done
 - depends_on: [P4-17]
 - human_required: false
 - touches: [lib/chatbot.ts (new), app/api/chatbot/route.ts (new), app/components/ChatWidget/ (new)]

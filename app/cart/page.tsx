@@ -12,6 +12,7 @@ import Footer from '../components/Footer/Footer';
 import { DELIVERY_FEE, CURRENCY_SYMBOL } from '@/lib/constants';
 import { useLocale } from '@/lib/locale-provider';
 import { t } from '@/lib/i18n';
+import CartRecommendations from '../components/Recommendations/CartRecommendations';
 
 const CartPage = () => {
   const router = useRouter();
@@ -255,6 +256,7 @@ const CartPage = () => {
           </section>
         </div>
       </div>
+      <CartRecommendations />
       <Footer></Footer>
     </>
   );

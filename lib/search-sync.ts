@@ -99,6 +99,35 @@ export function toTypesenseDocument(
   };
 }
 
+/**
+ * P4-13 — embedder config for hybrid/vector search. Attached to the collection
+ * ONLY when the embedder env vars exist (see lib/search.ts hybridSearchConfigured
+ * on the query side). Without them the collection stays text-only — the
+ * fallback that always works. Typesense embedder config lives at collection
+ * creation, so a NEW collection gets the embed block once the keys are set.
+ */
+function embedderConfig(): { from: string[]; embed: Record<string, unknown> }[] {
+  const host = process.env.NEXT_PUBLIC_TYPESENSE_EMBEDDER;
+  const key = process.env.NEXT_PUBLIC_TYPESENSE_EMBEDDING_KEY;
+  const model = process.env.TYPESENSE_EMBED_MODEL || "all-MiniLM-L6-v2";
+  if (!host || !key) return [];
+  return [
+    {
+      from: ["name", "description", "brand", "tags"],
+      embed: {
+        index: true,
+        query: true,
+        source: {
+          name: "custom/ollama",
+          url: host,
+          api_key: key,
+          model_name: model,
+        },
+      },
+    },
+  ];
+}
+
 /** Create the Typesense collection on first use if it doesn't exist yet. */
 export async function ensureProductsCollection(): Promise<void> {
   let exists = true;
@@ -110,6 +139,7 @@ export async function ensureProductsCollection(): Promise<void> {
   }
   if (exists) return;
 
+  const embed = embedderConfig();
   await adminClient.collections().create({
     name: "products",
     fields: [
@@ -130,6 +160,7 @@ export async function ensureProductsCollection(): Promise<void> {
       { name: "created_at", type: "int64" },
     ],
     default_sorting_field: "created_at",
+    ...(embed.length > 0 ? { embed } : {}),
   });
 }
 
