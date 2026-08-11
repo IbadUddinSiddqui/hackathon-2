@@ -415,6 +415,15 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - verify: manual — owner confirmation
 - notes: 2026-08-11 — OWNER CONFIRMED: /adminpanel/products loads and works after the 500 fix (commit 525da68, pushed). List verified working. Create/edit/delete still to be exercised per done_when (owner click-through against real Sanity data).
 
+### [P2-08] Admin product image editing (add/remove/replace on edit)
+- status: deferred
+- depends_on: [P2-06]
+- human_required: false
+- touches: [app/adminpanel/products/ProductForm.tsx, app/api/admin/products/[id]/route.ts, lib/admin-products.ts (buildUpdatePatch), lib/product-images.ts]
+- done_when: the edit form shows current product images with add-by-URL / remove / replace controls; on save the PATCH endpoint accepts an imageUrls replacement list, uploads new URLs as Sanity assets, and replaces the doc's images array; the existing "not supported yet" helper text is removed.
+- verify: `npm test -- admin-products` passes; tsc clean; edit-form save replaces images (spot-check a product in Studio)
+- notes: 2026-08-11 — ADDED per owner request ("mark it, see it later"): owner was confused by images being uneditable in the admin edit form. Current behavior documented in the form's helper text: create accepts image URLs (downloaded to Sanity assets, max 8); edit excludes imageUrls (buildUpdatePatch drops it) — users must use Studio or delete/recreate. DEFERRED by owner decision — revisit after Phase 3 selection.
+
 ### P2-EPIC-04 — expanded nodes (SEO pass) — ALL DONE 2026-08-10
 
 ### [P2-SEO-01] Metadata for every page + root SEO defaults
@@ -537,11 +546,219 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 
 ## PHASE 3 — Professional (epics only)
 
-- [ ] **P3-EPIC-01** Customer management screen + admin activity/audit log
-- [ ] **P3-EPIC-02** Abandoned cart recovery
-- [ ] **P3-EPIC-03** Loyalty / store credit / gift cards / bundles / flash sales
-- [ ] **P3-EPIC-04** Review submission + moderation, Meta/TikTok Pixel, GA, Merchant Center feed
-- [ ] **P3-EPIC-05** Urdu localization
+- [ ] **P3-EPIC-01** Customer management screen + admin activity/audit log — EXPANDED 2026-08-11 into P3-01..P3-05 below
+- [ ] **P3-EPIC-02** Abandoned cart recovery — EXPANDED 2026-08-11 into P3-06..P3-09 below
+- [ ] **P3-EPIC-03** Loyalty / store credit / gift cards / bundles / flash sales — EXPANDED 2026-08-11 into P3-10..P3-14 below
+- [ ] **P3-EPIC-04** Review submission + moderation, Meta/TikTok Pixel, GA, Merchant Center feed — EXPANDED 2026-08-11 into P3-15..P3-19 below
+- [ ] **P3-EPIC-05** Urdu localization — EXPANDED 2026-08-11 into P3-20..P3-22 below
+
+### P3-EPIC-01 — expanded nodes (Customer management + audit log)
+
+### [P3-01] Customer data model + capture on order
+- status: todo
+- depends_on: []
+- human_required: false
+- touches: [sanity/schemaTypes/customer.ts (new), lib/orders.ts, app/api/webhook/route.ts, app/api/create-cod-order/route.ts]
+- done_when: a `customer` Sanity type exists (email, name, phone, address, createdAt, orderCount) and is upserted (by email) whenever an order is created via any payment path (Stripe/Safepay webhook, COD); the customer doc is linked from the order.
+- verify: place a test order → a customer doc appears in Sanity with orderCount 1; `npm test` passes
+- notes:
+
+### [P3-02] Admin API — list + search customers
+- status: todo
+- depends_on: [P3-01]
+- human_required: false
+- touches: [app/api/admin/customers/route.ts (new), lib/admin-customers.ts (new), lib/admin-customers.test.ts (new)]
+- done_when: GET /api/admin/customers (admin-only) returns `{ items, total, page, pages }` (email, name, phone, orderCount, totalSpent, createdAt) with `?page=`/`?limit=`/`?search=` (email/name prefix); 401 unauthenticated.
+- verify: `npm test -- admin-customers` passes; curl unauth = 401; tsc clean
+- notes:
+
+### [P3-03] Admin customers page + detail
+- status: todo
+- depends_on: [P3-02]
+- human_required: false
+- touches: [app/adminpanel/customers/page.tsx (new), app/adminpanel/customers/[customerId]/page.tsx (new), app/components/Sidebar/index.tsx]
+- done_when: /adminpanel/customers shows a searchable table (customer, email, orders, total spent, joined); clicking a row opens a detail page listing that customer's orders with status/totals; sidebar link added.
+- verify: tsc clean; pages return 200 for an admin session; 307 → /denied without
+- notes:
+
+### [P3-04] Admin audit log — record admin actions
+- status: todo
+- depends_on: []
+- human_required: false
+- touches: [sanity/schemaTypes/auditLog.ts (new), lib/audit.ts (new), app/api/admin/products/route.ts, app/api/admin/products/[id]/route.ts, app/api/discount-codes/route.ts, app/api/orders/[orderId]/status/route.ts]
+- done_when: a `auditLog` Sanity type exists (adminEmail, action, targetType, targetId, details, createdAt) and every admin mutation endpoint (product create/update/delete, discount create/update/delete, order status change) writes a log entry via a shared lib/audit.ts helper.
+- verify: perform a product edit → an auditLog doc appears; `npm test` passes; tsc clean
+- notes:
+
+### [P3-05] Admin audit log page
+- status: todo
+- depends_on: [P3-04]
+- human_required: false
+- touches: [app/adminpanel/audit/page.tsx (new), app/api/admin/audit/route.ts (new), app/components/Sidebar/index.tsx]
+- done_when: /adminpanel/audit shows the latest log entries (time, admin, action, target) with type/action filters and pagination; sidebar link added.
+- verify: tsc clean; page 200 for admin; 307 → /denied without
+- notes:
+
+### P3-EPIC-02 — expanded nodes (Abandoned cart recovery)
+
+### [P3-06] Cart capture with contact info
+- status: todo
+- depends_on: []
+- human_required: false
+- touches: [app/checkout/page.tsx, app/api/cart-capture/route.ts (new), sanity/schemaTypes/abandonedCart.ts (new)]
+- done_when: when a shopper enters email/phone at checkout (or an email-capture prompt on exit), the cart contents + contact + createdAt are persisted server-side (only when they don't complete the order); completed orders are removed from the abandoned set.
+- verify: start a checkout with email, abandon it → an abandonedCart doc appears; complete a checkout → no abandonedCart doc for that email
+- notes:
+
+### [P3-07] Abandonment detection + recovery email
+- status: todo
+- depends_on: [P3-06]
+- human_required: false
+- touches: [app/api/cron/abandoned-cart/route.ts (new), lib/abandoned-cart.ts (new), lib/email.ts]
+- done_when: a cron endpoint (or manual trigger) finds carts untouched for > 24h and sends the recovery email (cart summary + checkout link) via Brevo; marks them as reminded (no double-send).
+- verify: seed an old abandoned cart → run the trigger → email sent (Brevo log) and cart marked reminded; idempotent on re-run
+- notes:
+
+### [P3-08] Admin abandoned-cart view
+- status: todo
+- depends_on: [P3-07]
+- human_required: false
+- touches: [app/adminpanel/abandoned/page.tsx (new), app/api/admin/abandoned/route.ts (new), app/components/Sidebar/index.tsx]
+- done_when: /adminpanel/abandoned lists carts (contact, items, value, age, reminded?) with a "send reminder now" button; sidebar link added.
+- verify: tsc clean; page 200 for admin
+- notes:
+
+### [P3-09] Owner: set up cron schedule (Vercel Cron)
+- status: todo
+- depends_on: [P3-07]
+- human_required: true
+- touches: [Vercel Cron settings / vercel.json]
+- done_when: the abandoned-cart endpoint is on a daily (or 6-hourly) schedule in Vercel Cron or an external scheduler.
+- verify: manual — confirm the schedule fires
+- notes:
+
+### P3-EPIC-03 — expanded nodes (Loyalty / store credit / gift cards / bundles / flash sales)
+
+### [P3-10] Store credit — balance + apply at checkout
+- status: todo
+- depends_on: [P3-01]
+- human_required: false
+- touches: [sanity/schemaTypes/customer.ts (creditBalance), lib/credit.ts (new), app/api/create-cod-order/route.ts, app/api/create-safepay-order/route.ts]
+- done_when: customers can have a credit balance; checkout can apply store credit toward the total; payment endpoints validate + deduct it and orders store `creditApplied`.
+- verify: `npm test -- credit` passes; apply-credit order stores correct totals; tsc clean
+- notes:
+
+### [P3-11] Gift cards
+- status: todo
+- depends_on: [P3-10]
+- human_required: false
+- touches: [sanity/schemaTypes/giftCard.ts (new), lib/gift-cards.ts (new), app/checkout/page.tsx]
+- done_when: admin can create gift cards (code, balance, active, expiry); customers redeem at checkout; balance decrements per order; discount-style validation server-side.
+- verify: `npm test -- gift-cards` passes; redeem flow stores correct totals; tsc clean
+- notes:
+
+### [P3-12] Bundles
+- status: todo
+- depends_on: []
+- human_required: false
+- touches: [sanity/schemaTypes/bundle.ts (new), lib/bundles.ts (new), app/products/[category]/page.tsx]
+- done_when: a bundle type (name, included products + quantities, bundle price) exists; bundles render on the storefront and checkout prices the bundle server-side.
+- verify: `npm test -- bundles` passes; bundle renders and prices correctly; tsc clean
+- notes:
+
+### [P3-13] Flash sales
+- status: todo
+- depends_on: []
+- human_required: false
+- touches: [sanity/schemaTypes/flashSale.ts (new), lib/flash-sales.ts (new), app/components/Hero/Hero.tsx]
+- done_when: a flashSale type (products, discounted price, start/end, active) exists; storefront shows discounted prices + countdown during the window; payment endpoints price from the sale when active.
+- verify: `npm test -- flash-sales` passes; active sale shows discounted price; tsc clean
+- notes:
+
+### [P3-14] Loyalty points
+- status: todo
+- depends_on: [P3-01]
+- human_required: false
+- touches: [sanity/schemaTypes/customer.ts (points), lib/loyalty.ts (new), app/checkout/page.tsx]
+- done_when: orders earn points (e.g. 1 point per Rs 100); points can be redeemed as credit at checkout; a points ledger tracks earn/spend; admin can adjust balances.
+- verify: `npm test -- loyalty` passes; earn/redeem math correct; tsc clean
+- notes:
+
+### P3-EPIC-04 — expanded nodes (Reviews + pixels + feeds)
+
+### [P3-15] Product reviews — schema + submission
+- status: todo
+- depends_on: []
+- human_required: false
+- touches: [sanity/schemaTypes/review.ts (new), app/api/reviews/route.ts (new), app/products/[category]/[productId]/ProductDetailClient.tsx]
+- done_when: a `review` type exists (product ref, rating 1-5, title, body, customer name, status pending/approved/rejected); a submit form on the product page posts reviews (rate-limited); reviews list on the product page shows only approved ones.
+- verify: `npm test -- reviews` passes; POST review → pending; only approved render; tsc clean
+- notes:
+
+### [P3-16] Review moderation in admin
+- status: todo
+- depends_on: [P3-15]
+- human_required: false
+- touches: [app/adminpanel/reviews/page.tsx (new), app/api/admin/reviews/route.ts (new), app/components/Sidebar/index.tsx]
+- done_when: /adminpanel/reviews lists pending reviews with approve/reject buttons; product average rating recomputes from approved reviews.
+- verify: tsc clean; page 200 for admin; approve → review visible on product page
+- notes:
+
+### [P3-17] Meta/TikTok Pixel events
+- status: todo
+- depends_on: []
+- human_required: true (needs Meta/TikTok pixel IDs from the owner's ad accounts)
+- touches: [app/layout.tsx, lib/pixels.ts (new), lib/stores/cartStore.ts, app/checkout/success/page.tsx]
+- done_when: pixel scripts load conditionally when NEXT_PUBLIC_META_PIXEL_ID / NEXT_PUBLIC_TIKTOK_PIXEL_ID are set; ViewContent, AddToCart, InitiateCheckout, Purchase events fire with real values.
+- verify: with IDs set, event calls visible in browser network tab / Meta test events
+- notes: blocked on owner providing pixel IDs
+
+### [P3-18] Google Analytics 4
+- status: todo
+- depends_on: []
+- human_required: true (needs a GA4 measurement ID from the owner's Google account)
+- touches: [app/layout.tsx, lib/analytics.ts (new)]
+- done_when: GA4 loads conditionally on NEXT_PUBLIC_GA_MEASUREMENT_ID; page_view + key ecommerce events fire.
+- verify: with ID set, realtime view shows the visit; events visible in GA debug
+- notes: blocked on owner providing measurement ID
+
+### [P3-19] Google Merchant Center feed
+- status: todo
+- depends_on: []
+- human_required: false
+- touches: [app/api/merchant-feed/route.ts (new), lib/merchant-feed.ts (new)]
+- done_when: GET /api/merchant-feed returns a valid Google Shopping XML feed (id, title, link, image, price PKR, availability, brand, condition) generated from Sanity products.
+- verify: curl /api/merchant-feed returns valid XML with product entries; validates against feed schema
+- notes:
+
+### P3-EPIC-05 — expanded nodes (Urdu localization)
+
+### [P3-20] i18n framework + language switcher
+- status: todo
+- depends_on: []
+- human_required: false
+- touches: [package.json, lib/i18n.ts (new), app/layout.tsx]
+- done_when: an i18n solution (lightweight custom dictionary or next-intl) is set up with en/ur dictionaries, a default locale, and a visible language switcher in the header.
+- verify: tsc clean; switcher flips visible strings between English and Urdu
+- notes:
+
+### [P3-21] Translate storefront pages
+- status: todo
+- depends_on: [P3-20]
+- human_required: false
+- touches: [app/page.tsx, app/components/Hero/Hero.tsx, app/components/Footer/Footer.tsx, app/cart/page.tsx, app/checkout/page.tsx]
+- done_when: key storefront strings (nav, hero, product cards, cart, checkout) come from the dictionary; product data stays as-authored.
+- verify: tsc clean; Urdu locale renders translated UI
+- notes:
+
+### [P3-22] Urdu RTL support + fonts
+- status: todo
+- depends_on: [P3-21]
+- human_required: false
+- touches: [app/layout.tsx, app/globals.css]
+- done_when: Urdu locale sets dir="rtl" and loads an Urdu-capable font; layout adapts for RTL.
+- verify: tsc clean; Urdu locale renders RTL correctly in a browser
+- notes:
 
 ## PHASE 4 — Enterprise (epics only — P4-EPIC-01 only applies if P1-14 decided "SaaS")
 
