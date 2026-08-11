@@ -407,13 +407,13 @@ Replaces reliance on raw Sanity Studio for day-to-day product ops. Reuses the ex
 - notes: VERIFIED 2026-08-10 — ProductForm.tsx (shared client form: create→POST /api/admin/products incl. imageUrls list; edit→PATCH /api/admin/products/[id]; Delete button w/ confirm→DELETE; comma-separated size/tags; numeric price/stock; error+message states; 401 handling via API). new/page.tsx + [id]/edit/page.tsx (guard, edit fetches doc via serverClient projection, notFound() when missing). tsc clean; 60/60; all pages 307 → /denied unauth.
 
 ### [P2-07] Owner browser-test the product admin UI
-- status: todo
+- status: in_progress
 - depends_on: [P2-06]
 - human_required: true
 - touches: [/adminpanel/products, /adminpanel/products/new, /adminpanel/products/[id]/edit]
 - done_when: owner clicks through list/search, create, edit, delete against real Sanity data in a real browser and confirms each works.
 - verify: manual — owner confirmation
-- notes:
+- notes: 2026-08-11 — OWNER CONFIRMED: /adminpanel/products loads and works after the 500 fix (commit 525da68, pushed). List verified working. Create/edit/delete still to be exercised per done_when (owner click-through against real Sanity data).
 
 ### P2-EPIC-04 — expanded nodes (SEO pass) — ALL DONE 2026-08-10
 
