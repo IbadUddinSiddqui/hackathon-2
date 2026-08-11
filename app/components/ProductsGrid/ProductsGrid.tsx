@@ -1,231 +1,171 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from "@/components/ui/button";
-import { getSanityProducts } from '@/lib/sanity/product';
-import { SanityProduct } from '@/lib/sanity/product';
-import { urlFor } from '@/sanity/lib/image';
+import React, { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { getSanityProducts, SanityProduct } from "@/lib/sanity/product";
+import { urlFor } from "@/sanity/lib/image";
+import { useCartStore } from "@/lib/stores/cartStore";
+import { useLocale } from "@/lib/locale-provider";
+import { t } from "@/lib/i18n";
 
-interface MayAlsoLikeProps {
+interface ProductsGridProps {
   category: string | undefined;
 }
 
-const ProductsGrid = ({ category }: MayAlsoLikeProps) => {
+const INITIAL_VISIBLE = 10;
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.07, delayChildren: 0.05 },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 280, damping: 24 },
+  },
+};
+
+function formatPrice(price: unknown): string {
+  const n = Number(price);
+  return Number.isFinite(n) && n > 0 ? `Rs ${n.toLocaleString()}` : "";
+}
+
+function ProductCard({
+  product,
+  category,
+}: {
+  product: SanityProduct;
+  category: string | undefined;
+}) {
+  const addItem = useCartStore((s) => s.addItem);
+  const { locale } = useLocale();
+  const href = `/products/${category || "all"}/${product._id}`;
+  const inStock = product.stock > 0;
+  const imageUrl = product.images?.[0] ? urlFor(product.images[0]).url() : null;
+
+  return (
+    <motion.div variants={cardVariants} className="group relative flex flex-col">
+      <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-gray-100 ring-1 ring-gray-100 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-black/10">
+        <Link href={href} aria-label={product.name} className="absolute inset-0 z-10">
+          {imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt={product.name}
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 text-gray-400">
+              <span className="text-xs font-medium">No image</span>
+            </div>
+          )}
+        </Link>
+
+        {!inStock && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/50 backdrop-blur-[2px]">
+            <span className="rounded-full bg-white px-4 py-1.5 text-xs font-semibold text-black">
+              {t(locale, "product.outOfStock")}
+            </span>
+          </div>
+        )}
+
+        {/* Quick add — always visible on touch, reveal-on-hover on desktop */}
+        <button
+          type="button"
+          onClick={() => inStock && addItem(product)}
+          disabled={!inStock}
+          className="absolute inset-x-3 bottom-3 z-20 rounded-xl bg-black/85 py-2.5 text-xs font-semibold text-white backdrop-blur transition-all duration-300 hover:bg-black focus:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-0 sm:translate-y-2 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100 sm:focus-visible:translate-y-0 sm:focus-visible:opacity-100"
+        >
+          {t(locale, "product.addToCart")}
+        </button>
+      </div>
+
+      <div className="flex flex-1 flex-col gap-1 px-1 pt-3">
+        <Link
+          href={href}
+          className="line-clamp-1 text-sm font-medium text-gray-900 transition-colors hover:text-black"
+        >
+          {product.name}
+        </Link>
+        <p className="text-sm font-semibold text-gray-900">{formatPrice(product.price)}</p>
+        <p className="text-xs">
+          {inStock ? (
+            <span className="flex items-center gap-1.5 text-gray-500">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              {t(locale, "product.inStock")}
+            </span>
+          ) : (
+            <span className="text-red-500">{t(locale, "product.outOfStock")}</span>
+          )}
+        </p>
+      </div>
+    </motion.div>
+  );
+}
+
+const ProductsGrid = ({ category }: ProductsGridProps) => {
   const [showAll, setShowAll] = useState(false);
   const [productData, setProductData] = useState<SanityProduct[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const { locale } = useLocale();
 
-  // Fetch products from Sanity
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const data = await getSanityProducts(category);
-        setProductData(data);
-        setError(null);
-      } catch (error) {
-        console.error('Error fetching products:', error);
-        setError('Failed to load products. Please try again later.');
-      }
+    let cancelled = false;
+    setProductData([]);
+    setShowAll(false);
+    getSanityProducts(category)
+      .then((data) => {
+        if (!cancelled) setProductData(data);
+      })
+      .catch((err) => {
+        console.error("Error fetching products:", err);
+        if (!cancelled) setError(t(locale, "common.loadError"));
+      });
+    return () => {
+      cancelled = true;
     };
-
-    fetchProducts();
-  }, [category]);
-
-  // Toggle visibility of products
-  const toggleProducts = () => setShowAll(!showAll);
-
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.2,
-      },
-    },
-  };
-
-  const cardVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      transition: { 
-        type: 'spring', 
-        stiffness: 300, 
-        damping: 20 
-      } 
-    },
-  };
-
-  // ProductCard component with responsive design
-  const ProductCard = ({ product, category }: { product: SanityProduct; category: string | undefined }) => (
-    <motion.div
-      className="flex justify-center p-2 sm:p-3 md:p-6 w-full "
-      variants={cardVariants}
-    >
-      <motion.div
-        className="relative w-[48rem] h-[300px] perspective-1000 group"
-        whileHover="hover"
-        initial="rest"
-      >
-        <motion.div
-          className="absolute inset-0 w-full h-full preserve-3d transition-transform duration-500 ease-in-out"
-          variants={{
-            rest: { rotateY: 0 },
-            hover: { rotateY: 180 }
-          }}
-        >
-          {/* Front Side */}
-          <div className="absolute inset-0 w-full h-full bg-white shadow-md rounded-xl p-4 backface-hidden flex flex-col items-center border border-gray-100">
-            <Link 
-              href={`/products/${category}/${product._id}`}
-              className="w-full h-40 relative mb-4 hover:scale-105 transition-transform"
-            >
-              <Image
-                src={urlFor(product.images[0]).url()}
-                alt={product.name}
-                fill
-                className="object-contain"
-                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
-                priority
-              />
-            </Link>
-            <h3 className="text-sm sm:text-base font-semibold text-gray-800 text-center truncate w-full">
-              {product.name}
-            </h3>
-            <p className="text-green-600 font-bold mt-2 text-sm sm:text-base">
-              Rs {product.price}
-            </p>
-          </div>
-
-          {/* Back Side */}
-          <div className="absolute inset-0 w-full h-full bg-white shadow-md rounded-xl p-4 backface-hidden rotate-y-180 flex flex-col items-center justify-center border border-green-100">
-            <div className="overflow-y-auto max-h-[180px] custom-scrollbar text-center">
-              <p className="text-xs sm:text-sm text-gray-600 leading-relaxed px-2">
-                {product.description || 'No description available'}
-              </p>
-            </div>
-            <Link 
-              href={`/products/${category}/${product._id}`}
-              className="mt-4 w-full max-w-[160px]"
-            >
-              <Button
-                className="w-full bg-green-500 hover:bg-green-600 text-white text-xs sm:text-sm py-2 transition-all"
-              >
-                View Details
-              </Button>
-            </Link>
-          </div>
-        </motion.div>
-      </motion.div>
-    </motion.div>
-  );
+  }, [category, locale]);
 
   if (error) {
-    return <div className="text-center text-red-500 p-8">{error}</div>;
+    return <div className="container mx-auto px-4 py-10 text-center text-red-500">{error}</div>;
   }
 
+  const visible = showAll ? productData : productData.slice(0, INITIAL_VISIBLE);
+
   return (
-    <>
-    <div className="container mt-24 md:hidden lg:hidden mx-auto px-2 sm:px-4 py-8">
+    <div className="container mx-auto px-4 py-10 sm:px-6">
       <motion.div
-        className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-4"
+        className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 lg:gap-x-6"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        <AnimatePresence>
-          {productData.slice(0, showAll ? productData.length : 3).map((product) => (
-            <ProductCard 
-              key={product._id} 
-              product={product} 
-              category={category} 
-              
-            />
-          ))}
-        </AnimatePresence>
+        {visible.map((product) => (
+          <ProductCard key={product._id} product={product} category={category} />
+        ))}
       </motion.div>
 
-      {/* View More / View Less Button */}
-      {productData.length > 5 && (
-        <div className="mt-8 text-center">
-          <Button
-            onClick={toggleProducts}
-            className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 text-sm sm:text-base"
+      {productData.length > INITIAL_VISIBLE && (
+        <div className="mt-12 text-center">
+          <button
+            type="button"
+            onClick={() => setShowAll((v) => !v)}
+            className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-8 py-3 text-sm font-semibold text-gray-900 transition-all hover:border-black hover:bg-black hover:text-white"
           >
-            {showAll ? 'View Less' : 'View More'}
-          </Button>
+            {showAll ? t(locale, "product.viewLess") : t(locale, "product.viewMore")}
+          </button>
         </div>
       )}
     </div>
-    <div className="container mt-24 hidden md:block lg:hidden  mx-auto px-2 sm:px-4 py-8">
-      <motion.div
-        className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-4"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <AnimatePresence>
-          {productData.slice(0, showAll ? productData.length : 4).map((product) => (
-            <ProductCard 
-              key={product._id} 
-              product={product} 
-              category={category} 
-              
-            />
-          ))}
-        </AnimatePresence>
-      </motion.div>
-
-      {/* View More / View Less Button */}
-      {productData.length > 5 && (
-        <div className="mt-8 text-center">
-          <Button
-            onClick={toggleProducts}
-            className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 text-sm sm:text-base"
-          >
-            {showAll ? 'View Less' : 'View More'}
-          </Button>
-        </div>
-      )}
-    </div>
-    <div className="container hidden  mt-12 md:hidden lg:block  mx-auto px-2 sm:px-4 py-8">
-      <motion.div
-        className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-4"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <AnimatePresence>
-          {productData.slice(0, showAll ? productData.length : 5).map((product) => (
-            <ProductCard 
-              key={product._id} 
-              product={product} 
-              category={category} 
-              
-            />
-          ))}
-        </AnimatePresence>
-      </motion.div>
-
-      {/* View More / View Less Button */}
-      {productData.length > 5 && (
-        <div className="mt-8 text-center">
-          <Button
-            onClick={toggleProducts}
-            className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 text-sm sm:text-base"
-          >
-            {showAll ? 'View Less' : 'View More'}
-          </Button>
-        </div>
-      )}
-    </div>
-    </>
   );
 };
 

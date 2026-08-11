@@ -126,7 +126,7 @@ export default function Recommendations({ productId, categorySlug, titleKey }: P
               </div>
               <div className="p-4">
                 <h3 className="font-bold truncate">{p.name}</h3>
-                <p className="font-medium text-green-700">Rs {Number(p.price || 0).toFixed(2)}</p>
+                <p className="font-semibold text-gray-900">Rs {Number(p.price || 0).toFixed(2)}</p>
               </div>
             </Link>
           );
@@ -190,7 +190,7 @@ function CategoryFallback({ categorySlug, title }: { categorySlug: string; title
               </div>
               <div className="p-4">
                 <h3 className="font-bold truncate">{p.name}</h3>
-                <p className="font-medium text-green-700">Rs {Number(p.price || 0).toFixed(2)}</p>
+                <p className="font-semibold text-gray-900">Rs {Number(p.price || 0).toFixed(2)}</p>
               </div>
             </Link>
           );

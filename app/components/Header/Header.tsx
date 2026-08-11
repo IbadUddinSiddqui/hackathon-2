@@ -1,12 +1,12 @@
 "use client";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { PiShoppingCartSimpleBold } from "react-icons/pi";
 import { RiAccountCircleLine } from "react-icons/ri";
-import { IoMenu } from "react-icons/io5";
+import { IoMenu, IoClose } from "react-icons/io5";
 import { FaHeart } from "react-icons/fa";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import ProductSearch from "../ProductSearch/ProductSearch";
 import { useCartStore } from "@/lib/stores/cartStore";
 import { useWishlistStore } from "@/lib/stores/wishlistStore";
@@ -15,369 +15,213 @@ import { t } from "@/lib/i18n";
 import { useTenant } from "@/lib/tenant-provider";
 import LanguageSwitcher from "../LanguageSwitcher/LanguageSwitcher";
 
+const NAV_LINKS = [
+  { href: "/about", key: "header.about" },
+  { href: "/contact", key: "header.contact" },
+  { href: "/products", key: "nav.shop" },
+  { href: "/dashboard", key: "header.dashboard" },
+  { href: "/login", key: "header.login" },
+];
+
 const Header = () => {
   const { items } = useCartStore();
-  const wishlist = useWishlistStore()
+  const wishlist = useWishlistStore();
   const cartItemCount = items.reduce((sum, item) => sum + item.quantity, 0);
   const wishItemCount = wishlist.items.length;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const [scrolled, setScrolled] = useState(false);
   const { locale } = useLocale();
   // P4-05 — per-tenant branding (name + accent color) from the tenant doc.
   const { tenant } = useTenant();
-  const accent = tenant.accentColor || undefined;
+  const accent = tenant.accentColor || "#000000";
+
+  // Subtle shadow once the page scrolls, so the header always reads as floating.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Lock body scroll while the mobile drawer is open.
+  useEffect(() => {
+    document.body.style.overflow = isMenuOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMenuOpen]);
 
   return (
     <div className="sticky top-0 z-50">
-      {/* Top Banner */}
-      <motion.div
-        initial={{ y: -50 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="h-8 flex justify-center items-center"
-        style={
-          accent
-            ? { background: `linear-gradient(90deg, ${accent}, #000)` }
-            : undefined
-        }
-      >
-        <p className="text-white text-center text-sm sm:text-base font-medium" dir="auto">
+      {/* Top banner */}
+      <div className="flex h-8 items-center justify-center bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 px-4">
+        <p className="truncate text-center text-xs font-medium text-white sm:text-sm" dir="auto">
           {tenant.name} — {t(locale, "header.banner")}{" "}
-          <Link href="/register" className="underline hover:text-yellow-400 transition-colors">
+          <Link
+            href="/register"
+            className="ml-1 underline decoration-yellow-400 decoration-2 underline-offset-2 hover:text-yellow-300"
+          >
             {t(locale, "header.claim")}
           </Link>
         </p>
-      </motion.div>
+      </div>
 
-      {/* Main Header */}
-      <header className="bg-white/95 backdrop-blur-sm border-b  border-gray-200 shadow-sm">
-        <div className="container mx-auto flex justify-between items-center h-16 px-4 lg:px-8">
-          {/* Hamburger Menu */}
+      {/* Main header */}
+      <header
+        className={`border-b border-gray-100 bg-white/95 backdrop-blur transition-shadow ${
+          scrolled ? "shadow-md" : "shadow-sm"
+        }`}
+      >
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 lg:px-8">
+          {/* Hamburger */}
           <button
-            onClick={toggleMenu}
-            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            onClick={() => setIsMenuOpen(true)}
+            className="rounded-full p-2 text-gray-700 transition-colors hover:bg-gray-100 lg:hidden"
             aria-label="Open menu"
           >
-            <IoMenu size={28} className="text-gray-700" />
+            <IoMenu size={26} />
           </button>
 
           {/* Logo */}
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            className="flex-shrink-0"
-          >
-            <Link href="/">
-              <Image
-                src="/logo-text-black.svg"
-                width={200}
-                height={40}
-                alt={tenant.name}
-                className="hover:opacity-80 transition-opacity"
-              />
-            </Link>
-          </motion.div>
+          <Link href="/" className="shrink-0">
+            <Image
+              src="/logo-text-black.svg"
+              width={180}
+              height={36}
+              alt={tenant.name}
+              className="h-auto w-auto transition-opacity hover:opacity-75"
+            />
+          </Link>
 
-          {/* Navigation Links */}
-          <nav className="hidden lg:flex ml-12 space-x-8">
-            <Link
-              href={`/about`}
-              className="relative group text-lg font-medium text-gray-700 hover:text-black transition-colors"
-            >
-              {t(locale, "header.about")}
-              <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
-            </Link>
-            <Link
-              href={`/contact`}
-              className="relative group text-lg font-medium text-gray-700 hover:text-black transition-colors"
-            >
-              {t(locale, "header.contact")}
-              <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
-            </Link>
-            <Link
-              href={`/dashboard`}
-              className="relative group text-lg font-medium text-gray-700 hover:text-black transition-colors"
-            >
-              {t(locale, "header.dashboard")}
-              <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
-            </Link>
-            <Link
-              href={`/login`}
-              className="relative group text-lg font-medium text-gray-700 hover:text-black transition-colors"
-            >
-              {t(locale, "header.login")}
-              <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
-            </Link>
+          {/* Desktop nav */}
+          <nav className="hidden items-center gap-7 lg:flex">
+            {NAV_LINKS.map(({ href, key }) => (
+              <Link
+                key={href}
+                href={href}
+                className="group relative text-[15px] font-medium text-gray-700 transition-colors hover:text-black"
+              >
+                {t(locale, key)}
+                <span className="absolute -bottom-1.5 left-0 h-0.5 w-0 bg-black transition-all duration-300 group-hover:w-full" />
+              </Link>
+            ))}
           </nav>
 
-          {/* Search Bar */}
-          <div className="flex-grow mx-8 max-w-[600px] hidden md:block">
+          {/* Search (md+) */}
+          <div className="hidden max-w-md flex-1 md:block lg:max-w-sm xl:max-w-md">
             <ProductSearch />
           </div>
 
-          {/* Action Buttons */}
-          <div className=" lg:flex hidden  items-center space-x-6">
-            <LanguageSwitcher />
-           
-            
+          {/* Actions */}
+          <div className="flex shrink-0 items-center gap-1">
+            <div className="hidden md:block">
+              <LanguageSwitcher />
+            </div>
+
             <Link
               href="/wishlist"
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors relative"
+              className="relative rounded-full p-2 text-gray-700 transition-colors hover:bg-gray-100"
               aria-label="Wishlist"
             >
-            <motion.div
-    whileHover={{ scale: 1.1, rotate: -10 }}
-    whileTap={{ scale: 0.9 }}
-    className="relative"
-  >
-    <motion.div
-      whileHover={{ 
-        filter: 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.6))'
-      }}
-      transition={{ duration: 0.3 }}
-    >
-      <FaHeart className="w-6 h-6 text-red-400 hover:text-red-700" />
-    </motion.div>
-
-    {/* Animated Cart Count Badge */}
-    {wishItemCount > 0 && (
-      <motion.span
-        key={wishItemCount}
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0, opacity: 0 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-        className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 flex items-center justify-center"
-      >
-        <motion.span
-          key={wishItemCount}
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 10 }}
-        >
-          {wishItemCount}
-        </motion.span>
-      </motion.span>
-    )}
-  </motion.div>
+              <FaHeart className="h-[22px] w-[22px] text-red-400 transition-colors hover:text-red-600" />
+              <AnimatePresence>
+                {wishItemCount > 0 && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[11px] font-bold text-white"
+                  >
+                    {wishItemCount}
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </Link>
-            
-            <Link href="/cart" className="relative">
-  <motion.div
-    whileHover={{ scale: 1.1, rotate: -10 }}
-    whileTap={{ scale: 0.9 }}
-    className="relative"
-  >
-    <motion.div
-      whileHover={{ 
-        filter: 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.6))'
-      }}
-      transition={{ duration: 0.3 }}
-    >
-      <PiShoppingCartSimpleBold className="w-6 h-6 text-black-2 hover:text-yellow-700" />
-    </motion.div>
 
-    {/* Animated Cart Count Badge */}
-    {cartItemCount > 0 && (
-      <motion.span
-        key={cartItemCount}
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0, opacity: 0 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-        className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 flex items-center justify-center"
-      >
-        <motion.span
-          key={cartItemCount}
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 10 }}
-        >
-          {cartItemCount}
-        </motion.span>
-      </motion.span>
-    )}
-  </motion.div>
-</Link>
-            <Link href='/dashboard'>
-            <div
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-              aria-label="Account"
+            <Link
+              href="/cart"
+              className="relative rounded-full p-2 text-gray-700 transition-colors hover:bg-gray-100"
+              aria-label="Cart"
             >
-              <RiAccountCircleLine size={24} className="text-blue-700 hover:text-blue-900" />
-            </div></Link>
+              <PiShoppingCartSimpleBold className="h-6 w-6" />
+              <AnimatePresence>
+                {cartItemCount > 0 && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold text-white"
+                    style={{ backgroundColor: accent }}
+                  >
+                    {cartItemCount}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </Link>
+
+            <Link
+              href="/dashboard"
+              className="rounded-full p-2 text-gray-700 transition-colors hover:bg-gray-100"
+              aria-label={t(locale, "header.dashboard")}
+            >
+              <RiAccountCircleLine size={26} />
+            </Link>
           </div>
         </div>
-
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="fixed inset-0 z-50 flex h-[100vh] w-full flex-col items-center bg-white p-6 dark:bg-black"
-            >
-              {/* Close Button */}
-              <button
-                onClick={toggleMenu}
-                className="absolute top-6 right-6 p-2 rounded-full bg-white hover:bg-gray-200 transition-colors"
-                aria-label="Close menu"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 text-gray-700"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-
-              {/* Menu Content */}
-              <div className="w-full  max-w-sm mt-20">
-                {/* Search Bar */}
-                <div className="relative mb-8">
-                  <ProductSearch />
-                </div>
-
-                {/* Navigation Links */}
-                <nav className="space-y-4 flex flex-col">
-                  <Link
-                    href={`/about`}
-                    className="relative group text-lg font-medium text-gray-700 hover:text-black transition-colors"
-                  >
-                    {t(locale, "header.about")}
-                    <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
-                  </Link>
-                  <Link
-                    href={`/contact`}
-                    className="relative group text-lg font-medium text-gray-700 hover:text-black transition-colors"
-                  >
-                    {t(locale, "header.contact")}
-                    <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
-                  </Link>
-                  <Link
-                    href={`/dashboard`}
-                    className="relative group text-lg font-medium text-gray-700 hover:text-black transition-colors"
-                  >
-                    {t(locale, "header.dashboard")}
-                    <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
-                  </Link>
-                  <Link
-                    href={`/login`}
-                    className="relative group text-lg font-medium text-gray-700 hover:text-black transition-colors"
-                  >
-                    {t(locale, "header.login")}
-                    <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
-                  </Link>
-                </nav>
-                <div className="mb-6">
-                  <LanguageSwitcher />
-                </div>
-                <div className="flex items-center space-x-6">
-           
-            
-            <Link
-              href="/wishlist"
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors relative"
-              aria-label="Wishlist"
-            >
-            <motion.div
-    whileHover={{ scale: 1.1, rotate: -10 }}
-    whileTap={{ scale: 0.9 }}
-    className="relative"
-  >
-    <motion.div
-      whileHover={{ 
-        filter: 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.6))'
-      }}
-      transition={{ duration: 0.3 }}
-    >
-      <FaHeart className="w-6 h-6 text-red-400 hover:text-red-700" />
-    </motion.div>
-
-    {/* Animated Cart Count Badge */}
-    {wishItemCount > 0 && (
-      <motion.span
-        key={wishItemCount}
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0, opacity: 0 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-        className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 flex items-center justify-center"
-      >
-        <motion.span
-          key={wishItemCount}
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 10 }}
-        >
-          {wishItemCount}
-        </motion.span>
-      </motion.span>
-    )}
-  </motion.div>
-            </Link>
-            
-            <Link href="/cart" className="relative">
-  <motion.div
-    whileHover={{ scale: 1.1, rotate: -10 }}
-    whileTap={{ scale: 0.9 }}
-    className="relative"
-  >
-    <motion.div
-      whileHover={{ 
-        filter: 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.6))'
-      }}
-      transition={{ duration: 0.3 }}
-    >
-      <PiShoppingCartSimpleBold className="w-6 h-6 text-black-2 hover:text-yellow-700" />
-    </motion.div>
-
-    {/* Animated Cart Count Badge */}
-    {cartItemCount > 0 && (
-      <motion.span
-        key={cartItemCount}
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0, opacity: 0 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-        className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 flex items-center justify-center"
-      >
-        <motion.span
-          key={cartItemCount}
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 10 }}
-        >
-          {cartItemCount}
-        </motion.span>
-      </motion.span>
-    )}
-  </motion.div>
-</Link>
-            <Link href='/dashboard'>
-            <div
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-              aria-label="Account"
-            >
-              <RiAccountCircleLine size={24} className="text-blue-700 hover:text-blue-900" />
-            </div></Link>
-          </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </header>
 
-      {/* Mobile Search Bar */}
-      
+      {/* Mobile drawer */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+              onClick={() => setIsMenuOpen(false)}
+            />
+            <motion.aside
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", stiffness: 320, damping: 32 }}
+              className="fixed inset-y-0 right-0 z-50 flex w-[86%] max-w-sm flex-col bg-white shadow-2xl lg:hidden"
+            >
+              <div className="flex items-center justify-between border-b border-gray-100 p-4">
+                <Image src="/logo-text-black.svg" width={140} height={28} alt={tenant.name} />
+                <button
+                  onClick={() => setIsMenuOpen(false)}
+                  className="rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-100"
+                  aria-label="Close menu"
+                >
+                  <IoClose size={26} />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-5">
+                <div className="mb-6">
+                  <ProductSearch />
+                </div>
+                <nav className="flex flex-col">
+                  {NAV_LINKS.map(({ href, key }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      onClick={() => setIsMenuOpen(false)}
+                      className="border-b border-gray-50 py-3.5 text-base font-medium text-gray-800 transition-colors hover:text-black"
+                    >
+                      {t(locale, key)}
+                    </Link>
+                  ))}
+                </nav>
+                <div className="mt-6">
+                  <LanguageSwitcher />
+                </div>
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
