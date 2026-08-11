@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { AvatarUpload } from "../components/AvatarUpload/AvatarUpload";
 import LogoutButton from "../components/LogoutButton/LogoutButton";
+import AccountSidebar from "../components/AccountSidebar/AccountSidebar";
 import Header from "../components/Header/Header";
 import Footer from "../components/Footer/Footer";
 import { getActiveTenantId, tenantFilter } from "@/lib/tenants";
@@ -25,12 +26,6 @@ type OrderRow = {
   created_at?: string;
   items?: { quantity?: number }[];
 };
-
-const NAV = [
-  { label: "Dashboard", href: "/dashboard", active: true },
-  { label: "Profile", href: "/profile", active: false },
-  { label: "Settings", href: "/settings", active: false },
-];
 
 export default async function Dashboard() {
   const session = await auth();
@@ -80,34 +75,9 @@ export default async function Dashboard() {
   return (
     <>
       <Header />
-      <div className="flex min-h-screen bg-gray-100">
+      <div className="flex min-h-screen bg-gray-100 dark:bg-gray-950">
         {/* Sidebar */}
-        <aside className="hidden w-64 bg-white shadow-md md:block">
-          <div className="border-b p-6">
-            <h2 className="text-2xl font-bold text-gray-800">My Account</h2>
-          </div>
-          <nav className="mt-2">
-            {NAV.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={`block px-6 py-3 transition-colors ${
-                  item.active
-                    ? "border-l-4 border-black bg-gray-100 font-semibold text-gray-900"
-                    : "text-gray-600 hover:bg-gray-200 hover:text-gray-800"
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
-            <Link
-              href="/"
-              className="block px-6 py-3 text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-800"
-            >
-              ← Back to store
-            </Link>
-          </nav>
-        </aside>
+        <AccountSidebar active="dashboard" />
 
         {/* Main */}
         <div className="flex flex-1 flex-col">

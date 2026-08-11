@@ -2,13 +2,17 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Link from "next/link";
 import Header from "../components/Header/Header";
 import Footer from "../components/Footer/Footer";
 import { motion } from "framer-motion";
 import { FiUser, FiMail, FiLock, FiArrowRight } from "react-icons/fi";
+import { useTenant } from "@/lib/tenant-provider";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { tenant } = useTenant();
+  const accent = tenant.accentColor || "#000000";
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -50,22 +54,30 @@ export default function RegisterPage() {
     }
   };
 
+  const inputClass =
+    "w-full rounded-lg border border-gray-200 bg-gray-50 py-3 pl-11 pr-4 text-gray-900 placeholder-gray-400 transition-colors focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-white";
+
+  const fieldIconClass = "absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400";
+
   return (
     <>
       <Header />
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-16 dark:bg-gray-950">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-100 dark:border-gray-700"
+          transition={{ duration: 0.4 }}
+          className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-800"
         >
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Join Our Community
+          <div className="mb-8 text-center">
+            <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em]" style={{ color: accent }}>
+              {tenant.name}
+            </p>
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+              Create Your Account
             </h1>
-            <p className="text-gray-600 dark:text-gray-300">
-              Create your account in seconds
+            <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
+              Join us for exclusive offers and faster checkout
             </p>
           </div>
 
@@ -73,64 +85,58 @@ export default function RegisterPage() {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex items-center justify-center bg-red-50 dark:bg-red-900 p-3 rounded-lg mb-4"
+              className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-600 dark:bg-red-950 dark:text-red-400"
             >
-              <span className="text-red-600 text-sm">{error}</span>
+              {error}
             </motion.div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Full Name
               </label>
               <div className="relative">
-                <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <FiUser className={fieldIconClass} />
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  className="w-full pl-10 pr-3 py-2.5 border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                  placeholder="John Doe"
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className={inputClass}
+                  placeholder="Your name"
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Email Address
               </label>
               <div className="relative">
-                <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <FiMail className={fieldIconClass} />
                 <input
                   type="email"
                   value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  className="w-full pl-10 pr-3 py-2.5 border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                  placeholder="john@example.com"
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className={inputClass}
+                  placeholder="you@example.com"
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Password
               </label>
               <div className="relative">
-                <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <FiLock className={fieldIconClass} />
                 <input
                   type="password"
                   value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
-                  className="w-full pl-10 pr-3 py-2.5 border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className={inputClass}
                   placeholder="••••••••"
                   required
                   minLength={6}
@@ -139,18 +145,16 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Confirm Password
               </label>
               <div className="relative">
-                <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <FiLock className={fieldIconClass} />
                 <input
                   type="password"
                   value={formData.confirmPassword}
-                  onChange={(e) =>
-                    setFormData({ ...formData, confirmPassword: e.target.value })
-                  }
-                  className="w-full pl-10 pr-3 py-2.5 border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  className={inputClass}
                   placeholder="••••••••"
                   required
                 />
@@ -158,14 +162,13 @@ export default function RegisterPage() {
             </div>
 
             <motion.button
-              whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-gray-900 py-3 text-sm font-semibold text-white transition-colors hover:bg-black disabled:opacity-60"
             >
               {isSubmitting ? (
-                <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
               ) : (
                 <>
                   Create Account
@@ -175,17 +178,15 @@ export default function RegisterPage() {
             </motion.button>
           </form>
 
-          <div className="mt-6 text-center text-sm">
-            <span className="text-gray-600 dark:text-gray-300">
-              Already have an account?{" "}
-              <motion.a
-                whileHover={{ scale: 1.05 }}
-                href="/login"
-                className="text-blue-600 dark:text-blue-400 font-medium hover:underline"
-              >
-                Sign in here
-              </motion.a>
-            </span>
+          <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
+            Already have an account?{" "}
+            <Link
+              href="/login"
+              className="font-semibold underline-offset-2 hover:underline"
+              style={{ color: accent }}
+            >
+              Sign in here
+            </Link>
           </div>
         </motion.div>
       </div>
