@@ -1,6 +1,7 @@
 // app/checkout/page.tsx
 "use client";
 import React, { useState, FormEvent } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/lib/stores/cartStore';
 import Header from '../components/Header/Header';
@@ -172,6 +173,32 @@ const CheckoutPage = () => {
   const [paymentMethod, setPaymentMethod] = useState<'safepay' | 'cod'>(
     safepayEnabled ? 'safepay' : 'cod'
   );
+  // Direction for the form-swap slide: +1 = towards COD, -1 = towards Safepay
+  // (same direction-aware pattern as the testimonials pager).
+  const [swapDirection, setSwapDirection] = useState(1);
+
+  const selectPaymentMethod = (method: 'safepay' | 'cod') => {
+    if (method === paymentMethod) return;
+    setSwapDirection(method === 'cod' ? 1 : -1);
+    setPaymentMethod(method);
+  };
+
+  // Direction-aware spring swap — the exact values from the testimonials
+  // pager (enter/exit slide 64px, spring 260/24, 0.18s tween exit) so the
+  // form change feels native to the rest of the site.
+  const formSwapVariants = {
+    enter: (dir: number) => ({ opacity: 0, x: dir * 64 }),
+    center: {
+      opacity: 1,
+      x: 0,
+      transition: { type: 'spring', stiffness: 260, damping: 24 },
+    },
+    exit: (dir: number) => ({
+      opacity: 0,
+      x: dir * -64,
+      transition: { duration: 0.18 },
+    }),
+  };
 
   // Calculate order summary values
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -193,7 +220,7 @@ const CheckoutPage = () => {
       <Header />
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
         <div className="max-w-screen-xl mx-auto px-4">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">{t(locale, 'checkout.title')}</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100 mb-8">{t(locale, 'checkout.title')}</h1>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Order Summary Section */}
             <Card className="bg-white dark:bg-gray-800 shadow">
@@ -241,7 +268,7 @@ const CheckoutPage = () => {
                     {safepayEnabled && (
                       <button
                         type="button"
-                        onClick={() => setPaymentMethod('safepay')}
+                        onClick={() => selectPaymentMethod('safepay')}
                         aria-pressed={paymentMethod === 'safepay'}
                         className={`rounded-lg border p-3 text-left text-sm transition ${
                           paymentMethod === 'safepay'
@@ -259,7 +286,7 @@ const CheckoutPage = () => {
                     )}
                     <button
                       type="button"
-                      onClick={() => setPaymentMethod('cod')}
+                      onClick={() => selectPaymentMethod('cod')}
                       aria-pressed={paymentMethod === 'cod'}
                       className={`rounded-lg border p-3 text-left text-sm transition ${
                         paymentMethod === 'cod'
@@ -279,18 +306,30 @@ const CheckoutPage = () => {
               </CardContent>
             </Card>
 
-            {/* Payment Form (Safepay card or Cash on Delivery) */}
+            {/* Payment Form (Safepay card or Cash on Delivery) — swaps with a
+                direction-aware spring slide instead of an instant cut. */}
             <div id="payment-form" className="scroll-mt-8">
-              {paymentMethod === 'safepay' && safepayEnabled ? (
-                <SafepayPayment
-                  items={checkoutItems}
-                  discountCode={discountCode || undefined}
-                  giftCardCode={undefined}
-                  creditAmount={undefined}
-                />
-              ) : (
-                <CodCheckoutForm items={checkoutItems} discountCode={discountCode || undefined} />
-              )}
+              <AnimatePresence mode="wait" initial={false} custom={swapDirection}>
+                <motion.div
+                  key={paymentMethod}
+                  custom={swapDirection}
+                  variants={formSwapVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                >
+                  {paymentMethod === 'safepay' && safepayEnabled ? (
+                    <SafepayPayment
+                      items={checkoutItems}
+                      discountCode={discountCode || undefined}
+                      giftCardCode={undefined}
+                      creditAmount={undefined}
+                    />
+                  ) : (
+                    <CodCheckoutForm items={checkoutItems} discountCode={discountCode || undefined} />
+                  )}
+                </motion.div>
+              </AnimatePresence>
             </div>
           </div>
         </div>

@@ -26,7 +26,7 @@ export default function Denied() {
           className="mx-auto w-20 h-20 mb-4"
         />
 
-        <h1 className="text-3xl font-extrabold text-gray-900 mb-2">
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900 mb-2">
           Access Denied
         </h1>
         <p className="text-gray-600 mb-6">

@@ -105,7 +105,7 @@ const Header = () => {
 
       {/* Main header */}
       <header
-        className={`border-b border-gray-100 bg-white/95 backdrop-blur transition-shadow ${
+        className={`border-b border-gray-100 bg-white/95 backdrop-blur transition-shadow dark:border-gray-800 dark:bg-gray-900/95 ${
           scrolled ? "shadow-md" : "shadow-sm"
         }`}
       >
@@ -113,7 +113,7 @@ const Header = () => {
           {/* Hamburger (mobile) */}
           <button
             onClick={() => setIsMenuOpen(true)}
-            className="rounded-full p-2 text-gray-700 transition-colors hover:bg-gray-100 lg:hidden"
+            className="rounded-full p-2 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 lg:hidden"
             aria-label="Open menu"
           >
             <IoMenu size={24} />
@@ -126,7 +126,7 @@ const Header = () => {
               width={132}
               height={26}
               alt={tenant.name}
-              className="h-auto w-auto transition-opacity hover:opacity-75"
+              className="h-auto w-auto transition-opacity hover:opacity-75 dark:invert"
             />
           </Link>
 
@@ -136,10 +136,10 @@ const Header = () => {
               <Link
                 key={href}
                 href={href}
-                className="group relative text-[15px] font-medium text-gray-700 transition-colors hover:text-black"
+                className="group relative text-[15px] font-medium text-gray-700 transition-colors hover:text-black dark:text-gray-300 dark:hover:text-white"
               >
                 {t(locale, key)}
-                <span className="absolute -bottom-1.5 left-0 h-0.5 w-0 bg-black transition-all duration-300 group-hover:w-full" />
+                <span className="absolute -bottom-1.5 left-0 h-0.5 w-0 bg-black transition-all duration-300 group-hover:w-full dark:bg-white" />
               </Link>
             ))}
           </nav>
@@ -157,7 +157,7 @@ const Header = () => {
 
             <Link
               href="/wishlist"
-              className="relative rounded-full p-2 text-gray-700 transition-colors hover:bg-gray-100"
+              className="relative rounded-full p-2 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
               aria-label="Wishlist"
             >
               <FaHeart className="h-[21px] w-[21px] text-red-400 transition-colors hover:text-red-600" />
@@ -177,7 +177,7 @@ const Header = () => {
 
             <Link
               href="/cart"
-              className="relative rounded-full p-2 text-gray-700 transition-colors hover:bg-gray-100"
+              className="relative rounded-full p-2 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
               aria-label="Cart"
             >
               <PiShoppingCartSimpleBold className="h-6 w-6" />
@@ -210,7 +210,7 @@ const Header = () => {
             <ClickOutside onClick={() => setAccountOpen(false)} className="relative">
               <button
                 onClick={() => setAccountOpen((o) => !o)}
-                className="flex items-center gap-0.5 rounded-full p-2 text-gray-700 transition-colors hover:bg-gray-100"
+                className="flex items-center gap-0.5 rounded-full p-2 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
                 aria-label={t(locale, "account.menu")}
                 aria-expanded={accountOpen}
               >
@@ -229,14 +229,14 @@ const Header = () => {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 8, scale: 0.98 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute right-0 top-[calc(100%+10px)] w-56 origin-top-right rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl"
+                    className="absolute right-0 top-[calc(100%+10px)] w-56 origin-top-right rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl dark:border-gray-700 dark:bg-gray-800"
                   >
                     {loggedIn && session?.user?.email && (
-                      <div className="border-b border-gray-100 px-3 pb-2 pt-1.5">
+                      <div className="border-b border-gray-100 px-3 pb-2 pt-1.5 dark:border-gray-700">
                         <p className="text-[11px] uppercase tracking-wide text-gray-400">
                           {t(locale, "account.signedInAs")}
                         </p>
-                        <p className="truncate text-sm font-medium text-gray-800">
+                        <p className="truncate text-sm font-medium text-gray-800 dark:text-gray-100">
                           {session.user.email}
                         </p>
                       </div>
@@ -246,17 +246,17 @@ const Header = () => {
                         key={item.href}
                         href={item.href}
                         onClick={() => setAccountOpen(false)}
-                        className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                        className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
                       >
                         {t(locale, item.key)}
                       </Link>
                     ))}
                     {loggedIn && (
                       <>
-                        <div className="my-1 border-t border-gray-100" />
+                        <div className="my-1 border-t border-gray-100 dark:border-gray-700" />
                         <button
                           onClick={handleLogout}
-                          className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+                          className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:hover:bg-red-950"
                         >
                           {t(locale, "account.logout")}
                         </button>
@@ -288,13 +288,13 @@ const Header = () => {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", stiffness: 320, damping: 32 }}
-              className="fixed inset-y-0 right-0 z-50 flex w-[86%] max-w-sm flex-col bg-white shadow-2xl lg:hidden"
+              className="fixed inset-y-0 right-0 z-50 flex w-[86%] max-w-sm flex-col bg-white shadow-2xl lg:hidden dark:bg-gray-900"
             >
-              <div className="flex items-center justify-between border-b border-gray-100 p-4">
-                <Image src="/logo-text-black.svg" width={120} height={24} alt={tenant.name} />
+              <div className="flex items-center justify-between border-b border-gray-100 p-4 dark:border-gray-700">
+                <Image src="/logo-text-black.svg" width={120} height={24} alt={tenant.name} className="dark:invert" />
                 <button
                   onClick={() => setIsMenuOpen(false)}
-                  className="rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-100"
+                  className="rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
                   aria-label="Close menu"
                 >
                   <IoClose size={26} />
@@ -310,7 +310,7 @@ const Header = () => {
                       key={href}
                       href={href}
                       onClick={() => setIsMenuOpen(false)}
-                      className="border-b border-gray-50 py-3.5 text-base font-medium text-gray-800 transition-colors hover:text-black"
+                      className="border-b border-gray-50 py-3.5 text-base font-medium text-gray-800 transition-colors hover:text-black dark:border-gray-800 dark:text-gray-100 dark:hover:text-white"
                     >
                       {t(locale, key)}
                     </Link>
@@ -329,7 +329,7 @@ const Header = () => {
                           key={item.href}
                           href={item.href}
                           onClick={() => setIsMenuOpen(false)}
-                          className="flex items-center justify-between rounded-full border border-gray-200 px-4 py-3 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-50"
+                          className="flex items-center justify-between rounded-full border border-gray-200 px-4 py-3 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-100 dark:hover:bg-gray-800"
                         >
                           {t(locale, item.key)}
                         </Link>
@@ -353,7 +353,7 @@ const Header = () => {
                       <Link
                         href="/register"
                         onClick={() => setIsMenuOpen(false)}
-                        className="block rounded-full border border-gray-300 px-4 py-3 text-center text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
+                        className="block rounded-full border border-gray-300 px-4 py-3 text-center text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-800"
                       >
                         {t(locale, "account.register")}
                       </Link>

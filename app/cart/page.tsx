@@ -75,7 +75,7 @@ const CartPage = () => {
         <div className="w-full max-w-screen-xl grid grid-cols-1 md:grid-cols-3 gap-6 p-4">
           {/* Cart Section */}
           <section className="col-span-2 w-full">
-            <h3 className="text-left text-4xl font-extrabold mb-4 text-gray-900 dark:text-gray-100">
+            <h3 className="text-left text-3xl font-bold tracking-tight sm:text-4xl mb-4 text-gray-900 dark:text-gray-100">
               {t(locale, 'cart.title')}
             </h3>
             <div className="mx-auto max-w-3xl">
@@ -149,11 +149,11 @@ const CartPage = () => {
                             id={`qty-${item._id}`}
                             type="number"
                             min="1"
-                            max={item.stock}
+                            max={item.stock ?? undefined}
                             value={item.quantity}
                             onChange={(e) => {
                               let value = Number(e.target.value);
-                              value = Math.max(1, Math.min(value, item.stock));
+                              value = Math.max(1, Math.min(value, item.stock ?? value));
                               updateQuantity(item._id, value);
                             }}
                             className="w-20 px-3 py-2 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"

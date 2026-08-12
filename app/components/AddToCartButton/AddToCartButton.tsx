@@ -7,26 +7,37 @@ import { ShoppingCart, PackageCheck, Info } from 'lucide-react';
 import { cn } from '@/lib/utils'; // Assume you have a cn utility
 import { useLocale } from '@/lib/locale-provider';
 import { t } from '@/lib/i18n';
+import { salePriceFor } from '@/lib/product-sale';
+import { useTenant } from '@/lib/tenant-provider';
 
 export default function AddToCartButton({ product }: { product: SanityProduct }) {
   const { addItem, items } = useCartStore();
   const { locale } = useLocale();
+  // P4-05 — the primary CTA uses the tenant accent (same system as the hero
+  // headline span, cart badge and category hover wash) so the detail page
+  // speaks the same design language as the rest of the storefront.
+  const { tenant } = useTenant();
+  const accent = tenant.accentColor || '#000000';
   const cartItem = items.find(item => item._id === product._id);
   const availableStock = product.stock - (cartItem?.quantity || 0);
+  // The cart always receives the EFFECTIVE price (sale when on sale) so the
+  // cart/checkout never show a price the customer isn't charged.
+  const salePrice = salePriceFor(product);
+  const addPayload = salePrice !== null ? { ...product, price: salePrice } : product;
 
   return (
     <div className="space-y-4">
       <motion.button
         whileHover={{ scale: 1.05, y: -2 }}
         whileTap={{ scale: 0.98 }}
-        onClick={() => addItem(product)}
+        onClick={() => addItem(addPayload)}
         disabled={availableStock <= 0}
         className={cn(
-          "relative w-[12rem] py-3 px-8 rounded-xl font-bold text-lg transition-all",
-          "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700",
-          "disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400 disabled:bg-none",
-          "shadow-lg hover:shadow-xl"
+          "relative w-[12rem] py-3 px-8 rounded-xl font-bold text-lg text-white transition-all",
+          "shadow-lg hover:shadow-xl hover:brightness-95",
+          "disabled:opacity-50 disabled:cursor-not-allowed"
         )}
+        style={{ backgroundColor: accent }}
       >
         <div className="flex items-center justify-center gap-2">
           <ShoppingCart className="w-5 h-5" />

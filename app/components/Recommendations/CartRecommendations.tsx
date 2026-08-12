@@ -15,7 +15,7 @@ export default function CartRecommendations() {
   return (
     <Recommendations
       productId={seed._id}
-      categorySlug={seed.category_slug}
+      categorySlug={seed.category_slug ?? undefined}
       titleKey="product.completeYourLook"
     />
   );

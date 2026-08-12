@@ -15,9 +15,9 @@ export default function WishlistPage() {
   return (
     <>
     <Header></Header>
-    <div className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-4 py-12 min-h-screen bg-white dark:bg-[#212020]">
       <div className="text-center mb-10">
-        <h1 className="text-5xl font-extrabold mb-4">Your Wishlist</h1>
+        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4 text-gray-900 dark:text-gray-100">Your Wishlist</h1>
         {items.length > 0 && (
           <Button 
             onClick={clearWishlist}
@@ -31,8 +31,8 @@ export default function WishlistPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         {items.map((product) => (
-          <div key={product._id} className="group relative border p-4 rounded-lg">
-            <div className="bg-[#F0EEED] h-56 w-full rounded-md p-4 flex items-center justify-center">
+          <div key={product._id} className="group relative border border-gray-200 bg-white p-4 rounded-lg dark:border-gray-700 dark:bg-gray-800">
+            <div className="bg-[#F0EEED] h-56 w-full rounded-md p-4 flex items-center justify-center dark:bg-gray-700">
               {product.images?.[0] && (
                 <Image
                   src={urlFor(product.images[0]).url()}
@@ -45,8 +45,8 @@ export default function WishlistPage() {
             </div>
             
             <div className="mt-4">
-              <h3 className="text-lg font-semibold">{product.name}</h3>
-              <p className="text-gray-500 mt-2">Rs {product.price.toFixed(2)}</p>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{product.name}</h3>
+              <p className="text-gray-500 mt-2 dark:text-gray-400">Rs {product.price.toFixed(2)}</p>
               
               <div className="flex gap-2 mt-4">
                 <Button
@@ -69,7 +69,7 @@ export default function WishlistPage() {
         
         {items.length === 0 && (
           <div className="col-span-full text-center py-12">
-            <p className="text-gray-500 text-xl">Your wishlist is empty</p>
+            <p className="text-gray-500 text-xl dark:text-gray-400">Your wishlist is empty</p>
           </div>
         )}
       </div>

@@ -1,17 +1,25 @@
-import React from 'react'
-import ProductsGrid from '../ProductsGrid/ProductsGrid'
+"use client";
+import React from "react";
+import ProductsGrid from "../ProductsGrid/ProductsGrid";
+import { useLocale } from "@/lib/locale-provider";
+import { t } from "@/lib/i18n";
 
-const NewArrivals = () => {
+// "On Sale" — a REAL sale query (products flagged on_sale with a lower
+// sale_price), not a hardcoded category grid.
+const TopSale = () => {
+  const { locale } = useLocale();
   return (
     <>
-    <div className="text-center mb-10">
-        <h2 className="text-5xl font-extrabold mb-4">Footwear Section</h2>
+      <div id="on-sale" className="text-center mb-10">
+        <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
+          {t(locale, "home.topSale")}
+        </h2>
       </div>
-    <div><ProductsGrid category='footwear'>
-     
-      
-      </ProductsGrid> </div>
-    </>)
-}
+      <div>
+        <ProductsGrid mode="sale" hideWhenEmpty />
+      </div>
+    </>
+  );
+};
 
-export default NewArrivals
+export default TopSale;

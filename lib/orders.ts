@@ -47,6 +47,9 @@ export type SanityProductRef = {
   stock: number;
   size?: string[];
   color?: string;
+  // P3-14 product-level sale — honored at checkout (server-truth).
+  on_sale?: boolean;
+  sale_price?: number | null;
 };
 
 /**
@@ -59,7 +62,7 @@ export async function fetchProductsByIds(
 ): Promise<SanityProductRef[]> {
   if (ids.length === 0) return [];
   return serverClient.fetch(
-    `*[_id in $ids && (!defined(tenantId) || tenantId == $tenantId)]{_id, name, price, stock, size, color}`,
+    `*[_id in $ids && (!defined(tenantId) || tenantId == $tenantId)]{_id, name, price, stock, size, color, on_sale, sale_price}`,
     { ids, tenantId }
   );
 }

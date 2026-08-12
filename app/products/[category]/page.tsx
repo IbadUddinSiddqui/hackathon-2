@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { client } from "@/sanity/lib/client";
 import { searchClient } from "@/lib/typesense";
 import CategoryClient from "./CategoryClient";
-import { getActiveTenantId } from "@/lib/tenants";
+import { getActiveTenant, getActiveTenantId } from "@/lib/tenants";
 import type { Product } from "@/types/products";
 
 // Same data source the old client page used (Sanity + Typesense merged and
@@ -19,7 +19,10 @@ async function fetchCategoryProducts(category: string): Promise<Product[]> {
     slug,
     brand,
     size,
-    tags
+    tags,
+    stock,
+    on_sale,
+    sale_price
   }`;
 
   const sanityProducts: Product[] = await client.fetch(sanityQuery, {
@@ -61,6 +64,10 @@ export async function generateMetadata({
   params: Promise<{ category: string }>;
 }): Promise<Metadata> {
   const { category } = await params;
+  // P4-05 — tenant-branded metadata: the brand name comes from the active
+  // tenant, never a hardcoded string.
+  const tenant = await getActiveTenant();
+  const brand = tenant.name || "AnK's";
   const name = category
     .split("-")
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
@@ -68,10 +75,10 @@ export async function generateMetadata({
 
   return {
     title: `${name} — Shop Online`,
-    description: `Shop ${name} at AnK's — premium Pakistani fashion and clothing with nationwide delivery.`,
+    description: `Shop ${name} at ${brand} — premium Pakistani fashion and clothing with nationwide delivery.`,
     openGraph: {
-      title: `${name} | AnK's`,
-      description: `Shop ${name} at AnK's — premium Pakistani fashion and clothing with nationwide delivery.`,
+      title: `${name} | ${brand}`,
+      description: `Shop ${name} at ${brand} — premium Pakistani fashion and clothing with nationwide delivery.`,
     },
   };
 }

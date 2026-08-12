@@ -48,15 +48,25 @@ export default function FashionHero() {
   const { days, hours, minutes, ready } = useCountdown();
 
   return (
-    <section className="relative flex min-h-[100svh] items-center overflow-hidden">
-      {/* Parallax background */}
+    <section className="relative flex min-h-[100svh] items-center overflow-hidden bg-white dark:bg-[#212020]">
+      {/* Parallax fabric-texture background — deliberately visible.
+          The weave is raised to a clearly perceptible opacity, and a
+          left-weighted white wash keeps the headline column fully legible
+          while the texture reads through on the right. */}
       <motion.div style={{ scale }} className="absolute inset-0 z-0">
         <Image
           src="/fabric-texture.jpg"
-          alt="Fabric Texture"
+          alt=""
+          aria-hidden
           fill
           priority
-          className="object-cover opacity-20"
+          className="object-cover opacity-45"
+        />
+        {/* Legibility wash: clean white behind the type (light) / solid dark
+            behind the type (dark), texture shows through on the right in both. */}
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-gradient-to-r from-white via-white/75 to-white/15 dark:from-[#212020] dark:via-[#212020]/70 dark:to-transparent"
         />
       </motion.div>
 
@@ -69,14 +79,14 @@ export default function FashionHero() {
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: "spring", stiffness: 260, damping: 18 }}
-              className="inline-flex items-center gap-3 rounded-full bg-white px-5 py-2.5 shadow-lg ring-1 ring-gray-100"
+              className="inline-flex items-center gap-3 rounded-full bg-white px-5 py-2.5 shadow-lg ring-1 ring-gray-100 dark:bg-gray-800 dark:ring-gray-700"
             >
               <span style={{ color: accent }}>
                 <FlashSaleIcon />
               </span>
-              <p className="flex items-center gap-2 text-sm font-medium text-gray-800">
+              <p className="flex items-center gap-2 text-sm font-medium text-gray-800 dark:text-gray-100">
                 <span style={{ color: accent }}>{t(locale, "hero.sale")}:</span>
-                <span className="tabular-nums text-gray-500">
+                <span className="tabular-nums text-gray-500 dark:text-gray-400">
                   {ready ? `${days}d ${hours}h ${minutes}m` : "--d --h --m"}
                 </span>
               </p>
@@ -86,7 +96,7 @@ export default function FashionHero() {
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl md:text-6xl"
+              className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl md:text-6xl dark:text-white"
             >
               {t(locale, "hero.title1")}
               <br />
@@ -97,7 +107,7 @@ export default function FashionHero() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="max-w-xl text-lg text-gray-600 md:text-xl"
+              className="max-w-xl text-lg text-gray-600 md:text-xl dark:text-gray-400"
             >
               {t(locale, "hero.subtitle")}
             </motion.p>
@@ -117,7 +127,7 @@ export default function FashionHero() {
               </Link>
               <Link
                 href="/products/womens-clothing"
-                className="rounded-full border-2 border-gray-900 bg-white/70 px-8 py-4 text-sm font-semibold text-gray-900 backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-gray-900 hover:text-white"
+                className="rounded-full border-2 border-gray-900 bg-white/70 px-8 py-4 text-sm font-semibold text-gray-900 backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-gray-900 hover:text-white dark:border-gray-500 dark:bg-gray-800/60 dark:text-gray-100 dark:hover:border-white dark:hover:bg-white dark:hover:text-gray-900"
               >
                 {t(locale, "hero.explore")}
               </Link>
@@ -138,11 +148,11 @@ export default function FashionHero() {
               ].map((item) => (
                 <motion.div
                   key={item.text}
-                  className="flex items-center gap-2.5 rounded-xl bg-white/90 p-3 shadow-sm ring-1 ring-gray-100 backdrop-blur"
+                  className="flex items-center gap-2.5 rounded-xl bg-white/90 p-3 shadow-sm ring-1 ring-gray-100 backdrop-blur dark:bg-gray-800/80 dark:ring-gray-700"
                   whileHover={{ y: -5 }}
                 >
                   <span style={{ color: accent }}>{item.icon}</span>
-                  <span className="text-sm text-gray-600">{item.text}</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-300">{item.text}</span>
                 </motion.div>
               ))}
             </motion.div>

@@ -80,7 +80,7 @@ export default function HomeRecommendations() {
 
   return (
     <section className="py-12 px-6 max-w-7xl mx-auto">
-      <h2 className="text-3xl font-bold text-center mb-8">
+      <h2 className="text-3xl font-bold tracking-tight text-center mb-8">
         {t(locale, "product.completeYourLook")}
       </h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -91,9 +91,9 @@ export default function HomeRecommendations() {
             <Link
               key={p._id}
               href={`/products/${p.category_slug || "all"}/${slug}`}
-              className="group bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
+              className="group bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow dark:bg-gray-800"
             >
-              <div className="aspect-square relative bg-gray-50 rounded-t-lg">
+              <div className="aspect-square relative bg-gray-50 rounded-t-lg dark:bg-gray-700">
                 {imgRef ? (
                   <Image
                     src={urlFor(imgRef).url()}
@@ -110,7 +110,7 @@ export default function HomeRecommendations() {
               </div>
               <div className="p-4">
                 <h3 className="font-bold truncate">{p.name}</h3>
-                <p className="font-semibold text-gray-900">Rs {Number(p.price || 0).toFixed(2)}</p>
+                <p className="font-semibold text-gray-900 dark:text-gray-100">Rs {Number(p.price || 0).toFixed(2)}</p>
               </div>
             </Link>
           );

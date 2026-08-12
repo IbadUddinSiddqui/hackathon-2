@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AnK's — Current Site Wireframe &amp; Style Doc</title>
+<style>
+  :root {
+    --ink: #1c2434;
+    --ink-2: #010101;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --accent: #3c50e0;
+    --accent-soft: #eef2ff;
+    --green: #10b981;
+    --green-soft: #ecfdf5;
+    --amber: #ffa70b;
+    --amber-soft: #fffbeb;
+    --red: #dc3545;
+    --red-soft: #fef2f2;
+    --blue: #259ae6;
+    --blue-soft: #eff8ff;
+    --purple: #7c3aed;
+    --purple-soft: #f5f3ff;
+    --tag-anim: #7c3aed;
+    --tag-anim-bg: #f5f3ff;
+    --tag-style: #259ae6;
+    --tag-style-bg: #eff8ff;
+    --tag-interaction: #d97706;
+    --tag-interaction-bg: #fffbeb;
+    --tag-warn: #dc3545;
+    --tag-warn-bg: #fef2f2;
+    --radius: 14px;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 8px 24px -12px rgba(0,0,0,.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+    padding-bottom: 80px;
+  }
+  a { color: var(--accent); text-decoration: none; }
+
+  /* ===== Top bar ===== */
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255,255,255,.92); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar-inner {
+    max-width: 1200px; margin: 0 auto; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .topbar h1 { font-size: 17px; font-weight: 800; letter-spacing: -.02em; }
+  .topbar h1 small { color: var(--muted); font-weight: 600; font-size: 12px; margin-left: 6px; }
+  .topbar nav { display: flex; flex-wrap: wrap; gap: 6px; }
+  .topbar nav a {
+    font-size: 12px; font-weight: 600; color: var(--ink);
+    padding: 5px 10px; border-radius: 999px; border: 1px solid var(--line);
+    background: #fff; transition: all .15s;
+  }
+  .topbar nav a:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 28px 24px; }
+
+  /* ===== Hero / headers ===== */
+  .page-hero { margin-bottom: 36px; }
+  .page-hero h2 { font-size: 30px; font-weight: 800; letter-spacing: -.03em; }
+  .page-hero p { color: var(--muted); max-width: 760px; margin-top: 8px; font-size: 15px; }
+
+  /* ===== Section shells ===== */
+  .section { margin-bottom: 44px; }
+  .section-head {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+  }
+  .section-head h3 { font-size: 19px; font-weight: 800; letter-spacing: -.01em; }
+  .section-head .count {
+    font-size: 11px; font-weight: 700; color: var(--muted);
+    border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 2px 9px;
+  }
+
+  /* ===== Tag chips ===== */
+  .tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 700; border-radius: 999px; padding: 2px 9px;
+    white-space: nowrap;
+  }
+  .tag::before { content: "●"; font-size: 8px; }
+  .anim    { color: var(--tag-anim); background: var(--tag-anim-bg); }
+  .anim::before { color: var(--tag-anim); }
+  .style   { color: var(--tag-style); background: var(--tag-style-bg); }
+  .style::before { color: var(--tag-style); }
+  .interaction { color: var(--tag-interaction); background: var(--tag-interaction-bg); }
+  .interaction::before { color: var(--tag-interaction); }
+  .warn    { color: var(--tag-warn); background: var(--tag-warn-bg); }
+  .warn::before { color: var(--tag-warn); }
+  .route-tag {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 11px; color: var(--accent); background: var(--accent-soft);
+    border-radius: 6px; padding: 2px 7px; font-weight: 600;
+  }
+
+  /* ===== Page card ===== */
+  .page-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: var(--shadow); overflow: hidden; margin-bottom: 28px;
+  }
+  .page-card-head {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+    padding: 16px 20px; border-bottom: 1px solid var(--line);
+    background: linear-gradient(180deg, #fff, #fafcff);
+  }
+  .page-card-head h4 { font-size: 16px; font-weight: 800; }
+  .page-card-head .meta { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .page-card-body { padding: 20px; }
+  .page-desc { font-size: 13.5px; color: var(--muted); margin-bottom: 16px; }
+
+  /* ===== Wireframe blocks ===== */
+  .wf { display: flex; flex-direction: column; gap: 8px; }
+  .wf-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .wf-block {
+    position: relative;
+    border: 1.5px dashed #cbd5e1;
+    background: #f1f5f9;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+    min-height: 34px;
+    display: flex; align-items: center; justify-content: center;
+    gap: 6px; text-align: center;
+    transition: all .15s;
+  }
+  .wf-block:hover { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+  .wf-block.solid { border-style: solid; border-color: #94a3b8; background: #e2e8f0; color: #334155; }
+  .wf-block.dark { border-style: solid; border-color: #1c2434; background: #1c2434; color: #f1f5f9; }
+  .wf-block.accent { border-style: solid; border-color: var(--accent); background: var(--accent-soft); color: #312e81; }
+  .wf-block.green { border-style: solid; border-color: var(--green); background: var(--green-soft); color: #065f46; }
+  .wf-block img-placeholder { display: block; }
+  .wf-block .icon { font-size: 14px; }
+  .wf-block .sub { display: block; font-size: 10px; font-weight: 500; color: #94a3b8; }
+  .wf-block.grow { flex: 1; }
+  .wf-block.fixed-w { width: 120px; }
+  .wf-block.auto { flex: 0 0 auto; }
+  .wf-block.tall { min-height: 90px; }
+  .wf-block.taller { min-height: 150px; }
+  .wf-block .notes {
+    position: absolute; top: -11px; right: 8px;
+  }
+  .wf-annot {
+    font-size: 11.5px; color: var(--muted);
+    display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 4px 2px 0;
+  }
+  .wf-annot b { color: var(--ink); }
+
+  /* generic placeholder image block */
+  .img { background: repeating-linear-gradient(45deg,#e2e8f0,#e2e8f0 6px,#eef2f7 6px,#eef2f7 12px); }
+
+  /* ===== Design tokens ===== */
+  .tokens { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .token-card {
+    background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px;
+  }
+  .token-card h5 { font-size: 13px; font-weight: 800; margin-bottom: 10px; display:flex; align-items:center; gap:8px; }
+  .swatches { display: flex; gap: 8px; flex-wrap: wrap; }
+  .swatch { text-align: center; font-size: 10px; color: var(--muted); }
+  .swatch .dot { width: 34px; height: 34px; border-radius: 9px; border: 1px solid rgba(0,0,0,.08); display:block; margin-bottom: 4px; }
+  .code { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: 11.5px; background: #0f172a; color: #7dd3fc; border-radius: 8px; padding: 10px 12px; overflow-x: auto; white-space: pre-wrap; }
+  .kv { font-size: 12px; color: var(--muted); }
+  .kv b { color: var(--ink); }
+
+  /* ===== Tables ===== */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 640px; }
+  th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); padding: 10px 14px; border-bottom: 1px solid var(--line); background: #f8fafc; }
+  td { padding: 10px 14px; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td .route-tag { font-size: 10px; }
+
+  /* ===== Page nav jump list ===== */
+  .jumplist { display: flex; flex-wrap: wrap; gap: 8px; }
+  .jumplist a {
+    font-size: 12.5px; font-weight: 700; color: var(--ink);
+    border: 1px solid var(--line); background: #fff; border-radius: 10px;
+    padding: 7px 12px; transition: all .15s;
+  }
+  .jumplist a:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+
+  /* ===== Sidebar wireframe ===== */
+  .admin-shell { display: grid; grid-template-columns: 220px 1fr; gap: 8px; }
+  .admin-side { display: flex; flex-direction: column; gap: 6px; }
+  .admin-side .wf-block { justify-content: flex-start; min-height: 28px; padding: 6px 10px; font-weight: 600; }
+  .admin-side .wf-block.active { border-color: var(--accent); background: var(--accent-soft); color: #312e81; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0 18px; font-size: 12px; }
+  .legend .tag { padding: 4px 12px; }
+
+  details.anim-item { border: 1px solid var(--line); border-radius: 10px; background: #fff; margin-bottom: 8px; overflow: hidden; }
+  details.anim-item summary {
+    cursor: pointer; padding: 12px 16px; font-size: 13.5px; font-weight: 700;
+    display: flex; align-items: center; gap: 10px; list-style: none;
+  }
+  details.anim-item summary::-webkit-details-marker { display: none; }
+  details.anim-item summary .chev { margin-left: auto; transition: transform .2s; font-size: 11px; color: var(--muted); }
+  details.anim-item[open] summary .chev { transform: rotate(90deg); }
+  details.anim-item .body { padding: 0 16px 14px; font-size: 12.5px; color: #475569; }
+  details.anim-item .body .code { margin-top: 8px; }
+
+  .pill { display:inline-block; font-size:11px; font-weight:700; border-radius:999px; padding:2px 9px; }
+  .pill.server { background:#eff6ff; color:#1d4ed8; }
+  .pill.client { background:#fef3c7; color:#92400e; }
+  .pill.auth { background:#fef2f2; color:#b91c1c; }
+  .pill.plain { background:#f1f5f9; color:#475569; }
+
+  footer.foot { margin-top: 60px; text-align: center; color: var(--muted); font-size: 12.5px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <h1>AnK's Storefront <small>Current-Site Wireframe · v1 · generated from code</small></h1>
+    <nav>
+      <a href="#design">Design System</a>
+      <a href="#home">Home</a>
+      <a href="#shop">Shop</a>
+      <a href="#detail">Product</a>
+      <a href="#cart">Cart</a>
+      <a href="#checkout">Checkout</a>
+      <a href="#auth">Auth</a>
+      <a href="#account">Account</a>
+      <a href="#admin">Admin</a>
+      <a href="#animations">Animations</a>
+      <a href="#routes">Route Map</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ================= INTRO ================= -->
+  <div class="page-hero">
+    <h2>🔍 Current Website Wireframe — "what exists right now"</h2>
+    <p>
+      This document is a structural wireframe of the site <b>as it currently stands in the codebase</b>, not a redesign.
+      Every block below maps to a real component/page. Dashed boxes = layout regions, solid boxes = real UI elements.
+      Annotations in <span class="tag anim">purple</span> = animation / motion, <span class="tag style">blue</span> = styling / design tokens,
+      <span class="tag interaction">orange</span> = interactions &amp; behaviour, <span class="tag warn">red</span> = gaps / things to flag before shipping.
+      Open the file in a browser — all sections are navigable and hoverable.
+    </p>
+    <div class="legend">
+      <span class="tag anim">Animation / motion</span>
+      <span class="tag style">Styling / tokens</span>
+      <span class="tag interaction">Interaction</span>
+      <span class="tag warn">Gap / flag</span>
+    </div>
+  </div>
+
+  <!-- ================= DESIGN SYSTEM ================= -->
+  <div class="section" id="design">
+    <div class="section-head"><h3>🎨 Design System (extracted from tailwind.config.ts · globals.css · components)</h3></div>
+
+    <div class="tokens">
+      <div class="token-card">
+        <h5>✏️ Typography</h5>
+        <div class="swatches" style="flex-direction:column;align-items:flex-start;gap:8px;">
+          <div class="kv"><b>Body / UI:</b> Geist Sans (variable, 100–900) — <code>--font-geist-sans</code></div>
+          <div class="kv"><b>Mono:</b> Geist Mono — <code>--font-geist-mono</code></div>
+          <div class="kv"><b>Admin/theme font:</b> "Satoshi" (css/fonts)</div>
+          <div class="kv"><b>Urdu (RTL):</b> Noto Nastaliq Urdu auto-loaded when <code>lang="ur"</code>, line-height 1.9</div>
+          <div class="kv"><b>Headings:</b> <code>text-4xl→6xl font-bold tracking-tight</code>; sections use <code>text-5xl font-extrabold</code> (older) vs <code>text-3xl/4xl font-bold</code> (newer)</div>
+          <div class="kv"><b>Eyebrows:</b> <code>text-xs font-bold uppercase tracking-[0.2em]</code> in tenant accent</div>
+        </div>
+      </div>
+
+      <div class="token-card">
+        <h5>🎨 Color palette</h5>
+        <div class="swatches">
+          <div class="swatch"><span class="dot" style="background:#FFFFFF;border:1px solid #e2e8f0"></span>white</div>
+          <div class="swatch"><span class="dot" style="background:#1C2434"></span>black DEFAULT</div>
+          <div class="swatch"><span class="dot" style="background:#010101"></span>black-2</div>
+          <div class="swatch"><span class="dot" style="background:#3C50E0"></span>primary</div>
+          <div class="swatch"><span class="dot" style="background:#64748B"></span>body</div>
+          <div class="swatch"><span class="dot" style="background:#E2E8F0"></span>stroke</div>
+          <div class="swatch"><span class="dot" style="background:#10B981"></span>meta-3</div>
+          <div class="swatch"><span class="dot" style="background:#DC3545"></span>meta-1</div>
+          <div class="swatch"><span class="dot" style="background:#FFA70B"></span>warning</div>
+        </div>
+        <div class="kv" style="margin-top:8px;">
+          <b>Tenant accent:</b> <code>tenant.branding.accentColor</code> (default <code>#000000</code>) drives hero headline span, sale badge icon, cart badge, eyebrows, category hover wash.<br>
+          <b>Dark mode:</b> class-based (<code>dark:</code>), plus shadcn-style HSL vars in globals.css.
+        </div>
+      </div>
+
+      <div class="token-card">
+        <h5>📐 Shape &amp; elevation</h5>
+        <div class="kv">
+          <b>Radius:</b> <code>--radius: 0.5rem</code> (shadcn tokens); storefront favours <b>rounded-full</b> pills/buttons and <b>rounded-2xl/3xl</b> cards.<br>
+          <b>Shadows:</b> TailAdmin scale <code>shadow-1…14</code>, <code>shadow-card</code>, <code>shadow-default</code>; product cards use <code>shadow-sm → hover:shadow-xl</code>.<br>
+          <b>Buttons:</b> pills — <code>rounded-full px-8 py-4 font-semibold</code> (hero), <code>rounded-full bg-gray-900 … hover:-translate-y-0.5</code>.<br>
+          <b>Container:</b> <code>max-w-7xl mx-auto px-4 lg:px-8</code>.
+        </div>
+      </div>
+
+      <div class="token-card">
+        <h5>🧩 Component libraries</h5>
+        <div class="kv">
+          <b>UI kit:</b> shadcn-style <code>components/ui/*</code> (button, card, input, separator, badge, accordion…)<br>
+          <b>Motion:</b> <code>framer-motion</code> (AnimatePresence, motion, useScroll/useTransform)<br>
+          <b>Icons:</b> react-icons (Fa/pir/ri/io5/fi), lucide-react (Star, Timer, Check, ShoppingCart…), inline SVG<br>
+          <b>Carousel:</b> Swiper (ProductGallery — vertical thumbs + main)<br>
+          <b>Search engine:</b> Typesense (client-side, hybrid/vector w/ fallback)<br>
+          <b>State:</b> Zustand (cartStore, wishlistStore) + localStorage persistence
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= HOMEPAGE ================= -->
+  <div class="section" id="home">
+    <div class="section-head"><h3>🏠 Homepage</h3><span class="count">/</span><span class="route-tag">/</span></div>
+    <div class="page-card">
+      <div class="page-card-head">
+        <h4>Home — 8 stacked sections</h4>
+        <span class="route-tag">/</span>
+        <span class="pill client">client-heavy</span>
+        <span class="pill plain">public</span>
+        <span class="meta">Server component shell · children are client components</span>
+      </div>
+      <div class="page-card-body">
+        <div class="wf">
+          <!-- Header -->
+          <div class="wf-block dark grow">Header <span class="sub">sticky · auto-hides on scroll-down, returns on scroll-up</span></div>
+          <div class="wf-annot">
+            <b>Header (every storefront page):</b>
+            <span class="tag style">bg-white/95 backdrop-blur</span>
+            <span class="tag interaction">scroll > 8px → shadow-sm→md</span>
+            <span class="tag anim">transition-transform 300ms (slide-away/back)</span>
+            <span class="tag style">logo /logo-text-black.svg 132×26 (compact)</span>
+          </div>
+          <div class="wf-annot">
+            Inside: ① top banner <span class="tag style">h-8 gradient gray-900→800, tenant name + "claim" link</span>
+            ② logo ③ desktop nav <span class="tag anim">underline grows 0→100% on hover (300ms)</span> — Shop · About · Contact
+            ④ <b>live search</b> (Typesense dropdown) ⑤ wishlist ❤ badge <span class="tag anim">scale 0→1 pop via AnimatePresence</span>
+            ⑥ cart badge <span class="tag anim">same pop, tenant-accent bg</span> ⑦ Login pill / account dropdown <span class="tag anim">opacity+y+scale 0.15s</span>
+          </div>
+          <div class="wf-annot">
+            Mobile: hamburger → right-side drawer <span class="tag anim">spring slide-in x:100%→0, stiffness 320 damping 32 + blurred overlay fade</span>, body scroll locked. Language switcher (EN/UR) in drawer &amp; header.
+          </div>
+
+          <!-- Hero -->
+          <div class="wf-block tall grow" style="min-height:170px;display:block;text-align:left;">
+            <b>HERO — full viewport (min-h-[100svh])</b>
+            <div class="wf-row" style="margin-top:8px;">
+              <div class="wf-block solid grow" style="flex:2;">Headline + sale badge + CTAs + trust badges</div>
+              <div class="wf-block solid grow img" style="flex:1.4;">Rotating category collage (4 images: Women / Men / Wearables / Children)</div>
+            </div>
+          </div>
+          <div class="wf-annot">
+            <span class="tag anim">Parallax fabric bg (useScroll → scale 1→1.2)</span>
+            <span class="tag anim">Sale badge: spring scale-in (stiffness 260); headline: y:30→0 0.5s delay .1; subtitle fade .2; CTAs y:20 delay .3; badges fade .4</span>
+            <span class="tag anim">Flash-sale countdown live (2d 5h 30m default, ticks every 30s)</span>
+            <span class="tag anim">Collage: wobble rotate −5↔5 mirror 8s infinite + per-tile hover scale 1.04 + image zoom 500ms</span>
+            <span class="tag anim">Floating dashed "thread" SVG bobs y −20↔20 8s infinite</span>
+            <span class="tag interaction">Trust badges whileHover y −5; CTAs hover lift −0.5 + shadow-xl</span>
+            <span class="tag warn">bg image /fabric-texture.jpg at 20% opacity — very subtle, may read as plain white</span>
+          </div>
+
+          <!-- Sponsors marquee -->
+          <div class="wf-block dark grow">Sponsor marquee — 5 brand SVGs duplicated ×6</div>
+          <div class="wf-annot"><span class="tag anim">CSS marquee: animate-scroll 20s linear infinite, translateX 0→−50%, seamless</span><span class="tag style">bg-black-2 h-24</span></div>
+
+          <!-- Category showcase -->
+          <div class="wf-block tall grow" style="min-height:150px;display:block;text-align:left;">
+            <b>CATEGORY SHOWCASE — bento grid (data-driven from Sanity)</b>
+            <div class="wf-row" style="margin-top:8px;">
+              <div class="wf-block solid grow img" style="flex:2;">Featured tile (2×2)</div>
+              <div class="wf-block solid grow img">tile</div>
+              <div class="wf-block solid grow img">tile</div>
+              <div class="wf-block solid grow img">tile</div>
+            </div>
+          </div>
+          <div class="wf-annot">
+            <span class="tag style">Top 4 categories by product count; image = highest-rated product's first image (multi-tenant scoped GROQ)</span>
+            <span class="tag anim">whileInView stagger 0.1s + spring cards (y:28→0, stiffness 260); skeleton pulse while loading</span>
+            <span class="tag anim">hover: image scale-110 (700ms ease-out) + accent-color wash (mix-blend-multiply, 500ms)</span>
+            <span class="tag interaction">View All pill: arrow nudges right on hover</span>
+            <span class="tag warn">Known label keys map to Women/Men/Kids/Footwear; unknown slugs humanized</span>
+          </div>
+
+          <!-- Womens -->
+          <div class="wf-block grow" style="display:block;text-align:left;">
+            <b>"WOMENS SECTION" — heading</b>
+            <div class="wf-row" style="margin-top:8px;">
+              <div class="wf-block solid img" style="flex:1;">card</div>
+              <div class="wf-block solid img" style="flex:1;">card</div>
+              <div class="wf-block solid img" style="flex:1;">card</div>
+              <div class="wf-block solid img" style="flex:1;">card</div>
+              <div class="wf-block solid img" style="flex:1;">card</div>
+            </div>
+          </div>
+          <div class="wf-annot">
+            <span class="tag style">text-5xl font-extrabold heading — inconsistent with newer 3xl/4xl sections</span>
+            <span class="tag anim">ProductCards: stagger 0.07s + spring (y:24); image zoom 500ms on hover; quick-add button slides up + fades in on hover (mobile: always visible)</span>
+            <span class="tag interaction">View More button toggles 10 → all (inverted black on hover)</span>
+          </div>
+
+          <!-- Footwear -->
+          <div class="wf-block grow" style="display:block;text-align:left;">
+            <b>"FOOTWEAR SECTION" — heading</b>
+            <div class="wf-row" style="margin-top:8px;">
+              <div class="wf-block solid img" style="flex:1;">card</div>
+              <div class="wf-block solid img" style="flex:1;">card</div>
+              <div class="wf-block solid img" style="flex:1;">card</div>
+              <div class="wf-block solid img" style="flex:1;">card</div>
+              <div class="wf-block solid img" style="flex:1;">card</div>
+            </div>
+          </div>
+          <div class="wf-annot"><span class="tag style">same ProductsGrid, category="footwear"</span><span class="tag warn">"NewArrivals" &amp; "TopSale" components are just category grids — no real "new" or "sale" logic</span></div>
+
+          <!-- Recommendations -->
+          <div class="wf-block grow">"Complete Your Look" — recommendations (4 cards)</div>
+          <div class="wf-annot"><span class="tag interaction">Seeds from cart's first item via /api/recommendations; falls back to top-rated; hides when empty</span></div>
+
+          <!-- Testimonials -->
+          <div class="wf-block grow" style="display:block;text-align:left;">
+            <b>"OUR HAPPY CUSTOMERS" — testimonial carousel</b>
+            <div class="wf-row" style="margin-top:8px;">
+              <div class="wf-block solid grow">review card 1</div>
+              <div class="wf-block solid grow">review card 2</div>
+              <div class="wf-block solid grow">review card 3</div>
+            </div>
+          </div>
+          <div class="wf-annot">
+            <span class="tag interaction">3-per-page pager, ←/→ arrows (disabled at ends), dot indicators</span>
+            <span class="tag style">Card UI (rounded-3xl border-black shadow-lg, gold stars, ✓ badge)</span>
+            <span class="tag warn">Hardcoded "Shop.co" copy + duplicate testimonials + avatar field referenced in dead code — client copy needed (P1-SP-10)</span>
+          </div>
+
+          <!-- Footer -->
+          <div class="wf-block dark grow">Footer — newsletter · 3 link columns · brand · payments</div>
+          <div class="wf-annot">
+            <span class="tag style">bg-gray-950; newsletter card bg-white/[0.04] ring-white/10 rounded-2xl</span>
+            <span class="tag anim">subscribe button hover scale-105; social icon buttons bg-white/5→15</span>
+            <span class="tag interaction">newsletter is local-only (no API), shows success text</span>
+            <span class="tag style">logo inverted /logo-full-black.svg; WhatsApp (wa.me) + mailto from tenant; Visa/Mastercard SVGs + "Safepay" + "COD" chips</span>
+          </div>
+
+          <!-- Chat widget -->
+          <div class="wf-block green grow" style="width:120px;align-self:flex-end;">💬 ChatWidget (floating FAQ)</div>
+          <div class="wf-annot"><span class="tag interaction">Floating bottom-right tenant-branded FAQ/chat → WhatsApp / email (P4-15)</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= SHOP ================= -->
+  <div class="section" id="shop">
+    <div class="section-head"><h3>🛍️ Shop / Catalog pages</h3><span class="count">3 pages</span></div>
+
+    <div class="page-card">
+      <div class="page-card-head">
+        <h4>All Products</h4><span class="route-tag">/products</span>
+        <span class="pill client">client</span><span class="pill plain">public</span>
+        <span class="meta">Sanity + Typesense merged &amp; de-duped, tenant-scoped</span>
+      </div>
+      <div class="page-card-body">
+        <div class="wf">
+          <div class="wf-block dark grow">Header</div>
+          <div class="wf-row">
+            <div class="wf-block solid fixed-w" style="align-self:stretch;min-height:220px;">Filter sidebar (FAB drawer)</div>
+            <div class="wf-block grow" style="min-height:220px;display:block;text-align:left;">
+              <b>Product grid — 2/3/4 cols, 9 per page</b>
+              <div class="wf-row" style="margin-top:8px;">
+                <div class="wf-block solid img" style="flex:1;">card</div><div class="wf-block solid img" style="flex:1;">card</div><div class="wf-block solid img" style="flex:1;">card</div>
+              </div>
+              <div class="wf-row" style="margin-top:8px;">
+                <div class="wf-block solid img" style="flex:1;">card</div><div class="wf-block solid img" style="flex:1;">card</div><div class="wf-block solid img" style="flex:1;">card</div>
+              </div>
+              <div class="wf-row" style="margin-top:8px;">
+                <div class="wf-block solid img" style="flex:1;">card</div><div class="wf-block solid img" style="flex:1;">card</div><div class="wf-block solid img" style="flex:1;">card</div>
+              </div>
+            </div>
+          </div>
+          <div class="wf-row">
+            <div class="wf-block grow">pagination: [Previous] Page x of y [Next]</div>
+            <div class="wf-block green fixed-w">🟢 filter FAB (bottom-right)</div>
+          </div>
+          <div class="wf-block dark grow">Footer</div>
+        </div>
+        <div class="wf-annot">
+          <span class="tag anim">Grid: framer-motion stagger + spring cards; loading = 9× pulse skeletons</span>
+          <span class="tag anim">Filter drawer (AppSidebar): spring slide x:−100%→0 (stiffness 300 damping 30) + overlay fade; accordion sections height/opacity; chevron rotates −90°; checkbox scale 1.05 + ✓ pop</span>
+          <span class="tag interaction">Client-side filters on Brand / Size / Tags (checkboxes)</span>
+          <span class="tag warn">Old-style card: fixed w-36/44, object-contain p-4, no add-to-cart — inconsistent with homepage card (aspect 4/5, quick-add)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-card">
+      <div class="page-card-head">
+        <h4>Category page</h4><span class="route-tag">/products/[category]</span>
+        <span class="pill server">server-rendered</span><span class="pill plain">public</span>
+        <span class="meta">SSR for SEO · same grid + filters · per-category generateMetadata</span>
+      </div>
+      <div class="page-card-body">
+        <div class="wf">
+          <div class="wf-block dark grow">Header</div>
+          <div class="wf-row">
+            <div class="wf-block solid fixed-w" style="align-self:stretch;min-height:180px;">Filter FAB</div>
+            <div class="wf-block grow" style="min-height:180px;display:block;text-align:left;">
+              <b>"{Category}" heading + grid (9/page)</b>
+              <div class="wf-row" style="margin-top:8px;">
+                <div class="wf-block solid img" style="flex:1;">card</div><div class="wf-block solid img" style="flex:1;">card</div><div class="wf-block solid img" style="flex:1;">card</div>
+              </div>
+            </div>
+          </div>
+          <div class="wf-block grow">pagination [Previous] Page x of y [Next]</div>
+          <div class="wf-block dark grow">Footer</div>
+        </div>
+        <div class="wf-annot"><span class="tag style">Dark-mode page bg #212020; SEO title "Women's Clothing — Shop Online"</span><span class="tag warn">metadata still hardcodes "AnK's" in description/OG</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= PRODUCT DETAIL ================= -->
+  <div class="section" id="detail">
+    <div class="section-head"><h3>👕 Product detail</h3><span class="count">/products/[category]/[productId]</span></div>
+    <div class="page-card">
+      <div class="page-card-head">
+        <h4>Product detail page</h4>
+        <span class="route-tag">/products/[category]/[productId]</span>
+        <span class="pill server">SSR data</span><span class="pill client">client UI</span>
+        <span class="meta">flash sale · color siblings · size quiz · reviews · recommendations</span>
+      </div>
+      <div class="page-card-body">
+        <div class="wf">
+          <div class="wf-block dark grow">Header</div>
+          <div class="wf-row" style="align-items:stretch;">
+            <div class="wf-block solid img" style="flex:1;min-height:220px;display:block;text-align:left;">
+              <b>Gallery (Swiper)</b>
+              <span class="sub">vertical thumbnails + main image, 400×400</span>
+            </div>
+            <div class="wf-block grow" style="flex:1.2;min-height:220px;display:block;text-align:left;">
+              <b>Info column</b>
+              <div class="wf-annot" style="padding:0;margin-top:6px;">
+                <span class="tag style">h1 name (4xl bold)</span>
+                <span class="tag style">★ rating + (x.x)</span>
+                <span class="tag style">price 4xl + sale strike + badge + ⏱ live countdown</span>
+                <span class="tag style">stock badge (green/red)</span>
+                <span class="tag style">description</span>
+              </div>
+              <div class="wf-row" style="margin-top:8px;">
+                <div class="wf-block solid auto">Color swatch picker</div>
+                <div class="wf-block solid auto">SizeQuiz (measurement → size)</div>
+              </div>
+              <div class="wf-row" style="margin-top:8px;">
+                <div class="wf-block accent auto">Add to Cart</div>
+                <div class="wf-block solid auto">♥ Wishlist</div>
+              </div>
+            </div>
+          </div>
+          <div class="wf-block grow">"You may also like" — Recommendations (co-purchase)</div>
+          <div class="wf-block grow">Reviews section</div>
+          <div class="wf-block dark grow">Footer</div>
+        </div>
+        <div class="wf-annot">
+          <span class="tag anim">Page fade-in 0.3s; gallery slides in x:−50; info column x:+50; headline fade; price/desc fade</span>
+          <span class="tag anim">Add to Cart: whileHover scale 1.05/y −2 + gradient blue→purple (⚠ blue-purple clashes with black/white storefront); qty bubble pops scale-0→1 + ping ring; stock bar fills 500ms; "in cart" panel fades in</span>
+          <span class="tag interaction">Color swatches: current = border-2 + ✓ (aria-current); siblings link to their listing; hex colors render as dots</span>
+          <span class="tag anim">Wishlist button whileHover scale 1.05, tap 0.95; heart turns red when in wishlist</span>
+          <span class="tag style">Flash-sale badge (red) + "-40%" static badge when no sale; countdown ticks every second (HH:MM:SS)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= CART / CHECKOUT ================= -->
+  <div class="section" id="cart">
+    <div class="section-head"><h3>🛒 Cart &amp; Checkout</h3><span class="count">3 pages</span></div>
+
+    <div class="page-card">
+      <div class="page-card-head">
+        <h4>Cart</h4><span class="route-tag">/cart</span>
+        <span class="pill client">client</span><span class="pill plain">public</span>
+      </div>
+      <div class="page-card-body">
+        <div class="wf">
+          <div class="wf-block dark grow">Header</div>
+          <div class="wf-row" style="align-items:stretch;">
+            <div class="wf-block grow" style="flex:2;display:block;text-align:left;">
+              <b>Cart items (2-col)</b>
+              <div class="wf-row" style="margin-top:8px;">
+                <div class="wf-block solid grow" style="text-align:left;">🖼 64×64 · name · price · stock · color · qty input · ✕ remove</div>
+              </div>
+              <div class="wf-row" style="margin-top:8px;">
+                <div class="wf-block solid grow" style="text-align:left;">🖼 · name · price · qty · ✕ remove</div>
+              </div>
+            </div>
+            <div class="wf-block solid grow" style="flex:1;display:block;text-align:left;">
+              <b>Order summary card</b>
+              <span class="sub">subtotal · discount (−) · delivery · total<br/>discount code input + Apply/Remove<br/>→ Proceed to Checkout</span>
+            </div>
+          </div>
+          <div class="wf-block grow">CartRecommendations ("Complete your look")</div>
+          <div class="wf-block dark grow">Footer</div>
+        </div>
+        <div class="wf-annot">
+          <span class="tag interaction">Quantity bounded 1..stock; ✕ removes; discount validated against /api/validate-discount (server-side), shows "you save Rs x"</span>
+          <span class="tag style">shadcn Card + Separator + Input + Button; CURRENCY_SYMBOL = "Rs" (PKR), DELIVERY_FEE constant</span>
+          <span class="tag interaction">Stripe is retired — checkout button simply routes to /checkout</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-card">
+      <div class="page-card-head">
+        <h4>Checkout</h4><span class="route-tag">/checkout</span>
+        <span class="pill client">client</span><span class="pill plain">public</span>
+      </div>
+      <div class="page-card-body">
+        <div class="wf">
+          <div class="wf-block dark grow">Header</div>
+          <div class="wf-row" style="align-items:stretch;">
+            <div class="wf-block solid grow" style="flex:1;display:block;text-align:left;">
+              <b>Order summary</b>
+              <span class="sub">subtotal · discount · delivery · total</span>
+              <div class="wf-row" style="margin-top:8px;">
+                <div class="wf-block solid auto">💳 Card (Safepay)</div>
+                <div class="wf-block solid auto">💵 Cash on Delivery</div>
+              </div>
+              <span class="sub" style="display:block;margin-top:8px;">radio-style selector, blue ring when active</span>
+            </div>
+            <div class="wf-block grow" style="flex:1;display:block;text-align:left;">
+              <b>Payment form</b>
+              <span class="sub">Safepay: email → redirect to Safepay hosted page (server creates order + session)<br/>COD: email · gift card · store credit → place order</span>
+            </div>
+          </div>
+          <div class="wf-block dark grow">Footer</div>
+        </div>
+        <div class="wf-annot">
+          <span class="tag interaction">Safepay behind flag NEXT_PUBLIC_SAFEPAY_ENABLED=true; total is computed server-side from Sanity prices (client never sends amount)</span>
+          <span class="tag interaction">COD creates pending order via /api/create-cod-order (payment_method:"cod")</span>
+          <span class="tag interaction">cart-capture fires-and-forgets the cart for abandoned-recovery (on blur/email valid)</span>
+          <span class="tag warn">Transition on payment-method buttons but no framer-motion swap between forms</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-card">
+      <div class="page-card-head">
+        <h4>Order success</h4><span class="route-tag">/checkout/success?method=cod|card</span>
+        <span class="pill client">client</span>
+      </div>
+      <div class="page-card-body">
+        <div class="wf">
+          <div class="wf-block dark grow">Header</div>
+          <div class="wf-block solid grow tall">✅ "Order Placed!" / "Payment Successful!" + Continue shopping</div>
+          <div class="wf-block dark grow">Footer</div>
+        </div>
+        <div class="wf-annot"><span class="tag interaction">Clears the cart on mount; message depends on ?method=cod</span><span class="tag warn">SafePay redirect-back (success_url) is not wired to this page's query params — webhook fulfils the order</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= WISHLIST / SEARCH ================= -->
+  <div class="section" id="misc">
+    <div class="section-head"><h3>❤️ Wishlist · 🔎 Search</h3></div>
+    <div class="page-card">
+      <div class="page-card-head"><h4>Wishlist</h4><span class="route-tag">/wishlist</span><span class="pill client">client</span></div>
+      <div class="page-card-body">
+        <div class="wf">
+          <div class="wf-block dark grow">Header</div>
+          <div class="wf-block grow" style="display:block;text-align:left;">
+            <b>"Your Wishlist" — grid 1/2/3/4 cols</b>
+            <div class="wf-row" style="margin-top:8px;">
+              <div class="wf-block solid img" style="flex:1;">item + Add to Cart + Remove</div>
+              <div class="wf-block solid img" style="flex:1;">item</div>
+              <div class="wf-block solid img" style="flex:1;">item</div>
+            </div>
+          </div>
+          <div class="wf-block dark grow">Footer</div>
+        </div>
+        <div class="wf-annot"><span class="tag interaction">Clear Wishlist (outline btn); empty state text</span><span class="tag style">#F0EEED image tile, object-contain</span></div>
+      </div>
+    </div>
+    <div class="page-card">
+      <div class="page-card-head"><h4>Search</h4><span class="route-tag">/search</span><span class="pill server">SSR shell</span></div>
+      <div class="page-card-body">
+        <div class="wf">
+          <div class="wf-block solid grow tall">ProductSearch component (typesense input + dropdown)</div>
+        </div>
+        <div class="wf-annot">
+          <span class="tag interaction">Live dropdown (up to 12 hits), auto-closes after 7s / on blur, pauses on hover; Enter or 🔍 triggers</span>
+          <span class="tag anim">dropdown bg-white/90 backdrop-blur, row hover bg</span>
+          <span class="tag warn">/search page renders only the search box with no header/footer — bare page</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= AUTH ================= -->
+  <div class="section" id="auth">
+    <div class="section-head"><h3>🔐 Auth</h3><span class="count">/login · /register</span></div>
+    <div class="page-card">
+      <div class="page-card-head"><h4>Login</h4><span class="route-tag">/login</span><span class="pill client">client</span><span class="pill plain">public</span></div>
+      <div class="page-card-body">
+        <div class="wf">
+          <div class="wf-block dark grow">Header</div>
+          <div class="wf-block solid grow tall" style="max-width:420px;margin:0 auto;display:block;text-align:left;">
+            <b>Centered card (max-w-md)</b>
+            <span class="sub">tenant eyebrow · "Welcome Back" · email+icon · password+icon · Sign In · link to register</span>
+          </div>
+          <div class="wf-block dark grow">Footer</div>
+        </div>
+        <div class="wf-annot">
+          <span class="tag anim">Card entrance: opacity + y:−24 0.4s; error banner fades/slides in; submit button whileTap scale .98 + spinner (animate-spin border trick)</span>
+          <span class="tag style">icon-inset inputs (FiMail/FiLock), focus ring; tenant accent on eyebrow + register link</span>
+          <span class="tag interaction">NextAuth credentials sign-in → redirect /dashboard; admin login flows to /adminpanel</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ACCOUNT ================= -->
+  <div class="section" id="account">
+    <div class="section-head"><h3>👤 Customer account</h3><span class="count">/dashboard · /profile · /settings</span></div>
+    <div class="page-card">
+      <div class="page-card-head"><h4>Dashboard (orders)</h4><span class="route-tag">/dashboard</span><span class="pill server">server</span><span class="pill auth">auth-gated</span></div>
+      <div class="page-card-body">
+        <div class="wf">
+          <div class="wf-block dark grow">Header</div>
+          <div class="wf-row" style="align-items:stretch;">
+            <div class="wf-block solid fixed-w" style="align-self:stretch;">AccountSidebar (nav)</div>
+            <div class="wf-block grow" style="display:block;text-align:left;">
+              <b>Order history</b>
+              <span class="sub">order id · status chip · date · total · item count</span>
+              <div class="wf-block solid grow" style="margin-top:8px;">row</div>
+              <div class="wf-block solid grow" style="margin-top:8px;">row</div>
+            </div>
+          </div>
+          <div class="wf-block dark grow">Footer</div>
+        </div>
+        <div class="wf-annot"><span class="tag style">statusStyle() color-coded chips; formatOrderId/formatDate/formatTotal helpers; noindex</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ADMIN ================= -->
+  <div class="section" id="admin">
+    <div class="section-head"><h3>🛠️ Admin panel</h3><span class="count">/adminpanel + 10 sections</span></div>
+    <div class="page-card">
+      <div class="page-card-head">
+        <h4>Admin shell (DefaultLayout)</h4>
+        <span class="route-tag">/adminpanel/**</span>
+        <span class="pill auth">requireAdmin() guard → /denied</span>
+      </div>
+      <div class="page-card-body">
+        <div class="admin-shell">
+          <div class="admin-side">
+            <div class="wf-block active">📊 Dashboard · eCommerce</div>
+            <div class="wf-block">📦 Orders</div>
+            <div class="wf-block">🏷️ Discounts</div>
+            <div class="wf-block">👕 Products</div>
+            <div class="wf-block">👥 Customers</div>
+            <div class="wf-block">📜 Audit Log</div>
+            <div class="wf-block">🛒 Abandoned Carts</div>
+            <div class="wf-block">⭐ Reviews</div>
+            <div class="wf-block">🏢 Tenants</div>
+            <div class="wf-block">📅 Calendar</div>
+            <div class="wf-block">👤 Profile</div>
+          </div>
+          <div class="wf" style="min-height:300px;">
+            <div class="wf-block dark">Admin header (hamburger · breadcrumb · search · user dropdown · dark-mode toggle)</div>
+            <div class="wf-block grow tall" style="display:block;text-align:left;">
+              <b>Content area (max-w-screen-2xl p-4/6/10)</b>
+              <span class="sub">per-route content below</span>
+            </div>
+          </div>
+        </div>
+        <div class="wf-annot" style="margin-top:10px;">
+          <span class="tag style">TailAdmin-style: collapsible sidebar (lg:ml-72.5), dark-mode class toggle</span>
+          <span class="tag anim">sidebar slide/fade (AnimatePresence), hover states on menu items</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Admin section</th><th>Route</th><th>What it does</th><th>UI</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Dashboard</td><td><span class="route-tag">/adminpanel</span></td>
+            <td>ECommerce dashboard</td>
+            <td>KPI stat cards (CardDataStats) + charts (ChartOne/Two/Three) + recent orders</td>
+          </tr>
+          <tr>
+            <td>Orders</td><td><span class="route-tag">/adminpanel/orders</span></td>
+            <td>All orders from Sanity</td>
+            <td>Table: status chip · customer · total · date; row → detail page (line items, product links, Stripe/Safepay IDs, color column, status changer paid/refunded)</td>
+          </tr>
+          <tr>
+            <td>Discounts</td><td><span class="route-tag">/adminpanel/discounts</span></td>
+            <td>Create / edit / disable codes</td>
+            <td>Form + list with active state</td>
+          </tr>
+          <tr>
+            <td>Products</td><td><span class="route-tag">/adminpanel/products</span></td>
+            <td>Hub: List · Create/Edit · Bulk Import tabs</td>
+            <td>ProductListManager (search), ProductForm (incl. color, images), BulkImportManager (download template .xlsx · upload xlsx+ZIP · results table)</td>
+          </tr>
+          <tr>
+            <td>Customers</td><td><span class="route-tag">/adminpanel/customers</span></td>
+            <td>Customer list + adjust (points/status)</td>
+            <td>Table + AdjustCustomer drawer/modal</td>
+          </tr>
+          <tr>
+            <td>Audit Log</td><td><span class="route-tag">/adminpanel/audit</span></td>
+            <td>Admin action trail</td>
+            <td>Timestamped log table</td>
+          </tr>
+          <tr>
+            <td>Abandoned Carts</td><td><span class="route-tag">/adminpanel/abandoned</span></td>
+            <td>Recoverable carts (Vercel cron daily 2am)</td>
+            <td>List with email + items + checkout URL</td>
+          </tr>
+          <tr>
+            <td>Reviews</td><td><span class="route-tag">/adminpanel/reviews</span></td>
+            <td>Moderate product reviews</td>
+            <td>List + approve/remove</td>
+          </tr>
+          <tr>
+            <td>Tenants</td><td><span class="route-tag">/adminpanel/tenants</span></td>
+            <td>Multi-tenant storefronts (SaaS P4)</td>
+            <td>Tenant rows: name · domain · branding (accent, tagline, WhatsApp, email)</td>
+          </tr>
+          <tr>
+            <td>Calendar</td><td><span class="route-tag">/calendar</span></td>
+            <td>Events calendar (TailAdmin demo)</td>
+            <td>Month grid (demo data)</td>
+          </tr>
+          <tr>
+            <td>Profile</td><td><span class="route-tag">/profile</span></td>
+            <td>User account</td>
+            <td>AvatarUpload + account form</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ================= ANIMATIONS ================= -->
+  <div class="section" id="animations">
+    <div class="section-head"><h3>🎞️ Animation &amp; Transition Inventory</h3><span class="count">every motion in the codebase</span></div>
+
+    <details class="anim-item" open>
+      <summary>🧱 Framer Motion — entrance &amp; scroll<span class="chev">▶</span></summary>
+      <div class="body">
+        <b>ProductsGrid:</b> container stagger 0.07s + cards y:24→0 spring (280/24) on mount. <span class="code">containerVariants / cardVariants</span><br>
+        <b>CategoryShowcase:</b> <code>whileInView</code> with viewport margin −80px, stagger 0.1s, spring cards y:28→0 (260/22) — plays once.<br>
+        <b>Hero:</b> parallax via <code>useScroll → useTransform scale [1, 1.2]</code>; badge spring (260/18); headline y:30 fade .5s delay .1; subtitle fade .2; CTAs y:20 delay .3; trust badges fade delay .4.<br>
+        <b>Product detail:</b> page fade .3s; gallery x:−50→0; info x:+50→0; headline/price/desc fade.<br>
+        <b>Login card:</b> opacity + y:−24, .4s.
+      </div>
+    </details>
+
+    <details class="anim-item" open>
+      <summary>🧱 Framer Motion — continuous / infinite<span class="chev">▶</span></summary>
+      <div class="body">
+        <b>Hero collage:</b> rotate −5↔5, mirror, 8s infinite + per-tile hover scale 1.04.<br>
+        <b>Floating thread SVG:</b> y −20↔20, 8s infinite, opacity 30%.<br>
+        <b>Badge counters (cart/wishlist):</b> AnimatePresence scale 0→1 pop on change.<br>
+        <b>AddToCart qty bubble:</b> scale 0→1 pop + <code>animate-ping</code> ring; stock progress bar width 500ms; in-cart panel fade + y −10.
+      </div>
+    </details>
+
+    <details class="anim-item" open>
+      <summary>🧱 Framer Motion — dropdowns / drawers / overlays<span class="chev">▶</span></summary>
+      <div class="body">
+        <b>Header account dropdown:</b> opacity 0→1 + y 8→0 + scale .98→1, 0.15s, origin-top-right; chevron rotate-180.<br>
+        <b>Mobile nav drawer:</b> spring x:100%→0 (stiffness 320, damping 32) + overlay fade + backdrop-blur; body scroll-lock.<br>
+        <b>Filter drawer (AppSidebar):</b> spring x:−100%→0 (300/30); sections height/opacity accordion; chevron rotate −90; checkbox scale 1.05 + ✓ scale pop.<br>
+        <b>Admin sidebar:</b> slide/fade via AnimatePresence.
+      </div>
+    </details>
+
+    <details class="anim-item" open>
+      <summary>🎬 CSS keyframes &amp; transitions<span class="chev">▶</span></summary>
+      <div class="body">
+        <b>Sponsor marquee:</b> <code>@keyframes scroll</code> translateX 0→−50%, 20s linear infinite (duplicated logo track).<br>
+        <b>Skeletons:</b> <code>animate-pulse</code> on product/category loading placeholders.<br>
+        <b>Nav underline:</b> w-0→w-full 300ms on hover (Shop/About/Contact).<br>
+        <b>Product images:</b> group-hover scale-105 (500ms) / scale-110 (700ms ease-out); category hover wash opacity 0→30 500ms.<br>
+        <b>Header auto-hide:</b> transition-transform 300ms, translate-y-full when scrolling down past 160px.<br>
+        <b>Thumbnails (Swiper):</b> img hover scale 1.1, 200ms ease-in-out.<br>
+        <b>Buttons:</b> hover −translate-y-0.5, shadow transitions, bg transitions (150–300ms).<br>
+        <b>TailAdmin keyframes (available):</b> linspin, easespin, left/right-spin, rotating 30s, topbottom/bottomtop 60s, line1/2/3, ping-once, accordion-down/up 0.2s ease-out.<br>
+        <b>Spinners:</b> <code>animate-spin</code> (login submit, apply discount "...").
+      </div>
+    </details>
+
+    <details class="anim-item" open>
+      <summary>⏱️ Live timers &amp; reactive motion<span class="chev">▶</span></summary>
+      <div class="body">
+        <b>Hero sale countdown:</b> updates every 30s, SSR-safe "--d --h --m" placeholder.<br>
+        <b>Product flash-sale countdown:</b> HH:MM:SS ticking every second.<br>
+        <b>Search dropdown:</b> auto-close 7s timer, pauses on hover.<br>
+        <b>Testimonials:</b> instant page swap (no slide transition — <span class="tag warn">candidate for improvement</span>).
+      </div>
+    </details>
+
+    <details class="anim-item" open>
+      <summary>⚠️ Motion inconsistencies worth flagging<span class="chev">▶</span></summary>
+      <div class="body">
+        • Homepage "Womens/Footwear" headings use <code>text-5xl font-extrabold</code> vs newer sections' <code>text-3xl/4xl font-bold</code>.<br>
+        • /products card is a different design (fixed width, object-contain) vs homepage card (aspect 4/5, quick-add, zoom) — two product-card languages coexist.<br>
+        • Add-to-cart gradient (blue→purple) clashes with the black/white storefront language.<br>
+        • Testimonials have no slide/carousel transition (instant swap).<br>
+        • No page-level route transitions (only per-section entrances).<br>
+        • Dark mode is partially applied — several storefront sections have no <code>dark:</code> variants (e.g. /products cards, wishlist).
+      </div>
+    </details>
+  </div>
+
+  <!-- ================= ROUTE MAP ================= -->
+  <div class="section" id="routes">
+    <div class="section-head"><h3>🗺️ Route map (all pages)</h3><span class="count">App Router</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Route</th><th>Type</th><th>Auth</th><th>Status / notes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="route-tag">/</span> Home</td><td>mixed</td><td>public</td><td>8 sections, tenant-branded metadata</td></tr>
+          <tr><td><span class="route-tag">/products</span> All products</td><td>client</td><td>public</td><td>Sanity+Typesense, filters, pagination</td></tr>
+          <tr><td><span class="route-tag">/products/[category]</span></td><td>SSR</td><td>public</td><td>SEO-friendly category listing</td></tr>
+          <tr><td><span class="route-tag">/products/[category]/[productId]</span></td><td>SSR+client</td><td>public</td><td>detail, gallery, color picker, size quiz, reviews</td></tr>
+          <tr><td><span class="route-tag">/cart</span></td><td>client</td><td>public</td><td>Zustand cart, discount apply</td></tr>
+          <tr><td><span class="route-tag">/checkout</span></td><td>client</td><td>public</td><td>Safepay (flag) + COD</td></tr>
+          <tr><td><span class="route-tag">/checkout/success</span></td><td>client</td><td>public</td><td>method-aware, clears cart</td></tr>
+          <tr><td><span class="route-tag">/wishlist</span></td><td>client</td><td>public</td><td>Zustand wishlist</td></tr>
+          <tr><td><span class="route-tag">/search</span></td><td>SSR</td><td>public</td><td>bare search box (no shell)</td></tr>
+          <tr><td><span class="route-tag">/login</span> · <span class="route-tag">/register</span></td><td>client</td><td>public</td><td>NextAuth credentials</td></tr>
+          <tr><td><span class="route-tag">/dashboard</span> · <span class="route-tag">/profile</span> · <span class="route-tag">/settings</span></td><td>server/client</td><td>auth</td><td>customer account</td></tr>
+          <tr><td><span class="route-tag">/about</span> · <span class="route-tag">/contact</span></td><td>—</td><td>public</td><td>linked in header/footer</td></tr>
+          <tr><td><span class="route-tag">/adminpanel/**</span> (11 sections)</td><td>server+client</td><td>admin</td><td>orders, discounts, products, customers, audit, abandoned, reviews, tenants, calendar, profile</td></tr>
+          <tr><td><span class="route-tag">/denied</span></td><td>SSR</td><td>—</td><td>403 screen</td></tr>
+          <tr><td><span class="route-tag">/studio</span> (Sanity Studio)</td><td>—</td><td>auth</td><td>CMS</td></tr>
+          <tr><td><span class="route-tag">/api/**</span></td><td>route handlers</td><td>mixed</td><td>create-safepay-order, create-cod-order, validate-discount, webhooks, admin CRUD, cart-capture, recommendations, promote, register, upload…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer class="foot">
+    Generated from the AnK's codebase · WIREFRAME.html · update this file whenever you change the site, then re-review.
+  </footer>
+</div>
+
+</body>
+</html>

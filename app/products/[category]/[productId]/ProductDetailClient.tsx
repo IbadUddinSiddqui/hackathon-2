@@ -18,6 +18,7 @@ import { useLocale } from "@/lib/locale-provider";
 import { t } from "@/lib/i18n";
 import { isHexColor } from "@/lib/is-hex-color";
 import type { ColorSibling } from "@/lib/product-colors";
+import { displayPriceFor } from "@/lib/product-sale";
 
 // P3-13 — live countdown to the flash-sale end.
 function FlashSaleCountdown({ endsAt }: { endsAt: string }) {
@@ -54,6 +55,9 @@ export type ProductDetail = {
   color?: string;
   tags: string[];
   created_at: string;
+  // P3-14 product-level sale.
+  on_sale?: boolean;
+  sale_price?: number | null;
 };
 
 const ProductDetailClient = ({
@@ -68,7 +72,8 @@ const ProductDetailClient = ({
   const { addToWishlist, items: wishlistItems } = useWishlistStore();
   const { locale } = useLocale();
   const isInWishlist = wishlistItems.some((item) => item._id === product?._id);
-  const displayPrice = flashSale ? flashSale.salePrice : product?.price ?? 0;
+  // Flash-sale price wins; otherwise the product-level sale (or list price).
+  const displayPrice = flashSale ? flashSale.salePrice : displayPriceFor(product);
 
   return (
     <>
@@ -114,15 +119,17 @@ const ProductDetailClient = ({
                         Rs {(product?.price ?? 0).toFixed(2)}
                       </span>
                       <Badge className="bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400">
-                        Sale
+                        {t(locale, "product.sale")}
                       </Badge>
-                      <FlashSaleCountdown endsAt={flashSale.endsAt} />
+                      {/* Real discount % — never a hardcoded fake badge. */}
+                      <Badge variant="outline" className="text-sm py-1 px-2.5">
+                        {Math.round((1 - displayPrice / (product?.price || 1)) * 100)}% OFF
+                      </Badge>
+                      {/* Product-level sales have no end time — only flash sales
+                          render the countdown. */}
+                      {flashSale.endsAt && <FlashSaleCountdown endsAt={flashSale.endsAt} />}
                     </>
-                  ) : (
-                    <Badge variant="outline" className="text-lg py-1 px-3">
-                      -40%
-                    </Badge>
-                  )}
+                  ) : null}
                 </div>
 
                 {product?.stock ? (
@@ -205,7 +212,13 @@ const ProductDetailClient = ({
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex">
                   <Button
                     variant="outline"
-                    onClick={() => addToWishlist(product)}
+                    onClick={() =>
+                      addToWishlist(
+                        displayPrice !== (product?.price ?? 0)
+                          ? { ...product, price: displayPrice }
+                          : product
+                      )
+                    }
                     disabled={isInWishlist}
                     className={isInWishlist ? "bg-red-400 text-red-700" : "hover:bg-red-400 hover:text-red-700"}
                   >

@@ -11,7 +11,8 @@ import bundle from './bundle'
 import flashSale from './flashSale'
 import review from './review'
 import tenant from './tenant'
+import newsletterSubscriber from './newsletterSubscriber'
 
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [product, user, order, discountCode, customer, auditLog, abandonedCart, giftCard, bundle, flashSale, review, tenant],
+  types: [product, user, order, discountCode, customer, auditLog, abandonedCart, giftCard, bundle, flashSale, review, tenant, newsletterSubscriber],
 }

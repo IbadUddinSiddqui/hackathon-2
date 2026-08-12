@@ -84,10 +84,10 @@ export default function Recommendations({ productId, categorySlug, titleKey }: P
     // Loading skeleton
     return (
       <section className="py-12 px-6 max-w-7xl mx-auto">
-        <h2 className="text-3xl font-bold text-center mb-8">{title}</h2>
+        <h2 className="text-3xl font-bold tracking-tight text-center mb-8">{title}</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="animate-pulse bg-gray-100 rounded-lg h-80" />
+            <div key={i} className="animate-pulse bg-gray-100 rounded-lg h-80 dark:bg-gray-800" />
           ))}
         </div>
       </section>
@@ -107,9 +107,9 @@ export default function Recommendations({ productId, categorySlug, titleKey }: P
             <Link
               key={p._id}
               href={`/products/${p.category_slug || categorySlug || "all"}/${slug}`}
-              className="group bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
+              className="group bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow dark:bg-gray-800"
             >
-              <div className="aspect-square relative bg-gray-50 rounded-t-lg">
+              <div className="aspect-square relative bg-gray-50 rounded-t-lg dark:bg-gray-700">
                 {imgRef ? (
                   <Image
                     src={urlFor(imgRef).url()}
@@ -126,7 +126,7 @@ export default function Recommendations({ productId, categorySlug, titleKey }: P
               </div>
               <div className="p-4">
                 <h3 className="font-bold truncate">{p.name}</h3>
-                <p className="font-semibold text-gray-900">Rs {Number(p.price || 0).toFixed(2)}</p>
+                <p className="font-semibold text-gray-900 dark:text-gray-100">Rs {Number(p.price || 0).toFixed(2)}</p>
               </div>
             </Link>
           );
@@ -171,9 +171,9 @@ function CategoryFallback({ categorySlug, title }: { categorySlug: string; title
             <Link
               key={p._id}
               href={`/products/${categorySlug}/${slug}`}
-              className="group bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
+              className="group bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow dark:bg-gray-800"
             >
-              <div className="aspect-square relative bg-gray-50 rounded-t-lg">
+              <div className="aspect-square relative bg-gray-50 rounded-t-lg dark:bg-gray-700">
                 {imgRef ? (
                   <Image
                     src={urlFor(imgRef).url()}
@@ -190,7 +190,7 @@ function CategoryFallback({ categorySlug, title }: { categorySlug: string; title
               </div>
               <div className="p-4">
                 <h3 className="font-bold truncate">{p.name}</h3>
-                <p className="font-semibold text-gray-900">Rs {Number(p.price || 0).toFixed(2)}</p>
+                <p className="font-semibold text-gray-900 dark:text-gray-100">Rs {Number(p.price || 0).toFixed(2)}</p>
               </div>
             </Link>
           );

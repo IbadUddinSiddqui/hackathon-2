@@ -12,7 +12,7 @@ export default function ReturnsPage() {
     <>
       <Header />
       <main className="mx-auto max-w-3xl px-4 py-12 text-gray-800 dark:text-gray-200">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
           Returns &amp; Exchanges
         </h1>
         <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">

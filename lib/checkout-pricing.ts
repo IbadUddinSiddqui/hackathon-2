@@ -71,8 +71,21 @@ export async function priceCheckout(input: {
       return { error: `Product no longer available: ${item.id}` };
     }
     const quantity = Math.max(1, Math.min(item.quantity, product.stock || 0));
-    // P3-13: use the active flash-sale price when one exists for this product.
-    const price = salePriceMap.has(product._id) ? salePriceMap.get(product._id)! : product.price;
+    // Server-truth pricing, in precedence order:
+    //   1. P3-13: an active flash-sale price for this product
+    //   2. product-level sale (on_sale flag + lower sale_price) — the same
+    //      rule the storefront shows on cards, so what the customer sees is
+    //      exactly what they're charged
+    //   3. the list price
+    const flashPrice = salePriceMap.get(product._id);
+    const productSale =
+      product.on_sale &&
+      typeof product.sale_price === "number" &&
+      product.sale_price < product.price
+        ? product.sale_price
+        : undefined;
+    const price =
+      flashPrice !== undefined ? flashPrice : productSale !== undefined ? productSale : product.price;
     subtotal += price * quantity;
     items.push({
       id: product._id,

@@ -19,7 +19,7 @@ function SuccessContent() {
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center px-4">
-        <h1 className="text-4xl font-bold mb-4">
+        <h1 className="text-4xl font-bold tracking-tight mb-4">
           {isCod ? "Order Placed!" : "Payment Successful!"}
         </h1>
         <p className="text-lg">

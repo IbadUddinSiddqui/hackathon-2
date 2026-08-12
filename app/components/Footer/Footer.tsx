@@ -17,12 +17,37 @@ function Footer() {
   const { tenant } = useTenant();
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const subscribe = (e: React.FormEvent) => {
+  // Real subscription: persists the email to Sanity via /api/newsletter. The
+  // success message only appears when the server confirms the write (or the
+  // email was already subscribed) — never for a local-only fake success.
+  const subscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
-    setSubscribed(true);
-    setEmail("");
+    const value = email.trim();
+    if (!value || submitting) return;
+    setSubmitting(true);
+    // Start the attempt fresh — never show a stale success from a previous run.
+    setSubscribed(false);
+    setError(null);
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: value }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) {
+        throw new Error(data?.error || t(locale, "footer.newsletterError"));
+      }
+      setSubscribed(true);
+      setEmail("");
+    } catch (err: any) {
+      setError(err?.message || t(locale, "footer.newsletterError"));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const year = new Date().getFullYear();
@@ -69,23 +94,33 @@ function Footer() {
               type="email"
               required
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              disabled={submitting}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setSubscribed(false);
+                setError(null);
+              }}
               placeholder={t(locale, "footer.emailPlaceholder")}
-              className="h-12 flex-1 rounded-full border border-white/15 bg-white/5 px-5 text-sm text-white placeholder-gray-400 outline-none transition focus:border-white/40 focus:ring-2 focus:ring-white/20"
+              className="h-12 flex-1 rounded-full border border-white/15 bg-white/5 px-5 text-sm text-white placeholder-gray-400 outline-none transition focus:border-white/40 focus:ring-2 focus:ring-white/20 disabled:opacity-60"
             />
             <button
               type="submit"
-              className="h-12 shrink-0 rounded-full bg-white px-7 text-sm font-semibold text-gray-900 transition-transform hover:scale-105"
+              disabled={submitting}
+              className="h-12 shrink-0 rounded-full bg-white px-7 text-sm font-semibold text-gray-900 transition-transform hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {t(locale, "footer.subscribe")}
+              {submitting ? t(locale, "footer.subscribing") : t(locale, "footer.subscribe")}
             </button>
           </form>
         </div>
-        {subscribed && (
+        {subscribed ? (
           <p className="mt-4 text-center text-sm text-emerald-400">
             {t(locale, "footer.subscribed")}
           </p>
-        )}
+        ) : error ? (
+          <p className="mt-4 text-center text-sm text-red-400" role="alert">
+            {error}
+          </p>
+        ) : null}
       </div>
 
       {/* Links */}

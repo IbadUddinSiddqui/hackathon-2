@@ -22,7 +22,9 @@ const PRODUCT_QUERY = `*[_type == "product" && (_id == $id || slug.current == $i
   brand,
   color,
   tags,
-  created_at
+  created_at,
+  on_sale,
+  sale_price
 }`;
 
 async function getProduct(id: string, tenantId: string): Promise<ProductDetail | null> {
@@ -120,6 +122,13 @@ export default async function ProductDetailPage({
     }
   } catch {
     // flash-sale lookup is best-effort — never break the product page
+  }
+
+  // P3-14 — product-level sale (on_sale flag + lower sale_price): show the
+  // sale price + badge like the storefront cards do. No countdown (it has no
+  // end time) — endsAt stays empty so the client skips the timer.
+  if (!flashSale && product.on_sale && typeof product.sale_price === "number" && product.sale_price < product.price) {
+    flashSale = { salePrice: product.sale_price, endsAt: "" };
   }
 
   // Product structured data for rich results.

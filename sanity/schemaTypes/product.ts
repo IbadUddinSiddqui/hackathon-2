@@ -35,6 +35,31 @@ export const product = defineType({
       validation: (Rule) => Rule.required().error('Stock is required'),
     }),
     defineField({
+      name: 'on_sale',
+      title: 'On Sale',
+      description: 'Marks this product for the homepage "On Sale" section and shows the sale price on product cards.',
+      type: 'boolean',
+      initialValue: false,
+    }),
+    defineField({
+      name: 'sale_price',
+      title: 'Sale Price (PKR)',
+      description: 'Required when On Sale is checked. Must be lower than the regular price — otherwise the sale is ignored.',
+      type: 'number',
+      validation: (Rule) =>
+        Rule.min(0).custom((value, context) => {
+          const onSale = (context.parent as { on_sale?: boolean } | undefined)?.on_sale;
+          const price = (context.parent as { price?: number } | undefined)?.price;
+          if (onSale && (value === undefined || value === null)) {
+            return 'Sale price is required when On Sale is enabled';
+          }
+          if (value !== undefined && value !== null && price !== undefined && value >= price) {
+            return 'Sale price must be lower than the regular price';
+          }
+          return true;
+        }),
+    }),
+    defineField({
       name: 'category',
       title: 'Category',
       type: 'string',

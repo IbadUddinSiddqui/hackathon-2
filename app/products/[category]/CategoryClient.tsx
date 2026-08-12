@@ -1,13 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
 import AppSidebar from '@/app/components/Sidebar/AppSidebar';
 import Header from '@/app/components/Header/Header';
 import Footer from '@/app/components/Footer/Footer';
-import { urlFor } from '@/sanity/lib/image';
 import { Product } from '@/types/products';
+import ProductCard from '@/app/components/ProductCard/ProductCard';
 
 interface CategoryClientProps {
   category: string;
@@ -92,7 +90,7 @@ const CategoryClient = ({ category, initialProducts }: CategoryClientProps) => {
 
         {/* Main Content */}
         <main className="lg:col-span-5 md:col-span-5 space-x-1 p-4">
-          <h1 className="text-3xl font-bold mb-8">
+          <h1 className="text-3xl font-bold tracking-tight mb-8">
             {generateCategoryName(category)}
           </h1>
 
@@ -104,7 +102,7 @@ const CategoryClient = ({ category, initialProducts }: CategoryClientProps) => {
             <>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {currentProducts.map(product => (
-                  <ProductCard key={product._id} product={product} category={category} />
+                  <ProductCard key={product._id} product={product} />
                 ))}
               </div>
 
@@ -113,7 +111,7 @@ const CategoryClient = ({ category, initialProducts }: CategoryClientProps) => {
                 <button
                   onClick={handlePreviousPage}
                   disabled={currentPage === 1}
-                  className="px-4 py-2 bg-gray-100 text-black-2 rounded disabled:opacity-50"
+                  className="px-4 py-2 bg-gray-100 text-black-2 rounded disabled:opacity-50 dark:bg-gray-800 dark:text-gray-100"
                 >
                   Previous
                 </button>
@@ -123,7 +121,7 @@ const CategoryClient = ({ category, initialProducts }: CategoryClientProps) => {
                 <button
                   onClick={handleNextPage}
                   disabled={currentPage === totalPages}
-                  className="px-4 py-2 bg-gray-100 rounded text-black-2 disabled:opacity-50"
+                  className="px-4 py-2 bg-gray-100 rounded text-black-2 disabled:opacity-50 dark:bg-gray-800 dark:text-gray-100"
                 >
                   Next
                 </button>
@@ -135,47 +133,6 @@ const CategoryClient = ({ category, initialProducts }: CategoryClientProps) => {
 
       <Footer />
     </div>
-  );
-};
-
-// Product Card Component
-const ProductCard = ({ product, category }: { product: Product; category: string }) => {
-  const firstImage = product.images?.[0]?.asset?._ref;
-  const productSlug = product.slug?.current || product._id;
-
-  return (
-    <Link
-      href={`/products/${category}/${productSlug}`}
-      className="group bg-white lg:w-56 md:w-40 rounded-lg shadow-sm hover:shadow-md transition-shadow"
-    >
-      <div className="aspect-square relative bg-gray-50 rounded-t-lg">
-        {firstImage ? (
-          <Image
-            src={urlFor(firstImage).url()}
-            alt={product.name}
-            fill
-            className="object-contain p-4"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-400">
-            No Image
-          </div>
-        )}
-      </div>
-
-      <div className="p-4">
-        <h3 className="font-bold text-xl text-black-2 truncate">{product.name}</h3>
-        <div className="flex justify-between items-center mt-2">
-          <div className="flex items-center gap-1">
-            <span className="text-sm text-yellow-700">
-              {product.ratings?.toFixed(1) || 'N/A'}
-            </span>
-          </div>
-          <span className="font-semibold text-gray-900">Rs {product.price?.toFixed(2)}</span>
-        </div>
-      </div>
-    </Link>
   );
 };
 

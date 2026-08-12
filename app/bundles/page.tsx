@@ -19,7 +19,7 @@ export default async function BundlesPage() {
       <Header />
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-10">
         <div className="mx-auto max-w-screen-xl px-4">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Bundles</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Bundles</h1>
           <p className="mt-2 text-gray-500 dark:text-gray-400">
             Curated sets at a better price than buying separately.
           </p>
