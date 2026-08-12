@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 // the ProductSearch `page` variant (inline results grid).
 function page() {
   return (
-    <div className="flex min-h-screen flex-col bg-brand-surface text-brand-ink dark:bg-brand-ink dark:text-brand-ink-inverse">
+    <div className="flex min-h-screen flex-col bg-brand-surface text-brand-ink ">
       <Header />
       <div className="flex-1">
         <ProductSearch variant="page" />

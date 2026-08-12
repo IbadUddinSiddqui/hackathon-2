@@ -77,7 +77,7 @@ const AppSidebar = ({
     <motion.div
       className={`flex h-5 w-5 items-center justify-center border-2 transition-colors duration-200 ${
         checked
-          ? 'border-brand-ink bg-brand-ink dark:border-brand-ink-inverse dark:bg-brand-ink-inverse'
+          ? 'border-brand-ink bg-brand-ink  dark:bg-brand-ink-inverse'
           : 'border-brand-line-strong group-hover:border-brand-ink dark:group-hover:border-brand-ink-inverse'
       }`}
       initial={false}
@@ -111,7 +111,7 @@ const AppSidebar = ({
           the storefront). Rendered by the page above the grid. */}
       <button
         onClick={() => setIsOpen(true)}
-        className="group flex items-center gap-3 border-b border-brand-line pb-2 text-sm font-medium tracking-wide text-brand-ink transition-colors hover:border-brand-ink dark:text-brand-ink-inverse dark:hover:border-brand-ink-inverse"
+        className="group flex items-center gap-3 border-b border-brand-line pb-2 text-sm font-medium tracking-wide text-brand-ink transition-colors hover:border-brand-ink  dark:hover:border-brand-ink-inverse"
       >
         <FiFilter className="h-4 w-4" />
         Filters
@@ -142,7 +142,7 @@ const AppSidebar = ({
         <div className="p-6">
           {/* Header for All Screens */}
           <div className="mb-8 flex items-center justify-between border-b border-brand-line pb-4">
-            <h2 className="text-xl font-bold tracking-tight text-brand-ink dark:text-brand-ink-inverse">
+            <h2 className="text-xl font-bold tracking-tight text-brand-ink ">
               Filters
             </h2>
             <button
@@ -160,7 +160,7 @@ const AppSidebar = ({
               onClick={() => toggleSection('brands')}
               className="mb-3 flex w-full items-center justify-between"
             >
-              <h3 className="text-eyebrow text-brand-ink dark:text-brand-ink-inverse">
+              <h3 className="text-eyebrow text-brand-ink ">
                 Brands
               </h3>
               <motion.div
@@ -208,7 +208,7 @@ const AppSidebar = ({
               onClick={() => toggleSection('sizes')}
               className="mb-3 flex w-full items-center justify-between"
             >
-              <h3 className="text-eyebrow text-brand-ink dark:text-brand-ink-inverse">
+              <h3 className="text-eyebrow text-brand-ink ">
                 Sizes
               </h3>
               <motion.div
@@ -256,7 +256,7 @@ const AppSidebar = ({
               onClick={() => toggleSection('tags')}
               className="mb-3 flex w-full items-center justify-between"
             >
-              <h3 className="text-eyebrow text-brand-ink dark:text-brand-ink-inverse">
+              <h3 className="text-eyebrow text-brand-ink ">
                 Tags
               </h3>
               <motion.div

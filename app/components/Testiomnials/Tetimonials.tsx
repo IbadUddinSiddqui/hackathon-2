@@ -115,7 +115,7 @@ const TestimonialCard: React.FC = () => {
       <div className="mb-12 flex items-end justify-between">
         <div>
           <p className="text-eyebrow mb-3 text-brand-muted">Social proof</p>
-          <h2 className="text-3xl font-bold tracking-tight text-brand-ink dark:text-brand-ink-inverse sm:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight text-brand-ink  sm:text-4xl">
             {t(locale, "product.reviews")}
           </h2>
         </div>
@@ -125,7 +125,7 @@ const TestimonialCard: React.FC = () => {
             onClick={() => paginate(-1)}
             disabled={isPrevDisabled}
             aria-label="Previous testimonials"
-            className={`flex h-11 w-11 items-center justify-center border border-brand-line-strong text-brand-ink transition-colors dark:text-brand-ink-inverse ${
+            className={`flex h-11 w-11 items-center justify-center border border-brand-line-strong text-brand-ink transition-colors  ${
               isPrevDisabled
                 ? "cursor-not-allowed opacity-40"
                 : "hover:border-brand-ink hover:bg-brand-surface-alt dark:hover:border-brand-ink-inverse dark:hover:bg-brand-charcoal"
@@ -137,7 +137,7 @@ const TestimonialCard: React.FC = () => {
             onClick={() => paginate(1)}
             disabled={isNextDisabled}
             aria-label="Next testimonials"
-            className={`flex h-11 w-11 items-center justify-center border border-brand-line-strong text-brand-ink transition-colors dark:text-brand-ink-inverse ${
+            className={`flex h-11 w-11 items-center justify-center border border-brand-line-strong text-brand-ink transition-colors  ${
               isNextDisabled
                 ? "cursor-not-allowed opacity-40"
                 : "hover:border-brand-ink hover:bg-brand-surface-alt dark:hover:border-brand-ink-inverse dark:hover:bg-brand-charcoal"
@@ -190,7 +190,7 @@ const TestimonialCard: React.FC = () => {
                     {initialsFor(testimonial.name)}
                   </span>
                   <div className="flex items-center gap-1.5">
-                    <h3 className="text-base font-semibold text-brand-ink dark:text-brand-ink-inverse">
+                    <h3 className="text-base font-semibold text-brand-ink ">
                       {testimonial.name}
                     </h3>
                     <Image

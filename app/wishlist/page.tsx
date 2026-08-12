@@ -16,7 +16,7 @@ export default function WishlistPage() {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-brand-surface text-brand-ink dark:bg-brand-ink dark:text-brand-ink-inverse">
+      <div className="min-h-screen bg-brand-surface text-brand-ink ">
         <div className="mx-auto w-full max-w-7xl px-4 py-12 lg:px-8">
           <div className="mb-12 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
             <div>

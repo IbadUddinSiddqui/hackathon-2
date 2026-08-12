@@ -33,14 +33,14 @@ export default function SizeQuiz({ availableSizes }: { availableSizes: string[] 
   };
 
   const inputCls =
-    "w-full border border-brand-line bg-transparent px-3 py-2 text-sm text-brand-ink placeholder:text-brand-muted focus:border-brand-ink focus:outline-none dark:border-brand-line dark:text-brand-ink-inverse dark:focus:border-brand-ink-inverse";
+    "w-full border border-brand-line bg-transparent px-3 py-2 text-sm text-brand-ink placeholder:text-brand-muted focus:border-brand-ink focus:outline-none dark:border-brand-line  ";
 
   return (
     <div className="mt-4 border border-dashed border-brand-line-strong p-5">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="text-sm font-semibold text-brand-ink underline underline-offset-4 transition-opacity hover:opacity-70 dark:text-brand-ink-inverse"
+        className="text-sm font-semibold text-brand-ink underline underline-offset-4 transition-opacity hover:opacity-70 "
       >
         {open ? "Hide" : "📏"} {t(locale, "product.findMySize")}
       </button>

@@ -72,7 +72,7 @@ const CartPage = () => {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-brand-surface text-brand-ink dark:bg-brand-ink dark:text-brand-ink-inverse">
+      <div className="min-h-screen bg-brand-surface text-brand-ink ">
         <div className="mx-auto w-full max-w-7xl px-4 py-12 lg:px-8">
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
             {/* Cart Section */}
@@ -100,7 +100,7 @@ const CartPage = () => {
                         />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h3 className="text-sm font-semibold text-brand-ink dark:text-brand-ink-inverse">
+                        <h3 className="text-sm font-semibold text-brand-ink ">
                           {item.name}
                         </h3>
                         <dl className="mt-1.5 space-y-px text-xs text-brand-muted">
@@ -135,7 +135,7 @@ const CartPage = () => {
                             value = Math.max(1, Math.min(value, item.stock ?? value));
                             updateQuantity(item._id, value);
                           }}
-                          className="w-18 border border-brand-line bg-transparent px-3 py-2 text-sm tabular-nums focus:border-brand-ink focus:outline-none dark:border-brand-line dark:focus:border-brand-ink-inverse"
+                          className="w-18 border border-brand-line bg-transparent px-3 py-2 text-sm tabular-nums focus:border-brand-ink focus:outline-none dark:border-brand-line "
                         />
                         <button
                           onClick={() => removeItem(item._id)}
@@ -199,7 +199,7 @@ const CartPage = () => {
                           setCodeInput(e.target.value);
                           setCodeError(null);
                         }}
-                        className="h-10 rounded-none border-brand-line bg-transparent focus:border-brand-ink focus:ring-0 dark:focus:border-brand-ink-inverse"
+                        className="h-10 rounded-none border-brand-line bg-transparent focus:border-brand-ink focus:ring-0 "
                       />
                       {discountCode ? (
                         <Button

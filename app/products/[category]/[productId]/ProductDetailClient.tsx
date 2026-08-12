@@ -87,7 +87,7 @@ const ProductDetailClient = ({
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-brand-surface text-brand-ink dark:bg-brand-ink dark:text-brand-ink-inverse">
+      <div className="min-h-screen bg-brand-surface text-brand-ink ">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -109,7 +109,7 @@ const ProductDetailClient = ({
                 {product.brand && (
                   <p className="text-eyebrow mb-3 text-brand-muted">{product.brand}</p>
                 )}
-                <h1 className="text-product-name text-brand-ink dark:text-brand-ink-inverse">
+                <h1 className="text-product-name text-brand-ink ">
                   {product.name}
                 </h1>
               </motion.div>
@@ -130,7 +130,7 @@ const ProductDetailClient = ({
 
               <motion.div custom={2} variants={fadeIn} initial="hidden" animate="visible" className="space-y-5">
                 <div className="flex flex-wrap items-center gap-x-5 gap-y-3 border-y border-brand-line py-5">
-                  <span className="text-price text-brand-ink dark:text-brand-ink-inverse">
+                  <span className="text-price text-brand-ink ">
                     Rs {displayPrice.toFixed(2)}
                   </span>
                   {(flashSale || (product.on_sale && product.sale_price != null)) && (
@@ -174,7 +174,7 @@ const ProductDetailClient = ({
                     single read-only chip. Nothing when no color set. */}
                 {product?.color ? (
                   <div className="space-y-3">
-                    <h3 className="text-eyebrow text-brand-ink dark:text-brand-ink-inverse">
+                    <h3 className="text-eyebrow text-brand-ink ">
                       {t(locale, "product.color")}
                     </h3>
                     {colorSiblings.length >= 1 ? (
@@ -193,7 +193,7 @@ const ProductDetailClient = ({
                               key={sw.id}
                               title={sw.color}
                               aria-current="page"
-                              className="inline-flex cursor-default items-center gap-2 border border-brand-ink px-3.5 py-2 text-sm font-medium text-brand-ink dark:border-brand-ink-inverse dark:text-brand-ink-inverse"
+                              className="inline-flex cursor-default items-center gap-2 border border-brand-ink px-3.5 py-2 text-sm font-medium text-brand-ink  "
                             >
                               <SwatchDot color={sw.color} />
                               {sw.color}
@@ -213,7 +213,7 @@ const ProductDetailClient = ({
                         )}
                       </div>
                     ) : (
-                      <span className="inline-flex items-center gap-2 border border-brand-line px-3.5 py-2 text-sm font-medium text-brand-ink dark:text-brand-ink-inverse">
+                      <span className="inline-flex items-center gap-2 border border-brand-line px-3.5 py-2 text-sm font-medium text-brand-ink ">
                         <SwatchDot color={product.color} />
                         {product.color}
                       </span>
@@ -247,7 +247,7 @@ const ProductDetailClient = ({
                     className={
                       isInWishlist
                         ? "border-brand-bad bg-brand-bad-soft text-brand-bad hover:bg-brand-bad-soft"
-                        : "border-brand-line-strong text-brand-ink hover:border-brand-bad hover:text-brand-bad dark:text-brand-ink-inverse"
+                        : "border-brand-line-strong text-brand-ink hover:border-brand-bad hover:text-brand-bad "
                     }
                   >
                     <HeartIcon className="h-5 w-5" />

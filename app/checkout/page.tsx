@@ -85,7 +85,7 @@ function CodCheckoutForm({
         <div className="mb-5">
           <label
             htmlFor="cod-email"
-            className="mb-1.5 block text-sm font-medium text-brand-ink dark:text-brand-ink-inverse"
+            className="mb-1.5 block text-sm font-medium text-brand-ink "
           >
             {t(locale, 'checkout.email')}
           </label>
@@ -101,7 +101,7 @@ function CodCheckoutForm({
             }}
             onBlur={(e) => EMAIL_RE.test(e.target.value) && captureCart(items, e.target.value)}
             placeholder="you@example.com"
-            className="w-full border border-brand-line bg-transparent px-3.5 py-2.5 text-sm text-brand-ink placeholder:text-brand-muted focus:border-brand-ink focus:outline-none dark:border-brand-line dark:text-brand-ink-inverse dark:focus:border-brand-ink-inverse"
+            className="w-full border border-brand-line bg-transparent px-3.5 py-2.5 text-sm text-brand-ink placeholder:text-brand-muted focus:border-brand-ink focus:outline-none dark:border-brand-line  "
           />
         </div>
 
@@ -109,7 +109,7 @@ function CodCheckoutForm({
           <div>
             <label
               htmlFor="cod-giftcard"
-              className="mb-1.5 block text-sm font-medium text-brand-ink dark:text-brand-ink-inverse"
+              className="mb-1.5 block text-sm font-medium text-brand-ink "
             >
               {t(locale, 'checkout.giftCard')}
             </label>
@@ -119,13 +119,13 @@ function CodCheckoutForm({
               value={giftCardCode}
               onChange={(e) => setGiftCardCode(e.target.value)}
               placeholder="GIFT-1234"
-              className="w-full border border-brand-line bg-transparent px-3.5 py-2.5 text-sm text-brand-ink placeholder:text-brand-muted focus:border-brand-ink focus:outline-none dark:border-brand-line dark:text-brand-ink-inverse dark:focus:border-brand-ink-inverse"
+              className="w-full border border-brand-line bg-transparent px-3.5 py-2.5 text-sm text-brand-ink placeholder:text-brand-muted focus:border-brand-ink focus:outline-none dark:border-brand-line  "
             />
           </div>
           <div>
             <label
               htmlFor="cod-credit"
-              className="mb-1.5 block text-sm font-medium text-brand-ink dark:text-brand-ink-inverse"
+              className="mb-1.5 block text-sm font-medium text-brand-ink "
             >
               {t(locale, 'checkout.credit')}
             </label>
@@ -136,7 +136,7 @@ function CodCheckoutForm({
               value={creditAmount}
               onChange={(e) => setCreditAmount(e.target.value)}
               placeholder="0"
-              className="w-full border border-brand-line bg-transparent px-3.5 py-2.5 text-sm text-brand-ink placeholder:text-brand-muted focus:border-brand-ink focus:outline-none dark:border-brand-line dark:text-brand-ink-inverse dark:focus:border-brand-ink-inverse"
+              className="w-full border border-brand-line bg-transparent px-3.5 py-2.5 text-sm text-brand-ink placeholder:text-brand-muted focus:border-brand-ink focus:outline-none dark:border-brand-line  "
             />
           </div>
         </div>
@@ -226,7 +226,7 @@ const CheckoutPage = () => {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-brand-surface text-brand-ink dark:bg-brand-ink dark:text-brand-ink-inverse">
+      <div className="min-h-screen bg-brand-surface text-brand-ink ">
         <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8">
           <p className="text-eyebrow mb-3 text-brand-muted">Secure checkout</p>
           <h1 className="mb-10 text-3xl font-bold tracking-tight sm:text-4xl">
@@ -236,7 +236,7 @@ const CheckoutPage = () => {
             {/* Order Summary Section */}
             <Card className="rounded-none border border-brand-line bg-brand-surface shadow-none dark:bg-brand-surface-alt">
               <CardHeader className="border-b border-brand-line p-6">
-                <CardTitle className="text-lg font-semibold tracking-tight text-brand-ink dark:text-brand-ink-inverse">
+                <CardTitle className="text-lg font-semibold tracking-tight text-brand-ink ">
                   {t(locale, 'cart.orderSummary')}
                 </CardTitle>
               </CardHeader>
@@ -266,7 +266,7 @@ const CheckoutPage = () => {
                 </div>
 
                 <div className="mt-8">
-                  <p className="mb-3 text-sm font-medium text-brand-ink dark:text-brand-ink-inverse">
+                  <p className="mb-3 text-sm font-medium text-brand-ink ">
                     {t(locale, 'checkout.paymentMethod')}
                   </p>
                   <div className="grid grid-cols-2 gap-3">
@@ -282,7 +282,7 @@ const CheckoutPage = () => {
                             : 'border-brand-line hover:border-brand-line-strong'
                         }`}
                       >
-                        <span className="block font-semibold text-brand-ink dark:text-brand-ink-inverse">
+                        <span className="block font-semibold text-brand-ink ">
                           {t(locale, 'checkout.cardSafepay')}
                         </span>
                         <span className="text-xs text-brand-muted">
@@ -301,7 +301,7 @@ const CheckoutPage = () => {
                           : 'border-brand-line hover:border-brand-line-strong'
                       }`}
                     >
-                      <span className="block font-semibold text-brand-ink dark:text-brand-ink-inverse">
+                      <span className="block font-semibold text-brand-ink ">
                         {t(locale, 'checkout.cod')}
                       </span>
                       <span className="text-xs text-brand-muted">

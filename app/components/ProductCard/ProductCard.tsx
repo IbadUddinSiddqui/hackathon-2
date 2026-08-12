@@ -122,7 +122,7 @@ export default function ProductCard({
             addItem(salePrice !== null ? { ...product, price: salePrice } : product)
           }
           disabled={!inStock}
-          className="absolute inset-x-0 bottom-0 z-20 bg-brand-ink py-3.5 text-xs font-semibold uppercase tracking-[0.18em] text-brand-ink-inverse transition-transform duration-[400ms] hover:bg-brand-ink-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-ink-inverse disabled:cursor-not-allowed disabled:opacity-0 sm:translate-y-full sm:group-hover:translate-y-0 dark:bg-brand-ink-inverse dark:text-brand-ink dark:hover:bg-white"
+          className="absolute inset-x-0 bottom-0 z-20 bg-brand-ink py-3.5 text-xs font-semibold uppercase tracking-[0.18em] text-brand-ink-inverse transition-transform duration-[400ms] hover:bg-brand-ink-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-ink-inverse disabled:cursor-not-allowed disabled:opacity-0 sm:translate-y-full sm:group-hover:translate-y-0 dark:bg-brand-ink-inverse dark:text-brand-ink dark:hover:bg-brand-charcoal"
         >
           {t(locale, "product.addToCart")}
         </button>
@@ -133,11 +133,11 @@ export default function ProductCard({
       <div className="flex flex-1 flex-col gap-1 pt-3">
         <Link
           href={href}
-          className="line-clamp-1 text-sm font-medium text-brand-ink transition-colors hover:opacity-70 dark:text-brand-ink-inverse"
+          className="line-clamp-1 text-sm font-medium text-brand-ink transition-colors hover:opacity-70 "
         >
           {product.name}
         </Link>
-        <p className="text-price text-[15px] font-semibold text-brand-ink dark:text-brand-ink-inverse">
+        <p className="text-price text-[15px] font-semibold text-brand-ink ">
           {formatPrice(displayPrice)}
           {salePrice !== null && (
             <span className="ml-2 text-xs font-medium text-brand-muted line-through">

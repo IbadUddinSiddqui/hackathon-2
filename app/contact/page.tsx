@@ -25,7 +25,7 @@ export default async function ContactPage() {
   return (
     <>
       <Header />
-      <main className="mx-auto max-w-3xl bg-brand-surface px-4 py-16 text-brand-ink dark:bg-brand-ink dark:text-brand-ink-inverse">
+      <main className="mx-auto max-w-3xl bg-brand-surface px-4 py-16 text-brand-ink ">
         <p className="text-eyebrow mb-3 text-brand-muted">Support</p>
         <h1 className="text-4xl font-bold tracking-tight">Contact Us</h1>
         <p className="mt-3 text-brand-muted">

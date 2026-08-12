@@ -15,7 +15,7 @@ export default function Denied() {
   return (
     <>
     <Header></Header>
-    <div className="flex min-h-screen flex-col items-center justify-center bg-brand-surface px-4 text-brand-ink dark:bg-brand-ink dark:text-brand-ink-inverse">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-brand-surface px-4 text-brand-ink ">
       <div className="w-full max-w-md border border-brand-line bg-brand-surface p-9 text-center dark:bg-brand-surface-alt">
         {/* Logo */}
         <Image

@@ -309,6 +309,12 @@ html[lang="ur"] .text-nav {
    ════════════════════════════════════════════════════════════════════════ */
 @layer base {
   :root {
+    /* P03 — editorial display face. Fraunces is loaded via <link> in
+       app/layout.tsx; this var is what wires it into the .text-display
+       / .text-display-sm component classes and the `font-display`
+       Tailwind utility. Without this definition the var() is invalid and
+       the whole font-family declaration is dropped (silent sans fallback). */
+    --font-display: "Fraunces", Georgia, serif;
     /* Foundations. NOTE: solid brand colors are stored as space-separated
        RGB channel triplets so Tailwind's `rgb(var(--brand-x) /
        <alpha-value>)` pattern (see tailwind.config.ts) can emit opacity

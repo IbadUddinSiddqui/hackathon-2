@@ -98,7 +98,7 @@ const ProductsGrid = ({
           <button
             type="button"
             onClick={() => setShowAll((v) => !v)}
-            className="group inline-flex items-center gap-3 border-b border-brand-line-strong pb-1 text-sm font-medium tracking-wide text-brand-ink transition-colors hover:border-brand-ink dark:text-brand-ink-inverse dark:hover:border-brand-ink-inverse"
+            className="group inline-flex items-center gap-3 border-b border-brand-line-strong pb-1 text-sm font-medium tracking-wide text-brand-ink transition-colors hover:border-brand-ink  dark:hover:border-brand-ink-inverse"
           >
             {showAll ? t(locale, "product.viewLess") : t(locale, "product.viewMore")}
             <span

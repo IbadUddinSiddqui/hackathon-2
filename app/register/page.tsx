@@ -55,14 +55,14 @@ export default function RegisterPage() {
   };
 
   const inputClass =
-    "w-full border border-brand-line bg-transparent py-3 pl-11 pr-4 text-brand-ink placeholder:text-brand-muted transition-colors focus:border-brand-ink focus:outline-none dark:border-brand-line dark:text-brand-ink-inverse dark:focus:border-brand-ink-inverse";
+    "w-full border border-brand-line bg-transparent py-3 pl-11 pr-4 text-brand-ink placeholder:text-brand-muted transition-colors focus:border-brand-ink focus:outline-none dark:border-brand-line  ";
 
   const fieldIconClass = "absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-brand-muted";
 
   return (
     <>
       <Header />
-      <div className="flex min-h-screen items-center justify-center bg-brand-surface px-4 py-16 text-brand-ink dark:bg-brand-ink dark:text-brand-ink-inverse">
+      <div className="flex min-h-screen items-center justify-center bg-brand-surface px-4 py-16 text-brand-ink ">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -93,7 +93,7 @@ export default function RegisterPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-brand-ink dark:text-brand-ink-inverse">
+              <label className="mb-1.5 block text-sm font-medium text-brand-ink ">
                 Full Name
               </label>
               <div className="relative">
@@ -110,7 +110,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-brand-ink dark:text-brand-ink-inverse">
+              <label className="mb-1.5 block text-sm font-medium text-brand-ink ">
                 Email Address
               </label>
               <div className="relative">
@@ -127,7 +127,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-brand-ink dark:text-brand-ink-inverse">
+              <label className="mb-1.5 block text-sm font-medium text-brand-ink ">
                 Password
               </label>
               <div className="relative">
@@ -145,7 +145,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-brand-ink dark:text-brand-ink-inverse">
+              <label className="mb-1.5 block text-sm font-medium text-brand-ink ">
                 Confirm Password
               </label>
               <div className="relative">

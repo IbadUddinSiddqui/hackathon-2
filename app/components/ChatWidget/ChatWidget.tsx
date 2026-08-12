@@ -98,7 +98,7 @@ export default function ChatWidget() {
                   className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm shadow-sm ${
                     m.from === "user"
                       ? "bg-brand-ink text-brand-ink-inverse dark:bg-brand-ink-inverse dark:text-brand-ink"
-                      : "border border-brand-line bg-brand-surface text-brand-ink dark:bg-brand-surface-alt dark:text-brand-ink-inverse"
+                      : "border border-brand-line bg-brand-surface text-brand-ink dark:bg-brand-surface-alt "
                   }`}
                 >
                   {m.text}
@@ -134,7 +134,7 @@ export default function ChatWidget() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && send(input)}
               placeholder="Type your question…"
-              className="flex-1 border border-brand-line bg-transparent px-4 py-2 text-sm text-brand-ink placeholder:text-brand-muted focus:border-brand-ink focus:outline-none dark:border-brand-line dark:text-brand-ink-inverse dark:focus:border-brand-ink-inverse"
+              className="flex-1 border border-brand-line bg-transparent px-4 py-2 text-sm text-brand-ink placeholder:text-brand-muted focus:border-brand-ink focus:outline-none dark:border-brand-line  "
             />
             <button
               onClick={() => send(input)}
@@ -159,7 +159,7 @@ export default function ChatWidget() {
               </a>
             )}
             {email && (
-              <a href={`mailto:${email}`} className="text-sm font-semibold text-brand-ink underline underline-offset-4 hover:opacity-70 dark:text-brand-ink-inverse">
+              <a href={`mailto:${email}`} className="text-sm font-semibold text-brand-ink underline underline-offset-4 hover:opacity-70 ">
                 Email
               </a>
             )}

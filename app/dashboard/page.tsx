@@ -75,7 +75,7 @@ export default async function Dashboard() {
   return (
     <>
       <Header />
-      <div className="flex min-h-screen bg-brand-surface text-brand-ink dark:bg-brand-ink dark:text-brand-ink-inverse">
+      <div className="flex min-h-screen bg-brand-surface text-brand-ink ">
         {/* Sidebar */}
         <AccountSidebar active="dashboard" />
 
@@ -83,7 +83,7 @@ export default async function Dashboard() {
         <div className="flex flex-1 flex-col">
           <header className="border-b border-brand-line bg-brand-surface dark:bg-brand-surface-alt">
             <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5 sm:px-6 lg:px-8">
-              <h1 className="text-2xl font-bold tracking-tight text-brand-ink dark:text-brand-ink-inverse">
+              <h1 className="text-2xl font-bold tracking-tight text-brand-ink ">
                 Welcome{user.name ? `, ${user.name}` : ""}
               </h1>
               <LogoutButton />

@@ -43,7 +43,7 @@ export default function LoginPage() {
   return (
     <>
       <Header />
-      <div className="flex min-h-screen items-center justify-center bg-brand-surface px-4 py-16 text-brand-ink dark:bg-brand-ink dark:text-brand-ink-inverse">
+      <div className="flex min-h-screen items-center justify-center bg-brand-surface px-4 py-16 text-brand-ink ">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -74,7 +74,7 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-brand-ink dark:text-brand-ink-inverse">
+              <label className="mb-1.5 block text-sm font-medium text-brand-ink ">
                 Email
               </label>
               <div className="relative">
@@ -84,14 +84,14 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="w-full border border-brand-line bg-transparent py-3 pl-11 pr-4 text-brand-ink placeholder:text-brand-muted transition-colors focus:border-brand-ink focus:outline-none dark:border-brand-line dark:text-brand-ink-inverse dark:focus:border-brand-ink-inverse"
+                  className="w-full border border-brand-line bg-transparent py-3 pl-11 pr-4 text-brand-ink placeholder:text-brand-muted transition-colors focus:border-brand-ink focus:outline-none dark:border-brand-line  "
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-brand-ink dark:text-brand-ink-inverse">
+              <label className="mb-1.5 block text-sm font-medium text-brand-ink ">
                 Password
               </label>
               <div className="relative">
@@ -101,7 +101,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full border border-brand-line bg-transparent py-3 pl-11 pr-4 text-brand-ink placeholder:text-brand-muted transition-colors focus:border-brand-ink focus:outline-none dark:border-brand-line dark:text-brand-ink-inverse dark:focus:border-brand-ink-inverse"
+                  className="w-full border border-brand-line bg-transparent py-3 pl-11 pr-4 text-brand-ink placeholder:text-brand-muted transition-colors focus:border-brand-ink focus:outline-none dark:border-brand-line  "
                   required
                 />
               </div>

@@ -93,7 +93,7 @@ export const SafepayPayment: React.FC<SafepayPaymentProps> = ({
         <div className="mb-5">
           <label
             htmlFor="safepay-email"
-            className="mb-1.5 block text-sm font-medium text-brand-ink dark:text-brand-ink-inverse"
+            className="mb-1.5 block text-sm font-medium text-brand-ink "
           >
             {t(locale, 'checkout.email')}
           </label>
@@ -104,7 +104,7 @@ export const SafepayPayment: React.FC<SafepayPaymentProps> = ({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="w-full border border-brand-line bg-transparent px-3.5 py-2.5 text-sm text-brand-ink placeholder:text-brand-muted focus:border-brand-ink focus:outline-none dark:border-brand-line dark:text-brand-ink-inverse dark:focus:border-brand-ink-inverse"
+            className="w-full border border-brand-line bg-transparent px-3.5 py-2.5 text-sm text-brand-ink placeholder:text-brand-muted focus:border-brand-ink focus:outline-none dark:border-brand-line  "
           />
         </div>
 

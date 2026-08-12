@@ -51,7 +51,7 @@ export default function SectionHead({
           {align === "center" && <span aria-hidden className="h-px w-8 bg-brand-line-strong" />}
         </div>
       )}
-      <h2 className="text-3xl font-bold tracking-tight text-brand-ink dark:text-brand-ink-inverse sm:text-4xl">
+      <h2 className="text-3xl font-bold tracking-tight text-brand-ink  sm:text-4xl">
         {title}
       </h2>
       {subtitle && (

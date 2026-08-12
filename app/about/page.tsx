@@ -35,7 +35,7 @@ export default async function AboutPage() {
   return (
     <>
       <Header />
-      <main className="bg-brand-surface text-brand-ink dark:bg-brand-ink dark:text-brand-ink-inverse">
+      <main className="bg-brand-surface text-brand-ink ">
         {/* Hero */}
         <section className="bg-brand-ink py-20 text-center text-brand-ink-inverse">
           <div className="mx-auto max-w-3xl px-4">

@@ -125,7 +125,7 @@ const ProductsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-brand-surface text-brand-ink dark:bg-brand-ink dark:text-brand-ink-inverse flex flex-col">
+    <div className="min-h-screen bg-brand-surface text-brand-ink  flex flex-col">
       <Header />
       
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-5 mx-auto w-full max-w-7xl px-4 lg:px-8 py-10">

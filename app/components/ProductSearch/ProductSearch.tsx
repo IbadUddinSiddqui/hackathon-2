@@ -135,10 +135,10 @@ export default function HeaderSearch({ variant = 'header' }: Props) {
       <div className="mx-auto w-full max-w-7xl px-4 py-12 lg:px-8">
         <div className="mb-10 max-w-2xl">
           <p className="text-eyebrow mb-3 text-brand-muted">Search</p>
-          <h1 className="mb-6 text-3xl font-bold tracking-tight text-brand-ink dark:text-brand-ink-inverse sm:text-4xl">
+          <h1 className="mb-6 text-3xl font-bold tracking-tight text-brand-ink  sm:text-4xl">
             {t(locale, 'nav.search')}
           </h1>
-          <div className="flex items-center gap-3 border-b-2 border-brand-ink pb-3 dark:border-brand-ink-inverse">
+          <div className="flex items-center gap-3 border-b-2 border-brand-ink pb-3 ">
             <FaSearch className="h-5 w-5 shrink-0 text-brand-muted" />
             <input
               type="text"
@@ -146,10 +146,10 @@ export default function HeaderSearch({ variant = 'header' }: Props) {
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={t(locale, 'common.searchPlaceholder')}
-              className="w-full bg-transparent text-lg text-brand-ink placeholder:text-brand-muted focus:outline-none dark:text-brand-ink-inverse"
+              className="w-full bg-transparent text-lg text-brand-ink placeholder:text-brand-muted focus:outline-none "
             />
             <button
-              className="shrink-0 text-sm font-semibold uppercase tracking-[0.15em] text-brand-ink transition-opacity hover:opacity-70 dark:text-brand-ink-inverse"
+              className="shrink-0 text-sm font-semibold uppercase tracking-[0.15em] text-brand-ink transition-opacity hover:opacity-70 "
               aria-label={t(locale, 'nav.search')}
               onClick={handleSearchClick}
             >
@@ -191,7 +191,7 @@ export default function HeaderSearch({ variant = 'header' }: Props) {
           onKeyDown={handleKeyDown}
           onFocus={() => setIsOpen(true)} // Open dropdown on focus
           placeholder={t(locale, 'common.searchPlaceholder')}
-          className="w-full max-w-md bg-transparent py-0.5 text-sm text-brand-ink placeholder:text-brand-muted focus:outline-none dark:text-brand-ink-inverse"
+          className="w-full max-w-md bg-transparent py-0.5 text-sm text-brand-ink placeholder:text-brand-muted focus:outline-none "
         />
         <button
           className="p-1 text-brand-muted transition-colors hover:text-brand-ink dark:hover:text-brand-ink-inverse"
@@ -233,10 +233,10 @@ export default function HeaderSearch({ variant = 'header' }: Props) {
                   className="h-14 w-14 shrink-0 object-cover"
                 />
                 <div className="min-w-0">
-                  <h3 className="truncate text-sm font-medium text-brand-ink dark:text-brand-ink-inverse">
+                  <h3 className="truncate text-sm font-medium text-brand-ink ">
                     {document.name}
                   </h3>
-                  <p className="text-sm font-semibold tabular-nums text-brand-ink dark:text-brand-ink-inverse">
+                  <p className="text-sm font-semibold tabular-nums text-brand-ink ">
                     Rs {document.price.toFixed(2)}
                   </p>
                 </div>

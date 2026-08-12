@@ -17,6 +17,7 @@ import { useLocale } from "@/lib/locale-provider";
 import { t } from "@/lib/i18n";
 import { useTenant } from "@/lib/tenant-provider";
 import LanguageSwitcher from "../LanguageSwitcher/LanguageSwitcher";
+import ThemeToggle from "../ThemeToggle/ThemeToggle";
 
 const NAV_LINKS = [
   { href: "/products", key: "nav.shop" },
@@ -201,6 +202,9 @@ const Header = () => {
               <LanguageSwitcher />
             </div>
 
+            {/* P22.5 — dark/light toggle, visible at every breakpoint */}
+            <ThemeToggle className={actionBtn} />
+
             <Link
               href="/wishlist"
               className={`relative rounded-full p-2 transition-colors ${actionBtn}`}
@@ -249,7 +253,7 @@ const Header = () => {
                 className={`ml-1 hidden items-center rounded-full px-4 py-2 text-sm font-semibold transition-opacity hover:opacity-90 md:inline-flex ${
                   transparent
                     ? "bg-white text-brand-ink"
-                    : "bg-brand-ink text-brand-ink-inverse dark:bg-brand-ink-soft dark:text-brand-ink"
+                    : "bg-brand-ink text-brand-ink-inverse dark:bg-brand-ink-inverse dark:text-brand-ink"
                 }`}
               >
                 {t(locale, "header.login")}
@@ -413,9 +417,10 @@ const Header = () => {
                   )}
                 </div>
 
-                {/* Priority 4: language */}
-                <div className="mt-6">
+                {/* Priority 4: language + theme */}
+                <div className="mt-6 flex items-center justify-between gap-3">
                   <LanguageSwitcher />
+                  <ThemeToggle className="border border-brand-line text-brand-ink transition-colors hover:bg-brand-surface-alt dark:border-brand-line dark:text-brand-ink-soft dark:hover:bg-brand-charcoal" />
                 </div>
               </div>
             </motion.aside>

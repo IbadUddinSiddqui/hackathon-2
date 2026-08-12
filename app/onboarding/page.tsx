@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function OnboardingPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-brand-surface px-4 text-brand-ink dark:bg-brand-ink dark:text-brand-ink-inverse">
+    <main className="flex min-h-screen items-center justify-center bg-brand-surface px-4 text-brand-ink ">
       <div className="w-full max-w-lg border border-brand-line bg-brand-surface p-10 text-center dark:bg-brand-surface-alt">
         <div className="mx-auto flex h-14 w-14 items-center justify-center bg-brand-ink text-2xl text-brand-ink-inverse dark:bg-brand-ink-inverse dark:text-brand-ink">
           !

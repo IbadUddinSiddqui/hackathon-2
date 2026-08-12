@@ -17,7 +17,7 @@ function SuccessContent() {
   }, [clearCart]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-brand-surface text-brand-ink dark:bg-brand-ink dark:text-brand-ink-inverse">
+    <div className="flex min-h-screen items-center justify-center bg-brand-surface text-brand-ink ">
       <div className="px-4 text-center">
         <p className="text-eyebrow mb-4 text-brand-ok">Confirmed</p>
         <h1 className="mb-4 text-4xl font-bold tracking-tight">

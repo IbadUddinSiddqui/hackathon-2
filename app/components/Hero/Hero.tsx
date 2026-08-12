@@ -82,7 +82,7 @@ export default function FashionHero() {
   ];
 
   return (
-    <section className="relative flex min-h-[100svh] items-center overflow-hidden bg-brand-ink text-brand-ink-inverse">
+    <section className="relative flex min-h-[100svh] items-center overflow-hidden bg-brand-ink text-brand-ink-inverse dark:bg-brand-ink-inverse dark:text-brand-ink">
       {/* Subtle parallax texture — kept as a restrained depth cue only.
           (Global film grain lives in globals.css body::after — P20.) */}
       <motion.div style={{ scale }} className="absolute inset-0 z-0 opacity-25">
@@ -99,7 +99,7 @@ export default function FashionHero() {
       {/* Legibility gradient — ink on the text column, fading right. */}
       <div
         aria-hidden
-        className="absolute inset-0 z-0 bg-gradient-to-r from-brand-ink via-brand-ink/85 to-brand-ink/30"
+        className="absolute inset-0 z-0 bg-gradient-to-r from-brand-ink via-brand-ink/85 to-brand-ink/30 dark:from-brand-ink-inverse dark:via-brand-ink-inverse/85 dark:to-brand-ink-inverse/30"
       />
 
       <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-20 lg:px-8">
@@ -121,7 +121,7 @@ export default function FashionHero() {
                 >
                   {t(locale, "hero.eyebrow")}
                 </span>
-                <span aria-hidden className="h-px w-12 bg-brand-ink-inverse/25" />
+                <span aria-hidden className="h-px w-12 bg-brand-ink-inverse/25 dark:bg-brand-ink/25" />
               </motion.div>
 
               {/* Display headline — Fraunces, mask-wipe reveal */}
@@ -130,7 +130,7 @@ export default function FashionHero() {
                   variants={maskReveal}
                   initial="hidden"
                   animate="visible"
-                  className="text-display text-brand-ink-inverse"
+                  className="text-display text-brand-ink-inverse dark:text-brand-ink"
                 >
                   {t(locale, "hero.title1")}
                   <br />
@@ -148,7 +148,7 @@ export default function FashionHero() {
                 variants={fadeIn}
                 initial="hidden"
                 animate="visible"
-                className="max-w-xl text-lg leading-relaxed text-brand-ink-inverse/70"
+                className="max-w-xl text-lg leading-relaxed text-brand-ink-inverse/70 dark:text-brand-ink/70"
               >
                 {t(locale, "hero.subtitle")}
               </motion.p>
@@ -160,16 +160,16 @@ export default function FashionHero() {
                 variants={fadeIn}
                 initial="hidden"
                 animate="visible"
-                className="flex flex-wrap items-center gap-x-5 gap-y-3 border-y border-brand-ink-inverse/15 py-4"
+                className="flex flex-wrap items-center gap-x-5 gap-y-3 border-y border-brand-ink-inverse/15 dark:border-brand-ink/15 py-4"
               >
                 <span className="text-eyebrow" style={{ color: accent === "#000000" ? "#ffffff" : accent }}>
                   {t(locale, "hero.sale")}
                 </span>
-                <span className="text-price tabular-nums text-brand-ink-inverse">
+                <span className="text-price tabular-nums text-brand-ink-inverse dark:text-brand-ink">
                   {ready ? `${days}d` : "--d"}
-                  <span className="mx-1.5 text-brand-ink-inverse/40">:</span>
+                  <span className="mx-1.5 text-brand-ink-inverse/40 dark:text-brand-ink/40">:</span>
                   {ready ? `${hours}h` : "--h"}
-                  <span className="mx-1.5 text-brand-ink-inverse/40">:</span>
+                  <span className="mx-1.5 text-brand-ink-inverse/40 dark:text-brand-ink/40">:</span>
                   {ready ? `${minutes}m` : "--m"}
                 </span>
               </motion.div>
@@ -185,19 +185,19 @@ export default function FashionHero() {
               >
                 <Link
                   href="/products"
-                  className="group inline-flex items-center gap-3 rounded-none bg-brand-ink-inverse px-9 py-4 text-sm font-semibold tracking-wide text-brand-ink transition-all duration-300 hover:bg-white"
+                  className="group inline-flex items-center gap-3 rounded-none bg-brand-ink-inverse px-9 py-4 text-sm font-semibold tracking-wide text-brand-ink transition-all duration-300 hover:bg-white dark:bg-brand-ink dark:text-brand-ink-inverse dark:hover:bg-brand-charcoal"
                 >
                   {t(locale, "hero.shopNew")}
                   <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                 </Link>
                 <Link
                   href="/products/mens-clothing"
-                  className="group inline-flex items-center gap-2 text-sm font-medium tracking-wide text-brand-ink-inverse/85 transition-colors hover:text-brand-ink-inverse"
+                  className="group inline-flex items-center gap-2 text-sm font-medium tracking-wide text-brand-ink-inverse/85 dark:text-brand-ink/85 transition-colors hover:text-brand-ink-inverse dark:hover:text-brand-ink"
                 >
                   {t(locale, "hero.explore")}
                   <span
                     aria-hidden
-                    className="h-px w-8 bg-brand-ink-inverse/40 transition-all duration-300 group-hover:w-12 group-hover:bg-brand-ink-inverse"
+                    className="h-px w-8 bg-brand-ink-inverse/40 dark:bg-brand-ink/40 transition-all duration-300 group-hover:w-12 group-hover:bg-brand-ink-inverse dark:group-hover:bg-brand-ink"
                   />
                 </Link>
               </motion.div>
@@ -209,7 +209,7 @@ export default function FashionHero() {
                 variants={fadeIn}
                 initial="hidden"
                 animate="visible"
-                className="flex flex-wrap gap-x-6 gap-y-3 pt-2 text-xs text-brand-ink-inverse/60"
+                className="flex flex-wrap gap-x-6 gap-y-3 pt-2 text-xs text-brand-ink-inverse/60 dark:text-brand-ink/60"
               >
                 {[
                   t(locale, "hero.freeReturns"),
@@ -218,7 +218,7 @@ export default function FashionHero() {
                   t(locale, "hero.support"),
                 ].map((text, i) => (
                   <span key={text} className="flex items-center gap-3">
-                    {i > 0 && <span aria-hidden className="h-3 w-px bg-brand-ink-inverse/20" />}
+                    {i > 0 && <span aria-hidden className="h-3 w-px bg-brand-ink-inverse/20 dark:bg-brand-ink/20" />}
                     {text}
                   </span>
                 ))}
@@ -239,7 +239,7 @@ export default function FashionHero() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`group relative block overflow-hidden bg-brand-ink-soft ${
+                  className={`group relative block overflow-hidden bg-brand-ink-soft dark:bg-brand-surface-alt ${
                     i === 0 ? "row-span-2" : ""
                   }`}
                 >
@@ -250,14 +250,14 @@ export default function FashionHero() {
                     sizes="(max-width: 1024px) 0vw, 25vw"
                     className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-brand-ink/80 via-transparent to-transparent" />
-                  <span className="absolute bottom-4 left-4 text-xs font-medium uppercase tracking-[0.15em] text-brand-ink-inverse/90">
+                  <div className="absolute inset-0 bg-gradient-to-t from-brand-ink/80 dark:from-brand-ink-inverse/80 via-transparent to-transparent" />
+                  <span className="absolute bottom-4 left-4 text-xs font-medium uppercase tracking-[0.15em] text-brand-ink-inverse/90 dark:text-brand-ink/90">
                     {item.label}
                   </span>
                   {/* Hairline reveal on hover */}
                   <span
                     aria-hidden
-                    className="absolute inset-x-4 bottom-0 h-px origin-left scale-x-0 bg-brand-ink-inverse/60 transition-transform duration-500 group-hover:scale-x-100"
+                    className="absolute inset-x-4 bottom-0 h-px origin-left scale-x-0 bg-brand-ink-inverse/60 dark:bg-brand-ink/60 transition-transform duration-500 group-hover:scale-x-100"
                   />
                 </Link>
               ))}

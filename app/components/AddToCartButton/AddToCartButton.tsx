@@ -9,6 +9,7 @@ import { useLocale } from '@/lib/locale-provider';
 import { t } from '@/lib/i18n';
 import { salePriceFor } from '@/lib/product-sale';
 import { useTenant } from '@/lib/tenant-provider';
+import { isHexColor } from '@/lib/is-hex-color';
 
 export default function AddToCartButton({ product }: { product: SanityProduct }) {
   const { addItem, items } = useCartStore();
@@ -19,6 +20,17 @@ export default function AddToCartButton({ product }: { product: SanityProduct })
   // action without dominating the page.
   const { tenant } = useTenant();
   const accent = tenant.accentColor || '#000000';
+  // P10 — accent contrast guard: the CTA text flips to brand ink when a
+  // tenant picks a light accent, so white-on-light never ships unreadable.
+  const isLightAccent =
+    isHexColor(accent) &&
+    (() => {
+      const n = accent.replace('#', '');
+      const r = parseInt(n.slice(0, 2), 16);
+      const g = parseInt(n.slice(2, 4), 16);
+      const b = parseInt(n.slice(4, 6), 16);
+      return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.6;
+    })();
   const cartItem = items.find(item => item._id === product._id);
   const availableStock = product.stock - (cartItem?.quantity || 0);
   // The cart always receives the EFFECTIVE price (sale when on sale) so the
@@ -34,7 +46,8 @@ export default function AddToCartButton({ product }: { product: SanityProduct })
         onClick={() => addItem(addPayload)}
         disabled={availableStock <= 0}
         className={cn(
-          "relative w-[13rem] py-3.5 px-8 text-sm font-semibold uppercase tracking-[0.15em] text-white transition-all",
+          "relative w-[13rem] py-3.5 px-8 text-sm font-semibold uppercase tracking-[0.15em] transition-all",
+          isLightAccent ? "text-brand-ink" : "text-white",
           "disabled:opacity-50 disabled:cursor-not-allowed",
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-ink focus-visible:ring-offset-2"
         )}

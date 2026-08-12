@@ -162,7 +162,7 @@ export default function CategoryShowcase() {
           >
             {t(locale, "category.eyebrow")}
           </p>
-          <h2 className="text-3xl font-bold tracking-tight text-brand-ink dark:text-brand-ink-inverse sm:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight text-brand-ink  sm:text-4xl">
             {t(locale, "category.title")}
           </h2>
           <p className="mt-2 max-w-md text-sm text-brand-muted">
