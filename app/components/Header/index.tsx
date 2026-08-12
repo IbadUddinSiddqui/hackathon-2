@@ -61,8 +61,9 @@ const Header = (props: {
             <Image
               width={32}
               height={32}
-              src={"/logo-white.svg"}
+              src={"/logo.svg"}
               alt="Logo"
+              className="rounded-sm"
             />
           </Link>
         </div>

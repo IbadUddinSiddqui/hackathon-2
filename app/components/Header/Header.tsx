@@ -156,16 +156,17 @@ const Header = () => {
             <IoMenu size={24} />
           </button>
 
-          {/* Logo — compact so it doesn't dominate the bar */}
+          {/* Logo — compact so it doesn't dominate the bar. The brand logo
+              (logo.svg) is a full-color mark on a black tile, so it never
+              inverts: it blends into the dark hero scrim and reads as a black
+              tile on light surfaces. */}
           <Link href="/" className="shrink-0">
             <Image
-              src="/logo-text-black.svg"
-              width={132}
-              height={26}
+              src="/logo.svg"
+              width={40}
+              height={40}
               alt={tenant.name}
-              className={`h-auto w-auto transition-opacity hover:opacity-75 ${
-                transparent ? "invert" : ""
-              } dark:invert`}
+              className="h-10 w-auto rounded-sm transition-opacity hover:opacity-80"
             />
           </Link>
 
@@ -345,7 +346,7 @@ const Header = () => {
               className="fixed inset-y-0 right-0 z-50 flex w-[86%] max-w-sm flex-col bg-brand-surface shadow-2xl lg:hidden dark:bg-brand-surface-alt"
             >
               <div className="flex items-center justify-between border-b border-brand-line p-4">
-                <Image src="/logo-text-black.svg" width={120} height={24} alt={tenant.name} className="dark:invert" />
+                <Image src="/logo.svg" width={40} height={40} alt={tenant.name} className="h-10 w-auto rounded-sm" />
                 <button
                   onClick={() => setIsMenuOpen(false)}
                   className="rounded-full p-2 text-brand-muted transition-colors hover:bg-brand-surface-alt dark:text-brand-muted dark:hover:bg-brand-charcoal"

@@ -128,11 +128,11 @@ function Footer() {
           {/* Brand */}
           <div className="col-span-2">
             <Image
-              src="/logo-full-black.svg"
-              width={150}
-              height={50}
+              src="/logo.svg"
+              width={56}
+              height={56}
               alt={tenant.name}
-              className="invert"
+              className="h-14 w-auto rounded-sm"
             />
             <p className="mt-3 max-w-xs text-sm text-brand-ink-inverse/60 dark:text-brand-ink/60">
               {tenant.tagline || t(locale, "footer.tagline")}

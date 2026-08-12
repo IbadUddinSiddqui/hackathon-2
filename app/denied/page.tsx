@@ -21,9 +21,9 @@ export default function Denied() {
         <Image
           width={80}
           height={80}
-          src="/logo-black.svg"
+          src="/logo.svg"
           alt="Store logo"
-          className="mx-auto mb-5 h-16 w-16 object-contain dark:invert"
+          className="mx-auto mb-5 h-16 w-16 rounded-sm object-contain"
         />
 
         <h1 className="mb-3 text-3xl font-bold tracking-tight">Access Denied</h1>

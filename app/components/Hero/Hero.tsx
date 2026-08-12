@@ -83,15 +83,18 @@ export default function FashionHero() {
 
   return (
     <section className="relative flex min-h-[100svh] items-center overflow-hidden bg-brand-ink text-brand-ink-inverse dark:bg-brand-ink-inverse dark:text-brand-ink">
-      {/* Subtle parallax texture — kept as a restrained depth cue only.
-          (Global film grain lives in globals.css body::after — P20.) */}
-      <motion.div style={{ scale }} className="absolute inset-0 z-0 opacity-25">
+      {/* Campaign photograph — full-bleed hero bg (bg.png), shown at full
+          strength. It is a dark low-key menswear shot, so the text column
+          relies on the legibility gradient below (dark left → clear right).
+          Parallax scale kept as a restrained depth cue. */}
+      <motion.div style={{ scale }} className="absolute inset-0 z-0">
         <Image
-          src="/fabric-texture.jpg"
+          src="/bg.png"
           alt=""
           aria-hidden
           fill
           priority
+          sizes="100vw"
           className="object-cover"
         />
       </motion.div>
