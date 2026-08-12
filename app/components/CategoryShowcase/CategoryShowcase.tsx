@@ -157,24 +157,27 @@ export default function CategoryShowcase() {
       <div className="mb-10 flex flex-col items-center justify-between gap-6 sm:flex-row sm:items-end">
         <div className="text-center sm:text-left">
           <p
-            className="mb-2 text-xs font-bold uppercase tracking-[0.2em]"
+            className="mb-3 text-eyebrow"
             style={{ color: accent }}
           >
             {t(locale, "category.eyebrow")}
           </p>
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight text-brand-ink dark:text-brand-ink-inverse sm:text-4xl">
             {t(locale, "category.title")}
           </h2>
-          <p className="mt-2 max-w-md text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-2 max-w-md text-sm text-brand-muted">
             {t(locale, "category.subtitle")}
           </p>
         </div>
         <Link
           href="/products"
-          className="group hidden items-center gap-2 rounded-full border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition-all hover:border-gray-900 hover:bg-gray-900 hover:text-white dark:border-gray-600 dark:text-gray-300 dark:hover:border-white dark:hover:bg-white dark:hover:text-gray-900 sm:inline-flex"
+          className="group hidden items-center gap-3 text-sm font-medium tracking-wide text-brand-muted transition-colors hover:text-brand-ink dark:hover:text-brand-ink-inverse sm:inline-flex"
         >
           {t(locale, "category.viewAll")}
-          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          <span className="flex items-center gap-2">
+            <span aria-hidden className="h-px w-8 bg-brand-line-strong transition-all duration-300 group-hover:w-12 group-hover:bg-brand-ink dark:group-hover:bg-brand-ink-inverse" />
+            <ArrowRight className="h-4 w-4" />
+          </span>
         </Link>
       </div>
 
@@ -191,10 +194,10 @@ export default function CategoryShowcase() {
             // doesn't jump when the data arrives.
             Array.from({ length: 4 }).map((_, i) => (
               <motion.div key={`skeleton-${i}`} variants={cardVariants} className={tileLayout(i, 4).span}>
-                <div className="h-44 animate-pulse rounded-2xl bg-gray-200 dark:bg-gray-800 sm:h-60 lg:h-full" />
+                <div className="h-44 animate-pulse bg-brand-surface-alt dark:bg-brand-charcoal sm:h-60 lg:h-full" />
               </motion.div>
             ))
-          : tiles.map((tile) => {
+          : tiles.map((tile, index) => {
               const label = KNOWN_LABEL_KEYS[tile.slug]
                 ? t(locale, KNOWN_LABEL_KEYS[tile.slug])
                 : tile.category || humanizeSlug(tile.slug);
@@ -202,37 +205,49 @@ export default function CategoryShowcase() {
                 <motion.div key={tile.slug} variants={cardVariants} className={tile.span}>
                   <Link
                     href={tile.href}
-                    className="group relative block h-44 overflow-hidden rounded-2xl bg-gray-100 shadow-sm ring-1 ring-gray-900/5 transition-shadow duration-300 hover:shadow-xl dark:bg-gray-800 sm:h-60 lg:h-full"
+                    className="group relative block h-44 overflow-hidden bg-brand-ink-soft sm:h-60 lg:h-full"
                   >
                     <Image
                       src={tile.src}
                       alt={label}
                       fill
                       sizes={tile.sizes}
-                      className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                      className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105"
                     />
-                    {/* Legibility gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
-                    {/* Hover accent wash */}
-                    <div
-                      className="absolute inset-0 opacity-0 mix-blend-multiply transition-opacity duration-500 group-hover:opacity-30"
-                      style={{ backgroundColor: accent }}
-                    />
+                    {/* Legibility gradient — editorial, bottom-weighted */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-brand-ink/85 via-brand-ink/10 to-transparent" />
 
-                    {/* Label */}
-                    <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-4 sm:p-5">
+                    {/* Editorial label — featured tile gets display-serif type;
+                        rail tiles get a compact index + name. No card chrome. */}
+                    <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-5 sm:p-6">
                       <div>
-                        <h3 className="text-lg font-bold text-white drop-shadow sm:text-2xl">
+                        <span className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.25em] text-brand-ink-inverse/60">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+                        <h3
+                          className={
+                            index === 0
+                              ? "font-display text-3xl font-normal leading-tight text-brand-ink-inverse sm:text-4xl"
+                              : "text-base font-semibold tracking-wide text-brand-ink-inverse sm:text-lg"
+                          }
+                        >
                           {label}
                         </h3>
-                        <span className="mt-1.5 inline-flex items-center gap-1.5 text-xs font-semibold text-white/90 sm:text-sm">
-                          {t(locale, "category.shopNow")}
-                          <ArrowRight
-                            className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1.5"
-                            style={{ color: accent === "#000000" ? "#ffffff" : accent }}
-                          />
-                        </span>
+                        {/* Hairline underline reveal instead of the accent wash */}
+                        <span
+                          aria-hidden
+                          className={`mt-3 block h-px origin-left scale-x-0 transition-transform duration-500 group-hover:scale-x-100 ${
+                            accent === "#000000" ? "bg-brand-ink-inverse/70" : ""
+                          }`}
+                          style={
+                            accent === "#000000" ? undefined : { backgroundColor: accent }
+                          }
+                        />
                       </div>
+                      <span className="hidden items-center gap-1.5 pb-1 text-xs font-medium uppercase tracking-[0.15em] text-brand-ink-inverse/80 sm:flex">
+                        {t(locale, "category.shopNow")}
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </span>
                     </div>
                   </Link>
                 </motion.div>
@@ -244,7 +259,7 @@ export default function CategoryShowcase() {
       <div className="mt-8 text-center sm:hidden">
         <Link
           href="/products"
-          className="inline-flex items-center gap-2 rounded-full bg-gray-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-black"
+          className="inline-flex items-center gap-2 bg-brand-ink px-6 py-3 text-sm font-semibold text-brand-ink-inverse transition-opacity hover:opacity-85 dark:bg-brand-ink-inverse dark:text-brand-ink"
         >
           {t(locale, "category.viewAll")}
           <ArrowRight className="h-4 w-4" />

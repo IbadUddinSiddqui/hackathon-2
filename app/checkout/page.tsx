@@ -12,6 +12,7 @@ import { SafepayPayment, type CheckoutItem } from '../components/CheckOut/Safepa
 import { DELIVERY_FEE, CURRENCY_SYMBOL } from '@/lib/constants';
 import { useLocale } from '@/lib/locale-provider';
 import { t } from '@/lib/i18n';
+import { useTenant } from '@/lib/tenant-provider';
 
 /** P3-06 — fire-and-forget: persist the cart server-side for recovery. */
 async function captureCart(items: CheckoutItem[], email: string) {
@@ -79,12 +80,12 @@ function CodCheckoutForm({
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 border rounded-lg shadow-sm bg-white dark:bg-gray-800">
+    <div className="mx-auto max-w-md border border-brand-line bg-brand-surface p-7 dark:bg-brand-surface-alt">
       <form onSubmit={placeOrder}>
-        <div className="mb-4">
+        <div className="mb-5">
           <label
             htmlFor="cod-email"
-            className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200"
+            className="mb-1.5 block text-sm font-medium text-brand-ink dark:text-brand-ink-inverse"
           >
             {t(locale, 'checkout.email')}
           </label>
@@ -100,15 +101,15 @@ function CodCheckoutForm({
             }}
             onBlur={(e) => EMAIL_RE.test(e.target.value) && captureCart(items, e.target.value)}
             placeholder="you@example.com"
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+            className="w-full border border-brand-line bg-transparent px-3.5 py-2.5 text-sm text-brand-ink placeholder:text-brand-muted focus:border-brand-ink focus:outline-none dark:border-brand-line dark:text-brand-ink-inverse dark:focus:border-brand-ink-inverse"
           />
         </div>
 
-        <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label
               htmlFor="cod-giftcard"
-              className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200"
+              className="mb-1.5 block text-sm font-medium text-brand-ink dark:text-brand-ink-inverse"
             >
               {t(locale, 'checkout.giftCard')}
             </label>
@@ -118,13 +119,13 @@ function CodCheckoutForm({
               value={giftCardCode}
               onChange={(e) => setGiftCardCode(e.target.value)}
               placeholder="GIFT-1234"
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+              className="w-full border border-brand-line bg-transparent px-3.5 py-2.5 text-sm text-brand-ink placeholder:text-brand-muted focus:border-brand-ink focus:outline-none dark:border-brand-line dark:text-brand-ink-inverse dark:focus:border-brand-ink-inverse"
             />
           </div>
           <div>
             <label
               htmlFor="cod-credit"
-              className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200"
+              className="mb-1.5 block text-sm font-medium text-brand-ink dark:text-brand-ink-inverse"
             >
               {t(locale, 'checkout.credit')}
             </label>
@@ -135,25 +136,25 @@ function CodCheckoutForm({
               value={creditAmount}
               onChange={(e) => setCreditAmount(e.target.value)}
               placeholder="0"
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+              className="w-full border border-brand-line bg-transparent px-3.5 py-2.5 text-sm text-brand-ink placeholder:text-brand-muted focus:border-brand-ink focus:outline-none dark:border-brand-line dark:text-brand-ink-inverse dark:focus:border-brand-ink-inverse"
             />
           </div>
         </div>
 
-        <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mb-5 text-sm leading-relaxed text-brand-muted">
           {t(locale, 'checkout.codNote')}
         </p>
 
         <button
           type="submit"
           disabled={loading || items.length === 0}
-          className="w-full bg-gray-900 text-white py-2 px-4 rounded-md hover:bg-gray-700 disabled:bg-gray-400 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+          className="w-full bg-brand-ink py-3.5 text-sm font-semibold uppercase tracking-[0.15em] text-brand-ink-inverse transition-opacity hover:opacity-90 disabled:opacity-40 dark:bg-brand-ink-inverse dark:text-brand-ink"
         >
           {loading ? t(locale, 'checkout.placing') : t(locale, 'checkout.placeCod')}
         </button>
 
         {error && (
-          <p className="mt-3 p-3 rounded-md bg-red-100 text-red-700 text-sm" role="alert">
+          <p className="mt-4 border border-brand-bad/40 bg-brand-bad-soft p-3 text-sm text-brand-bad" role="alert">
             {error}
           </p>
         )}
@@ -164,6 +165,8 @@ function CodCheckoutForm({
 
 const CheckoutPage = () => {
   const { locale } = useLocale();
+  const { tenant } = useTenant();
+  const accent = tenant.accentColor || '#000000';
   const { items, discountCode, discountAmount } = useCartStore();
 
   // Safepay is behind a feature flag until it's live: set
@@ -215,53 +218,55 @@ const CheckoutPage = () => {
     color: item.color,
   }));
 
+  const methodBtn = (active: boolean) =>
+    active
+      ? { borderColor: accent, boxShadow: `inset 0 -2px 0 ${accent}` }
+      : undefined;
+
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-        <div className="max-w-screen-xl mx-auto px-4">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100 mb-8">{t(locale, 'checkout.title')}</h1>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="min-h-screen bg-brand-surface text-brand-ink dark:bg-brand-ink dark:text-brand-ink-inverse">
+        <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8">
+          <p className="text-eyebrow mb-3 text-brand-muted">Secure checkout</p>
+          <h1 className="mb-10 text-3xl font-bold tracking-tight sm:text-4xl">
+            {t(locale, 'checkout.title')}
+          </h1>
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
             {/* Order Summary Section */}
-            <Card className="bg-white dark:bg-gray-800 shadow">
-              <CardHeader className="bg-gray-100 dark:bg-gray-700 p-4">
-                <CardTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            <Card className="rounded-none border border-brand-line bg-brand-surface shadow-none dark:bg-brand-surface-alt">
+              <CardHeader className="border-b border-brand-line p-6">
+                <CardTitle className="text-lg font-semibold tracking-tight text-brand-ink dark:text-brand-ink-inverse">
                   {t(locale, 'cart.orderSummary')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                <div className="flex justify-between mb-4">
-                  <span className="text-gray-600 dark:text-gray-400">{t(locale, 'cart.subtotal')}</span>
-                  <span className="font-bold text-gray-900 dark:text-gray-100">
-                    {CURRENCY_SYMBOL} {subtotal.toFixed(2)}
-                  </span>
+                <div className="flex justify-between py-2 text-sm">
+                  <span className="text-brand-muted">{t(locale, 'cart.subtotal')}</span>
+                  <span className="font-semibold tabular-nums">{CURRENCY_SYMBOL} {subtotal.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between mb-4">
-                  <span className="text-gray-600 dark:text-gray-400">
+                <div className="flex justify-between py-2 text-sm">
+                  <span className="text-brand-muted">
                     {t(locale, 'cart.discount')}{discountCode ? ` (${discountCode})` : ''}
                   </span>
-                  <span className="font-bold text-red-500">
+                  <span className={`font-semibold tabular-nums ${discount > 0 ? 'text-brand-sale' : ''}`}>
                     {discount > 0
                       ? `-${CURRENCY_SYMBOL} ${discount.toFixed(2)}`
                       : `${CURRENCY_SYMBOL} 0.00`}
                   </span>
                 </div>
-                <div className="flex justify-between mb-4">
-                  <span className="text-gray-600 dark:text-gray-400">{t(locale, 'cart.delivery')}</span>
-                  <span className="font-bold text-gray-900 dark:text-gray-100">
-                    {CURRENCY_SYMBOL} {deliveryFee.toFixed(2)}
-                  </span>
+                <div className="flex justify-between py-2 text-sm">
+                  <span className="text-brand-muted">{t(locale, 'cart.delivery')}</span>
+                  <span className="font-semibold tabular-nums">{CURRENCY_SYMBOL} {deliveryFee.toFixed(2)}</span>
                 </div>
-                <Separator className="my-4 dark:bg-gray-700" />
+                <Separator className="my-4 bg-brand-line" />
                 <div className="flex justify-between font-semibold">
-                  <span className="text-gray-600 dark:text-gray-400">{t(locale, 'cart.total')}</span>
-                  <span className="text-xl text-gray-900 dark:text-gray-100">
-                    {CURRENCY_SYMBOL} {total.toFixed(2)}
-                  </span>
+                  <span>{t(locale, 'cart.total')}</span>
+                  <span className="text-xl tabular-nums">{CURRENCY_SYMBOL} {total.toFixed(2)}</span>
                 </div>
 
-                <div className="mt-6">
-                  <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">
+                <div className="mt-8">
+                  <p className="mb-3 text-sm font-medium text-brand-ink dark:text-brand-ink-inverse">
                     {t(locale, 'checkout.paymentMethod')}
                   </p>
                   <div className="grid grid-cols-2 gap-3">
@@ -270,16 +275,17 @@ const CheckoutPage = () => {
                         type="button"
                         onClick={() => selectPaymentMethod('safepay')}
                         aria-pressed={paymentMethod === 'safepay'}
-                        className={`rounded-lg border p-3 text-left text-sm transition ${
+                        style={methodBtn(paymentMethod === 'safepay')}
+                        className={`border p-4 text-left text-sm transition ${
                           paymentMethod === 'safepay'
-                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/10 ring-1 ring-blue-500'
-                            : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500'
+                            ? 'border-brand-line-strong bg-brand-surface-alt'
+                            : 'border-brand-line hover:border-brand-line-strong'
                         }`}
                       >
-                        <span className="block font-semibold text-gray-900 dark:text-gray-100">
+                        <span className="block font-semibold text-brand-ink dark:text-brand-ink-inverse">
                           {t(locale, 'checkout.cardSafepay')}
                         </span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                        <span className="text-xs text-brand-muted">
                           {t(locale, 'checkout.cardSub')}
                         </span>
                       </button>
@@ -288,16 +294,17 @@ const CheckoutPage = () => {
                       type="button"
                       onClick={() => selectPaymentMethod('cod')}
                       aria-pressed={paymentMethod === 'cod'}
-                      className={`rounded-lg border p-3 text-left text-sm transition ${
+                      style={methodBtn(paymentMethod === 'cod')}
+                      className={`border p-4 text-left text-sm transition ${
                         paymentMethod === 'cod'
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/10 ring-1 ring-blue-500'
-                          : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500'
+                          ? 'border-brand-line-strong bg-brand-surface-alt'
+                          : 'border-brand-line hover:border-brand-line-strong'
                       }`}
                     >
-                      <span className="block font-semibold text-gray-900 dark:text-gray-100">
+                      <span className="block font-semibold text-brand-ink dark:text-brand-ink-inverse">
                         {t(locale, 'checkout.cod')}
                       </span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                      <span className="text-xs text-brand-muted">
                         {t(locale, 'checkout.codSub')}
                       </span>
                     </button>

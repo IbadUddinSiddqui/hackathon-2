@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTenant } from "@/lib/tenant-provider";
+import { useLocale } from "@/lib/locale-provider";
+import { t } from "@/lib/i18n";
 
 // Placeholder testimonials — the client's final copy can replace these.
 // The brand is ALWAYS interpolated at render from the active tenant (via the
@@ -62,6 +64,7 @@ function initialsFor(name: string): string {
 
 const TestimonialCard: React.FC = () => {
   const { tenant } = useTenant();
+  const { locale } = useLocale();
   const brand = tenant.name || "AnK's";
 
   // Brand interpolation (split/join avoids replaceAll lib-version concerns).
@@ -108,39 +111,40 @@ const TestimonialCard: React.FC = () => {
   };
 
   return (
-    <div className="relative p-8 mt-12" id="testimonial">
-      <div className="flex justify-between">
-        <h2 className="text-left text-3xl ml-4 m-2 font-bold tracking-tight sm:text-4xl text-black dark:text-gray-100">
-          OUR HAPPY CUSTOMERS
-        </h2>
+    <section className="mx-auto w-full max-w-7xl px-4 py-16 lg:px-8" id="testimonial">
+      <div className="mb-12 flex items-end justify-between">
+        <div>
+          <p className="text-eyebrow mb-3 text-brand-muted">Social proof</p>
+          <h2 className="text-3xl font-bold tracking-tight text-brand-ink dark:text-brand-ink-inverse sm:text-4xl">
+            {t(locale, "product.reviews")}
+          </h2>
+        </div>
         {/* Navigation Buttons */}
-        <div className="mt-6">
-          <div className="absolute right-8 -top-[10px] text-3xl flex space-x-4">
-            <button
-              onClick={() => paginate(-1)}
-              disabled={isPrevDisabled}
-              aria-label="Previous testimonials"
-              className={`px-4 text-black py-4 text-[22px] md:text-2xl lg:text-3xl dark:text-gray-100 ${
-                isPrevDisabled
-                  ? "opacity-50 cursor-not-allowed"
-                  : "hover:text-gray-500 transition-colors"
-              }`}
-            >
-              <FaArrowLeft />
-            </button>
-            <button
-              onClick={() => paginate(1)}
-              disabled={isNextDisabled}
-              aria-label="Next testimonials"
-              className={`px-2 py-4 text-[22px] text-black md:text-2xl lg:text-3xl dark:text-gray-100 ${
-                isNextDisabled
-                  ? "opacity-50 cursor-not-allowed"
-                  : "hover:text-gray-500 transition-colors"
-              }`}
-            >
-              <FaArrowRight />
-            </button>
-          </div>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => paginate(-1)}
+            disabled={isPrevDisabled}
+            aria-label="Previous testimonials"
+            className={`flex h-11 w-11 items-center justify-center border border-brand-line-strong text-brand-ink transition-colors dark:text-brand-ink-inverse ${
+              isPrevDisabled
+                ? "cursor-not-allowed opacity-40"
+                : "hover:border-brand-ink hover:bg-brand-surface-alt dark:hover:border-brand-ink-inverse dark:hover:bg-brand-charcoal"
+            }`}
+          >
+            <FaArrowLeft />
+          </button>
+          <button
+            onClick={() => paginate(1)}
+            disabled={isNextDisabled}
+            aria-label="Next testimonials"
+            className={`flex h-11 w-11 items-center justify-center border border-brand-line-strong text-brand-ink transition-colors dark:text-brand-ink-inverse ${
+              isNextDisabled
+                ? "cursor-not-allowed opacity-40"
+                : "hover:border-brand-ink hover:bg-brand-surface-alt dark:hover:border-brand-ink-inverse dark:hover:bg-brand-charcoal"
+            }`}
+          >
+            <FaArrowRight />
+          </button>
         </div>
       </div>
 
@@ -153,22 +157,23 @@ const TestimonialCard: React.FC = () => {
           initial="enter"
           animate="center"
           exit="exit"
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mt-4 min-h-[420px] md:min-h-[380px]"
+          className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 min-h-[420px] md:min-h-[380px]"
         >
           {currentTestimonials.map((testimonial) => (
             <Card
               key={testimonial.name}
-              className="p-6 border h-[420px] md:h-[380px] border-black w-72 md:w-80 lg:w-80 xl:w-[420px] 2xl:w-[420px] rounded-3xl shadow-lg dark:border-gray-700 dark:bg-gray-800/40"
+              className="border border-brand-line bg-brand-surface p-7 dark:bg-brand-surface-alt"
             >
               <CardHeader>
-                <div className="flex mb-1">
+                <div className="flex gap-1">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <svg
                       key={i}
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 20 20"
-                      fill={i < testimonial.rating ? "gold" : "gray"}
-                      className="w-6 h-6"
+                      fill={i < testimonial.rating ? "currentColor" : "none"}
+                      stroke={i < testimonial.rating ? "currentColor" : "currentColor"}
+                      className={`h-5 w-5 ${i < testimonial.rating ? "text-brand-warn" : "text-brand-line-strong"}`}
                     >
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
@@ -177,26 +182,26 @@ const TestimonialCard: React.FC = () => {
               </CardHeader>
               <CardContent>
                 {/* Real avatar — initials monogram (no external image needed) */}
-                <div className="flex items-center gap-3 mb-4">
+                <div className="mb-4 flex items-center gap-3">
                   <span
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gray-900 text-sm font-bold text-white"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center bg-brand-ink text-sm font-bold text-brand-ink-inverse dark:bg-brand-ink-inverse dark:text-brand-ink"
                     aria-hidden
                   >
                     {initialsFor(testimonial.name)}
                   </span>
                   <div className="flex items-center gap-1.5">
-                    <h3 className="text-lg font-semibold text-black dark:text-gray-100">
+                    <h3 className="text-base font-semibold text-brand-ink dark:text-brand-ink-inverse">
                       {testimonial.name}
                     </h3>
                     <Image
                       src="/check.svg"
                       alt="Verified buyer"
-                      width="24"
-                      height="25"
+                      width="20"
+                      height="20"
                     />
                   </div>
                 </div>
-                <p className="text-left text-gray-500 text-lg mb-6 dark:text-gray-400">{`"${testimonial.review}"`}</p>
+                <p className="text-left text-[15px] leading-relaxed text-brand-muted">{`"${testimonial.review}"`}</p>
               </CardContent>
             </Card>
           ))}
@@ -204,8 +209,8 @@ const TestimonialCard: React.FC = () => {
       </AnimatePresence>
 
       {/* Pagination Dots */}
-      <div className="flex flex-start ml-8">
-        <div className="flex justify-center items-center mt-8">
+      <div className="mt-10 flex justify-center">
+        <div className="flex items-center gap-2">
           {Array.from({ length: totalPages }).map((_, index) => (
             <button
               key={index}
@@ -214,16 +219,16 @@ const TestimonialCard: React.FC = () => {
                 setCurrentPage(index);
               }}
               aria-label={`Go to testimonial page ${index + 1}`}
-              className={`w-2 h-2 mx-1 rounded-full transition-colors duration-300 ${
+              className={`h-1.5 transition-all duration-300 ${
                 index === currentPage
-                  ? "bg-black dark:bg-white"
-                  : "bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500"
+                  ? "w-8 bg-brand-ink dark:bg-brand-ink-inverse"
+                  : "w-3 bg-brand-line-strong hover:bg-brand-muted"
               }`}
             />
           ))}
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

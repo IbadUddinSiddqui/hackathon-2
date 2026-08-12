@@ -4,7 +4,7 @@ import { useCartStore } from '@/lib/stores/cartStore';
 import { SanityProduct } from '@/lib/sanity/product';
 import { motion } from 'framer-motion';
 import { ShoppingCart, PackageCheck, Info } from 'lucide-react';
-import { cn } from '@/lib/utils'; // Assume you have a cn utility
+import { cn } from '@/lib/utils';
 import { useLocale } from '@/lib/locale-provider';
 import { t } from '@/lib/i18n';
 import { salePriceFor } from '@/lib/product-sale';
@@ -13,9 +13,10 @@ import { useTenant } from '@/lib/tenant-provider';
 export default function AddToCartButton({ product }: { product: SanityProduct }) {
   const { addItem, items } = useCartStore();
   const { locale } = useLocale();
-  // P4-05 — the primary CTA uses the tenant accent (same system as the hero
-  // headline span, cart badge and category hover wash) so the detail page
-  // speaks the same design language as the rest of the storefront.
+  // P4-05 + P10 — the primary CTA uses the tenant accent (same system as the
+  // hero headline span, cart badge and category underline), but RESTRAINED:
+  // sharp corners, no glow shadow, a small spring — the accent signals the
+  // action without dominating the page.
   const { tenant } = useTenant();
   const accent = tenant.accentColor || '#000000';
   const cartItem = items.find(item => item._id === product._id);
@@ -28,32 +29,32 @@ export default function AddToCartButton({ product }: { product: SanityProduct })
   return (
     <div className="space-y-4">
       <motion.button
-        whileHover={{ scale: 1.05, y: -2 }}
+        whileHover={{ y: -2 }}
         whileTap={{ scale: 0.98 }}
         onClick={() => addItem(addPayload)}
         disabled={availableStock <= 0}
         className={cn(
-          "relative w-[12rem] py-3 px-8 rounded-xl font-bold text-lg text-white transition-all",
-          "shadow-lg hover:shadow-xl hover:brightness-95",
-          "disabled:opacity-50 disabled:cursor-not-allowed"
+          "relative w-[13rem] py-3.5 px-8 text-sm font-semibold uppercase tracking-[0.15em] text-white transition-all",
+          "disabled:opacity-50 disabled:cursor-not-allowed",
+          "focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-ink focus-visible:ring-offset-2"
         )}
         style={{ backgroundColor: accent }}
       >
         <div className="flex items-center justify-center gap-2">
-          <ShoppingCart className="w-5 h-5" />
+          <ShoppingCart className="h-4 w-4" />
           {availableStock > 0 ? t(locale, 'product.addToCart') : t(locale, 'product.outOfStock')}
         </div>
-        
-        {/* Animated quantity indicator */}
+
+        {/* Animated quantity indicator — brand-ok, sharp */}
         {cartItem && (
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className="absolute -top-2 -right-2"
+            className="absolute -right-2 -top-2"
           >
             <div className="relative">
-              <div className="absolute inset-0 bg-green-500 rounded-full animate-ping"></div>
-              <div className="relative flex items-center justify-center w-6 h-6 bg-green-500 rounded-full text-xs text-white">
+              <div className="absolute inset-0 animate-ping rounded-none bg-brand-ok/40"></div>
+              <div className="relative flex h-6 w-6 items-center justify-center bg-brand-ok text-xs font-bold text-white">
                 {cartItem.quantity}
               </div>
             </div>
@@ -65,27 +66,27 @@ export default function AddToCartButton({ product }: { product: SanityProduct })
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="space-y-2 p-4 bg-white/10 rounded-lg backdrop-blur-sm"
+          className="space-y-2 border-l-2 border-brand-line p-3 pl-4"
         >
           <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-2 text-gray-600">
-              <PackageCheck className="w-4 h-4" />
-              <span>{cartItem.quantity} in cart</span>
+            <div className="flex items-center gap-2 text-brand-muted">
+              <PackageCheck className="h-4 w-4" />
+              <span>{cartItem.quantity} {t(locale, 'cart.title').toLowerCase()}</span>
             </div>
-            <div className="flex items-center gap-2 text-emerald-600">
-              <div className="h-1 w-16 bg-gray-200 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-emerald-400 transition-all duration-500"
+            <div className="flex items-center gap-2 text-brand-ok">
+              <div className="h-1 w-16 overflow-hidden bg-brand-line">
+                <div
+                  className="h-full bg-brand-ok transition-all duration-500"
                   style={{ width: `${(availableStock / product.stock) * 100}%` }}
                 ></div>
               </div>
-              <span>{availableStock} left</span>
+              <span>{availableStock} {t(locale, 'product.left')}</span>
             </div>
           </div>
           {availableStock < 3 && (
-            <div className="flex items-center gap-2 text-xs text-amber-600">
-              <Info className="w-4 h-4" />
-              <span>Low stock available</span>
+            <div className="flex items-center gap-2 text-xs text-brand-warn">
+              <Info className="h-4 w-4" />
+              <span>{t(locale, 'product.outOfStock')} — {availableStock} {t(locale, 'product.left')}</span>
             </div>
           )}
         </motion.div>

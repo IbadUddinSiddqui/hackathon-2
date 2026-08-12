@@ -17,19 +17,20 @@ function SuccessContent() {
   }, [clearCart]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center px-4">
-        <h1 className="text-4xl font-bold tracking-tight mb-4">
+    <div className="flex min-h-screen items-center justify-center bg-brand-surface text-brand-ink dark:bg-brand-ink dark:text-brand-ink-inverse">
+      <div className="px-4 text-center">
+        <p className="text-eyebrow mb-4 text-brand-ok">Confirmed</p>
+        <h1 className="mb-4 text-4xl font-bold tracking-tight">
           {isCod ? "Order Placed!" : "Payment Successful!"}
         </h1>
-        <p className="text-lg">
+        <p className="text-lg text-brand-muted">
           {isCod
             ? "Thank you for your order \u2014 keep cash ready for delivery."
-            : "Thank you for your purchase."}
+            : "Thank you for your purchase. A receipt is on its way."}
         </p>
         <Link
           href="/"
-          className="mt-6 inline-block rounded-lg bg-gray-900 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-gray-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+          className="mt-8 inline-block bg-brand-ink px-8 py-3.5 text-sm font-semibold uppercase tracking-[0.15em] text-brand-ink-inverse transition-opacity hover:opacity-90 dark:bg-brand-ink-inverse dark:text-brand-ink"
         >
           Continue shopping
         </Link>

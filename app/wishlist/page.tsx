@@ -1,80 +1,65 @@
-
 "use client";
 import { useWishlistStore } from '@/lib/stores/wishlistStore';
 import { useCartStore } from '@/lib/stores/cartStore';
-import Image from 'next/image';
 import { Button } from "@/components/ui/button";
-import { urlFor } from '@/sanity/lib/image';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
+import ProductCard from '../components/ProductCard/ProductCard';
+import { useLocale } from '@/lib/locale-provider';
+import { t } from '@/lib/i18n';
 
 export default function WishlistPage() {
-  const { items, removeFromWishlist, clearWishlist } = useWishlistStore();
+  const { items, clearWishlist } = useWishlistStore();
   const { addItem } = useCartStore();
+  const { locale } = useLocale();
 
   return (
     <>
-    <Header></Header>
-    <div className="container mx-auto px-4 py-12 min-h-screen bg-white dark:bg-[#212020]">
-      <div className="text-center mb-10">
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4 text-gray-900 dark:text-gray-100">Your Wishlist</h1>
-        {items.length > 0 && (
-          <Button 
-            onClick={clearWishlist}
-            variant="outline"
-            className="mb-4"
-          >
-            Clear Wishlist
-          </Button>
-        )}
-      </div>
+      <Header />
+      <div className="min-h-screen bg-brand-surface text-brand-ink dark:bg-brand-ink dark:text-brand-ink-inverse">
+        <div className="mx-auto w-full max-w-7xl px-4 py-12 lg:px-8">
+          <div className="mb-12 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
+            <div>
+              <p className="text-eyebrow mb-3 text-brand-muted">Saved</p>
+              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+                {t(locale, 'nav.wishlist')}
+              </h1>
+            </div>
+            {items.length > 0 && (
+              <button
+                onClick={clearWishlist}
+                className="text-sm font-medium text-brand-muted underline decoration-brand-line-strong underline-offset-4 transition-colors hover:text-brand-bad hover:decoration-brand-bad"
+              >
+                {t(locale, 'cart.remove')} all
+              </button>
+            )}
+          </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-        {items.map((product) => (
-          <div key={product._id} className="group relative border border-gray-200 bg-white p-4 rounded-lg dark:border-gray-700 dark:bg-gray-800">
-            <div className="bg-[#F0EEED] h-56 w-full rounded-md p-4 flex items-center justify-center dark:bg-gray-700">
-              {product.images?.[0] && (
-                <Image
-                  src={urlFor(product.images[0]).url()}
-                  alt={product.name}
-                  width={200}
-                  height={200}
-                  className="object-contain h-40 w-40"
-                />
-              )}
-            </div>
-            
-            <div className="mt-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{product.name}</h3>
-              <p className="text-gray-500 mt-2 dark:text-gray-400">Rs {product.price.toFixed(2)}</p>
-              
-              <div className="flex gap-2 mt-4">
-                <Button
-                  onClick={() => addItem(product)}
-                  className="w-full"
-                >
-                  Add to Cart
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => removeFromWishlist(product._id)}
-                  className="w-full"
-                >
-                  Remove
-                </Button>
-              </div>
-            </div>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 lg:gap-x-6">
+            {items.map((product) => (
+              <ProductCard key={product._id} product={product} />
+            ))}
           </div>
-        ))}
-        
-        {items.length === 0 && (
-          <div className="col-span-full text-center py-12">
-            <p className="text-gray-500 text-xl dark:text-gray-400">Your wishlist is empty</p>
-          </div>
-        )}
+
+          {items.length === 0 && (
+            <div className="border-y border-brand-line py-20 text-center">
+              <p className="text-xl text-brand-muted">{t(locale, 'cart.empty')}</p>
+            </div>
+          )}
+
+          {items.length > 0 && (
+            <div className="mt-14 text-center">
+              <Button
+                onClick={() => items.forEach((p) => addItem(p))}
+                className="rounded-none bg-brand-ink px-8 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-brand-ink-inverse hover:bg-brand-ink-soft dark:bg-brand-ink-inverse dark:text-brand-ink"
+              >
+                {t(locale, 'product.addToCart')} — all
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-    <Footer/>
+      <Footer />
     </>
   );
 }

@@ -39,247 +39,244 @@ function useCountdown(): {
   };
 }
 
+// P05 — Cinematic entrance register (per Brand Brief §Motion): slow, quiet,
+// precise reveals for the hero; snappy springs stay reserved for
+// interactions. The headline lifts through a clip-path mask (not a plain
+// y-slide) and the body copy fades in on a long, gentle curve.
+const maskReveal = {
+  hidden: { y: "110%" },
+  visible: {
+    y: "0%",
+    transition: { duration: 1.1, ease: [0.22, 1, 0.36, 1], delay: 0.15 },
+  },
+};
+
+const fadeIn = {
+  hidden: { opacity: 0, y: 12 },
+  visible: (i: number = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.35 + i * 0.12 },
+  }),
+};
+
 export default function FashionHero() {
   const { locale } = useLocale();
   const { tenant } = useTenant();
   const accent = tenant.accentColor || "#000000";
   const { scrollYProgress } = useScroll();
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.2]);
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
   const { days, hours, minutes, ready } = useCountdown();
 
+  // P05 decision (documented): the multi-category collage STAYS — it mirrors
+  // the real catalog and the category bento below already owns editorial
+  // category storytelling. The menswear-forward voice is carried by copy,
+  // type and treatment: dark campaign backdrop, Fraunces display headline,
+  // editorial season metadata. The 8s wobble and floating thread are CUT
+  // (decorative loops with no orientation purpose — Brand Brief §Motion).
+  const collage = [
+    { href: "/products/mens-clothing", src: "/mens-clothing.webp", label: t(locale, "hero.mens") },
+    { href: "/products/womens-clothing", src: "/womens-clothing.jpg", label: t(locale, "hero.womens") },
+    { href: "/products/wearables", src: "/wearables.jpg", label: t(locale, "hero.wearables") },
+    { href: "/products/children", src: "/children.jpg", label: t(locale, "hero.children") },
+  ];
+
   return (
-    <section className="relative flex min-h-[100svh] items-center overflow-hidden bg-white dark:bg-[#212020]">
-      {/* Parallax fabric-texture background — deliberately visible.
-          The weave is raised to a clearly perceptible opacity, and a
-          left-weighted white wash keeps the headline column fully legible
-          while the texture reads through on the right. */}
-      <motion.div style={{ scale }} className="absolute inset-0 z-0">
+    <section className="relative flex min-h-[100svh] items-center overflow-hidden bg-brand-ink text-brand-ink-inverse">
+      {/* Subtle parallax texture — kept as a restrained depth cue only.
+          (Global film grain lives in globals.css body::after — P20.) */}
+      <motion.div style={{ scale }} className="absolute inset-0 z-0 opacity-25">
         <Image
           src="/fabric-texture.jpg"
           alt=""
           aria-hidden
           fill
           priority
-          className="object-cover opacity-45"
-        />
-        {/* Legibility wash: clean white behind the type (light) / solid dark
-            behind the type (dark), texture shows through on the right in both. */}
-        <div
-          aria-hidden
-          className="absolute inset-0 bg-gradient-to-r from-white via-white/75 to-white/15 dark:from-[#212020] dark:via-[#212020]/70 dark:to-transparent"
+          className="object-cover"
         />
       </motion.div>
 
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-16 lg:px-8">
-        <div className="grid items-center gap-12 lg:grid-cols-2">
-          {/* Text content */}
-          <div className="space-y-8">
-            {/* Flash sale badge */}
-            <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: "spring", stiffness: 260, damping: 18 }}
-              className="inline-flex items-center gap-3 rounded-full bg-white px-5 py-2.5 shadow-lg ring-1 ring-gray-100 dark:bg-gray-800 dark:ring-gray-700"
-            >
-              <span style={{ color: accent }}>
-                <FlashSaleIcon />
-              </span>
-              <p className="flex items-center gap-2 text-sm font-medium text-gray-800 dark:text-gray-100">
-                <span style={{ color: accent }}>{t(locale, "hero.sale")}:</span>
-                <span className="tabular-nums text-gray-500 dark:text-gray-400">
-                  {ready ? `${days}d ${hours}h ${minutes}m` : "--d --h --m"}
-                </span>
-              </p>
-            </motion.div>
+      {/* Legibility gradient — ink on the text column, fading right. */}
+      <div
+        aria-hidden
+        className="absolute inset-0 z-0 bg-gradient-to-r from-brand-ink via-brand-ink/85 to-brand-ink/30"
+      />
 
-            <motion.h1
-              initial={{ y: 30, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl md:text-6xl dark:text-white"
-            >
-              {t(locale, "hero.title1")}
-              <br />
-              <span style={{ color: accent }}>{t(locale, "hero.title2")}</span>
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="max-w-xl text-lg text-gray-600 md:text-xl dark:text-gray-400"
-            >
-              {t(locale, "hero.subtitle")}
-            </motion.p>
-
-            {/* CTAs */}
-            <motion.div
-              className="flex flex-wrap gap-4"
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.3 }}
-            >
-              <Link
-                href="/products"
-                className="rounded-full bg-gray-900 px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-black/10 transition-all hover:-translate-y-0.5 hover:bg-black hover:shadow-xl"
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-20 lg:px-8">
+        <div className="grid items-center gap-14 lg:grid-cols-12">
+          {/* Text column — asymmetric 7/5 split, editorial column measure */}
+          <div className="lg:col-span-7">
+            <div className="max-w-2xl space-y-9">
+              {/* Editorial metadata: season eyebrow in accent, then a hairline */}
+              <motion.div
+                custom={0}
+                variants={fadeIn}
+                initial="hidden"
+                animate="visible"
+                className="flex items-center gap-4"
               >
-                {t(locale, "hero.shopNew")}
-              </Link>
-              <Link
-                href="/products/womens-clothing"
-                className="rounded-full border-2 border-gray-900 bg-white/70 px-8 py-4 text-sm font-semibold text-gray-900 backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-gray-900 hover:text-white dark:border-gray-500 dark:bg-gray-800/60 dark:text-gray-100 dark:hover:border-white dark:hover:bg-white dark:hover:text-gray-900"
-              >
-                {t(locale, "hero.explore")}
-              </Link>
-            </motion.div>
-
-            {/* Trust badges */}
-            <motion.div
-              className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-            >
-              {[
-                { icon: <FreeReturnsIcon />, text: t(locale, "hero.freeReturns") },
-                { icon: <EcoFriendlyIcon />, text: t(locale, "hero.eco") },
-                { icon: <QualityIcon />, text: t(locale, "hero.quality") },
-                { icon: <SupportIcon />, text: t(locale, "hero.support") },
-              ].map((item) => (
-                <motion.div
-                  key={item.text}
-                  className="flex items-center gap-2.5 rounded-xl bg-white/90 p-3 shadow-sm ring-1 ring-gray-100 backdrop-blur dark:bg-gray-800/80 dark:ring-gray-700"
-                  whileHover={{ y: -5 }}
+                <span
+                  className="text-eyebrow"
+                  style={{ color: accent === "#000000" ? "#ffffff" : accent }}
                 >
-                  <span style={{ color: accent }}>{item.icon}</span>
-                  <span className="text-sm text-gray-600 dark:text-gray-300">{item.text}</span>
-                </motion.div>
-              ))}
-            </motion.div>
+                  {t(locale, "hero.eyebrow")}
+                </span>
+                <span aria-hidden className="h-px w-12 bg-brand-ink-inverse/25" />
+              </motion.div>
+
+              {/* Display headline — Fraunces, mask-wipe reveal */}
+              <div className="overflow-hidden">
+                <motion.h1
+                  variants={maskReveal}
+                  initial="hidden"
+                  animate="visible"
+                  className="text-display text-brand-ink-inverse"
+                >
+                  {t(locale, "hero.title1")}
+                  <br />
+                  <em
+                    className="not-italic"
+                    style={{ color: accent === "#000000" ? "#ffffff" : accent }}
+                  >
+                    {t(locale, "hero.title2")}
+                  </em>
+                </motion.h1>
+              </div>
+
+              <motion.p
+                custom={1}
+                variants={fadeIn}
+                initial="hidden"
+                animate="visible"
+                className="max-w-xl text-lg leading-relaxed text-brand-ink-inverse/70"
+              >
+                {t(locale, "hero.subtitle")}
+              </motion.p>
+
+              {/* Flash-sale countdown — editorial bar, not a pill: thin rules,
+                  tabular numerals, live 30s tick with SSR-safe placeholder. */}
+              <motion.div
+                custom={2}
+                variants={fadeIn}
+                initial="hidden"
+                animate="visible"
+                className="flex flex-wrap items-center gap-x-5 gap-y-3 border-y border-brand-ink-inverse/15 py-4"
+              >
+                <span className="text-eyebrow" style={{ color: accent === "#000000" ? "#ffffff" : accent }}>
+                  {t(locale, "hero.sale")}
+                </span>
+                <span className="text-price tabular-nums text-brand-ink-inverse">
+                  {ready ? `${days}d` : "--d"}
+                  <span className="mx-1.5 text-brand-ink-inverse/40">:</span>
+                  {ready ? `${hours}h` : "--h"}
+                  <span className="mx-1.5 text-brand-ink-inverse/40">:</span>
+                  {ready ? `${minutes}m` : "--m"}
+                </span>
+              </motion.div>
+
+              {/* CTAs — primary: high-contrast solid (accent never dominates a
+                  CTA again); secondary: quiet underline link. */}
+              <motion.div
+                custom={3}
+                variants={fadeIn}
+                initial="hidden"
+                animate="visible"
+                className="flex flex-wrap items-center gap-x-8 gap-y-4"
+              >
+                <Link
+                  href="/products"
+                  className="group inline-flex items-center gap-3 rounded-none bg-brand-ink-inverse px-9 py-4 text-sm font-semibold tracking-wide text-brand-ink transition-all duration-300 hover:bg-white"
+                >
+                  {t(locale, "hero.shopNew")}
+                  <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                </Link>
+                <Link
+                  href="/products/mens-clothing"
+                  className="group inline-flex items-center gap-2 text-sm font-medium tracking-wide text-brand-ink-inverse/85 transition-colors hover:text-brand-ink-inverse"
+                >
+                  {t(locale, "hero.explore")}
+                  <span
+                    aria-hidden
+                    className="h-px w-8 bg-brand-ink-inverse/40 transition-all duration-300 group-hover:w-12 group-hover:bg-brand-ink-inverse"
+                  />
+                </Link>
+              </motion.div>
+
+              {/* Trust metadata — restrained row with hairline dividers,
+                  replacing the generic badge grid. */}
+              <motion.div
+                custom={4}
+                variants={fadeIn}
+                initial="hidden"
+                animate="visible"
+                className="flex flex-wrap gap-x-6 gap-y-3 pt-2 text-xs text-brand-ink-inverse/60"
+              >
+                {[
+                  t(locale, "hero.freeReturns"),
+                  t(locale, "hero.eco"),
+                  t(locale, "hero.quality"),
+                  t(locale, "hero.support"),
+                ].map((text, i) => (
+                  <span key={text} className="flex items-center gap-3">
+                    {i > 0 && <span aria-hidden className="h-3 w-px bg-brand-ink-inverse/20" />}
+                    {text}
+                  </span>
+                ))}
+              </motion.div>
+            </div>
           </div>
 
-          {/* Category showcase */}
+          {/* Editorial collage — tight 2×2, sharp corners, quiet hover zoom.
+              No infinite wobble (cut). */}
           <motion.div
-            className="relative hidden h-[560px] overflow-hidden rounded-3xl bg-gray-50 shadow-2xl ring-1 ring-gray-100 lg:block"
-            initial={{ rotate: -5, opacity: 0 }}
-            animate={{ rotate: 5, opacity: 1 }}
-            transition={{ rotate: { repeat: Infinity, repeatType: "mirror", duration: 8 }, opacity: { delay: 0.2 } }}
+            className="relative hidden lg:col-span-5 lg:block"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.45 }}
           >
-            <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-4 p-4">
-              {[
-                { href: "/products/womens-clothing", src: "/womens-clothing.jpg", label: t(locale, "hero.womens") },
-                { href: "/products/mens-clothing", src: "/mens-clothing.webp", label: t(locale, "hero.mens") },
-                { href: "/products/wearables", src: "/wearables.jpg", label: t(locale, "hero.wearables") },
-                { href: "/products/children", src: "/children.jpg", label: t(locale, "hero.children") },
-              ].map((item) => (
-                <motion.div
+            <div className="grid h-[560px] grid-cols-2 gap-3">
+              {collage.map((item, i) => (
+                <Link
                   key={item.href}
-                  className="relative overflow-hidden rounded-xl bg-white"
-                  whileHover={{ scale: 1.04 }}
+                  href={item.href}
+                  className={`group relative block overflow-hidden bg-brand-ink-soft ${
+                    i === 0 ? "row-span-2" : ""
+                  }`}
                 >
-                  <Link href={item.href} className="group absolute inset-0 block">
-                    <Image
-                      src={item.src}
-                      alt={item.label}
-                      fill
-                      sizes="(max-width: 1024px) 0vw, 25vw"
-                      className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                      <span className="text-sm font-semibold text-white">{item.label}</span>
-                    </div>
-                  </Link>
-                </motion.div>
+                  <Image
+                    src={item.src}
+                    alt={item.label}
+                    fill
+                    sizes="(max-width: 1024px) 0vw, 25vw"
+                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-brand-ink/80 via-transparent to-transparent" />
+                  <span className="absolute bottom-4 left-4 text-xs font-medium uppercase tracking-[0.15em] text-brand-ink-inverse/90">
+                    {item.label}
+                  </span>
+                  {/* Hairline reveal on hover */}
+                  <span
+                    aria-hidden
+                    className="absolute inset-x-4 bottom-0 h-px origin-left scale-x-0 bg-brand-ink-inverse/60 transition-transform duration-500 group-hover:scale-x-100"
+                  />
+                </Link>
               ))}
             </div>
           </motion.div>
         </div>
       </div>
-
-      {/* Floating decoration */}
-      <motion.div
-        className="absolute left-10 top-1/4 z-0 opacity-30"
-        animate={{ y: [-20, 20, -20] }}
-        transition={{ duration: 8, repeat: Infinity }}
-        aria-hidden
-      >
-        <FloatingThread />
-      </motion.div>
     </section>
   );
 }
 
-// --- Inline SVG icons -----------------------------------------------------
-
-const FlashSaleIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+const ArrowRight = ({ className }: { className?: string }) => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
     <path
-      d="M13 2V4.12602C15.7252 4.57006 18 6.89616 18 9.75933C18 10.8271 17.7011 11.8295 17.1779 12.687M11 21.874C8.27477 21.4299 6 19.1038 6 16.2407C6 15.1729 6.2989 14.1705 6.82214 13.313M13 2L11 7M11 21.874L13 17M21 10L19 12L17 10M7 14L5 16L3 14"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const FreeReturnsIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <path
-      d="M9 17L4 12M4 12L9 7M4 12H20M15 7L20 12M20 12L15 17"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const EcoFriendlyIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <path
-      d="M7.5 7.5C7.5 7.5 9 9 9 12C9 15 7.5 16.5 7.5 16.5M16.5 7.5C16.5 7.5 15 9 15 12C15 15 16.5 16.5 16.5 16.5M12 12H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const QualityIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <path
-      d="M14 10L12 11M12 11L10 10M12 11V13.5M20 7L18 8M18 8L16 7M18 8V10.5M8 7L6 8M6 8L4 7M6 8V10.5M18 16L16 17M16 17L14 16M16 17V19.5M8 16L6 17M6 17L4 16M6 17V19.5"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const SupportIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <path
-      d="M8 14V12M8 10V8M16 14V12M16 10V8M3 10V14C3 17.7712 3 19.6569 4.17157 20.8284C5.34315 22 7.22876 22 11 22H13C16.7712 22 18.6569 22 19.8284 20.8284C21 19.6569 21 17.7712 21 14V10C21 6.22876 21 4.34315 19.8284 3.17157C18.6569 2 16.7712 2 13 2H11C7.22876 2 5.34315 2 4.17157 3.17157C3 4.34315 3 6.22876 3 10Z"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-    />
-  </svg>
-);
-
-const FloatingThread = () => (
-  <svg width="100" height="100" viewBox="0 0 100 100">
-    <path
-      d="M10 50 Q25 30 40 50 T70 50 T90 30"
+      d="M5 12H19M19 12L13 6M19 12L13 18"
       stroke="currentColor"
       strokeWidth="2"
-      fill="none"
-      strokeDasharray="4 4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
-    <circle cx="10" cy="50" r="3" fill="currentColor" />
-    <circle cx="90" cy="30" r="3" fill="currentColor" />
   </svg>
 );

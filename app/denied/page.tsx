@@ -15,27 +15,25 @@ export default function Denied() {
   return (
     <>
     <Header></Header>
-    <div className="min-h-screen bg-gradient-to-r from-gray-100 via-red-50 to-gray-100 flex flex-col items-center justify-center">
-      <div className="bg-white shadow-lg rounded-lg p-8 max-w-md w-full text-center">
-        {/* Logo: Replace "/logo.png" with your actual logo path */}
+    <div className="flex min-h-screen flex-col items-center justify-center bg-brand-surface px-4 text-brand-ink dark:bg-brand-ink dark:text-brand-ink-inverse">
+      <div className="w-full max-w-md border border-brand-line bg-brand-surface p-9 text-center dark:bg-brand-surface-alt">
+        {/* Logo */}
         <Image
-        width={100}
-        height={100}
+          width={80}
+          height={80}
           src="/logo-black.svg"
-          alt="Ecommerce Logo"
-          className="mx-auto w-20 h-20 mb-4"
+          alt="Store logo"
+          className="mx-auto mb-5 h-16 w-16 object-contain dark:invert"
         />
 
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900 mb-2">
-          Access Denied
-        </h1>
-        <p className="text-gray-600 mb-6">
+        <h1 className="mb-3 text-3xl font-bold tracking-tight">Access Denied</h1>
+        <p className="mb-7 text-brand-muted">
           You do not have the necessary permissions to access this admin panel.
           If you believe this is an error, please contact your administrator.
         </p>
         <Link
           href="/"
-          className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition duration-300"
+          className="inline-block bg-brand-ink px-7 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-brand-ink-inverse transition-opacity hover:opacity-90 dark:bg-brand-ink-inverse dark:text-brand-ink"
         >
           Back to Home
         </Link>

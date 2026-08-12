@@ -20,6 +20,9 @@ const config: Config = {
     // Add a custom font family
     fontFamily: {
       satoshi: ["Satoshi", "sans-serif"],
+      // P03 — editorial display face (Fraunces), reserved for hero/campaign
+      // moments only. Loaded via Google Fonts link in app/layout.tsx.
+      display: ["var(--font-display)", "Georgia", "serif"],
     },
     // Merge screens from the second config with custom breakpoints
     screens: {
@@ -121,12 +124,46 @@ const config: Config = {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // P02 — ANK'S brand tokens (customer-facing system). The TailAdmin
+        // tokens above are DEPRECATED for customer-facing use. See
+        // DESIGN_TOKENS.md for usage guidance per token.
+        //
+        // Colors are declared as `rgb(var(--brand-x) / <alpha-value>)` — the
+        // standard Tailwind pattern that makes opacity modifiers (/95, /80)
+        // actually compile. The CSS vars in globals.css hold space-separated
+        // RGB channel triplets (e.g. `--brand-surface: 250 249 246`), NOT hex
+        // strings — bare `var(--brand-x)` colors silently DROP every /NN
+        // modifier, which broke the header's frosted band (bg-brand-surface/95
+        // compiled to nothing). The *-soft pairs keep baked-in alpha values
+        // (rgba in dark mode) so they stay as plain var() references.
+        "brand-ink": "rgb(var(--brand-ink) / <alpha-value>)",
+        "brand-ink-soft": "rgb(var(--brand-ink-soft) / <alpha-value>)",
+        "brand-ink-inverse": "rgb(var(--brand-ink-inverse) / <alpha-value>)",
+        "brand-surface": "rgb(var(--brand-surface) / <alpha-value>)",
+        "brand-surface-alt": "rgb(var(--brand-surface-alt) / <alpha-value>)",
+        "brand-charcoal": "rgb(var(--brand-charcoal) / <alpha-value>)",
+        "brand-line": "rgb(var(--brand-line) / <alpha-value>)",
+        "brand-line-strong": "rgb(var(--brand-line-strong) / <alpha-value>)",
+        "brand-muted": "rgb(var(--brand-muted) / <alpha-value>)",
+        "brand-ok": "rgb(var(--brand-ok) / <alpha-value>)",
+        "brand-ok-soft": "var(--brand-ok-soft)",
+        "brand-bad": "rgb(var(--brand-bad) / <alpha-value>)",
+        "brand-bad-soft": "var(--brand-bad-soft)",
+        "brand-sale": "rgb(var(--brand-sale) / <alpha-value>)",
+        "brand-sale-soft": "var(--brand-sale-soft)",
+        "brand-warn": "rgb(var(--brand-warn) / <alpha-value>)",
+        "brand-warn-soft": "var(--brand-warn-soft)",
+        "brand-heart": "rgb(var(--brand-heart) / <alpha-value>)",
       },
       // Extend border radius, keyframes, and animations
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        // P02 — architectural radii for the storefront (sharp, restrained)
+        "brand-sm": "var(--brand-radius-sm)",
+        brand: "var(--brand-radius)",
+        "brand-lg": "var(--brand-radius-lg)",
       },
       
       
@@ -330,6 +367,10 @@ const config: Config = {
         12: "0px 0.5px 3px 0px rgba(0, 0, 0, 0.18)",
         13: "0px 1px 3px 0px rgba(0, 0, 0, 0.08)",
         14: "0px 2px 3px 0px rgba(0, 0, 0, 0.10)",
+        // P02 — flat, restrained elevation for the storefront
+        "brand-1": "var(--brand-shadow-1)",
+        "brand-2": "var(--brand-shadow-2)",
+        "brand-3": "var(--brand-shadow-3)",
       },
       dropShadow: {
         1: "0px 1px 0px #E2E8F0",

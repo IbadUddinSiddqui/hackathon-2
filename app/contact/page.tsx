@@ -25,9 +25,10 @@ export default async function ContactPage() {
   return (
     <>
       <Header />
-      <main className="mx-auto max-w-3xl px-4 py-16">
-        <h1 className="text-4xl font-bold tracking-tight text-gray-900">Contact Us</h1>
-        <p className="mt-3 text-gray-600">
+      <main className="mx-auto max-w-3xl bg-brand-surface px-4 py-16 text-brand-ink dark:bg-brand-ink dark:text-brand-ink-inverse">
+        <p className="text-eyebrow mb-3 text-brand-muted">Support</p>
+        <h1 className="text-4xl font-bold tracking-tight">Contact Us</h1>
+        <p className="mt-3 text-brand-muted">
           Questions about an order, sizing, or your delivery? We&apos;re here to help.
         </p>
 
@@ -35,18 +36,18 @@ export default async function ContactPage() {
           {email ? (
             <a
               href={`mailto:${email}`}
-              className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+              className="flex items-center justify-between border border-brand-line bg-brand-surface p-6 transition-colors hover:border-brand-line-strong dark:bg-brand-surface-alt"
             >
               <div>
-                <div className="text-sm font-medium text-gray-500">Email</div>
-                <div className="mt-1 font-semibold text-gray-900">{email}</div>
+                <div className="text-sm font-medium text-brand-muted">Email</div>
+                <div className="mt-1 font-semibold">{email}</div>
               </div>
               <span className="text-2xl">✉️</span>
             </a>
           ) : (
-            <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-              <div className="text-sm font-medium text-gray-500">Email</div>
-              <div className="mt-1 text-gray-600">Email support coming soon.</div>
+            <div className="border border-brand-line bg-brand-surface p-6 dark:bg-brand-surface-alt">
+              <div className="text-sm font-medium text-brand-muted">Email</div>
+              <div className="mt-1 text-brand-muted">Email support coming soon.</div>
             </div>
           )}
 
@@ -55,22 +56,20 @@ export default async function ContactPage() {
               href={whatsapp}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+              className="flex items-center justify-between border border-brand-line bg-brand-surface p-6 transition-colors hover:border-brand-line-strong dark:bg-brand-surface-alt"
             >
               <div>
-                <div className="text-sm font-medium text-gray-500">WhatsApp</div>
-                <div className="mt-1 font-semibold text-gray-900">
-                  {tenant.branding?.whatsapp}
-                </div>
+                <div className="text-sm font-medium text-brand-muted">WhatsApp</div>
+                <div className="mt-1 font-semibold">{tenant.branding?.whatsapp}</div>
               </div>
               <span className="text-2xl">💬</span>
             </a>
           )}
 
-          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-            <div className="text-sm font-medium text-gray-500">Store</div>
-            <div className="mt-1 font-semibold text-gray-900">{name}</div>
-            <div className="mt-1 text-sm text-gray-600">
+          <div className="border border-brand-line bg-brand-surface p-6 dark:bg-brand-surface-alt">
+            <div className="text-sm font-medium text-brand-muted">Store</div>
+            <div className="mt-1 font-semibold">{name}</div>
+            <div className="mt-1 text-sm text-brand-muted">
               Karachi, Pakistan · Mon–Sat, 10am–7pm
             </div>
           </div>

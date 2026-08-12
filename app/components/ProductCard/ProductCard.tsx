@@ -11,7 +11,10 @@ import { urlFor } from "@/sanity/lib/image";
 
 /**
  * The single standardized product card used by EVERY storefront product grid
- * (homepage sections via ProductsGrid, /products, /products/[category]).
+ * (homepage sections via ProductsGrid, /products, /products/[category],
+ * recommendations). P08: a fashion-object expression — sharp corners, no card
+ * chrome (the image IS the card), tabular price numerals, a full-width
+ * quick-add bar that slides up on hover, and a slow quiet entrance.
  *
  * `ProductCardData` is structural on purpose so both the Sanity-typed product
  * (lib/sanity/product) and the merged Sanity + Typesense Product
@@ -30,13 +33,15 @@ export type ProductCardData = {
   sale_price?: number | null;
 };
 
-/** Entrance animation — drives the stagger when a motion parent provides it. */
+/** Entrance — P08 re-time: slow, quiet cinematic fade (entrance register).
+    The grid container provides the stagger; interaction springs stay in the
+    buttons/badges where they belong. */
 const cardVariants = {
   hidden: { opacity: 0, y: 24 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring", stiffness: 280, damping: 24 },
+    transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
   },
 };
 
@@ -73,7 +78,8 @@ export default function ProductCard({
 
   return (
     <motion.div variants={cardVariants} className="group relative flex flex-col">
-      <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-gray-100 ring-1 ring-gray-100 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-black/10 dark:bg-gray-800/70 dark:ring-gray-700/60">
+      {/* The image is the card — no rounded chrome, no ring, no shadow. */}
+      <div className="relative aspect-[4/5] overflow-hidden bg-brand-surface-alt dark:bg-brand-charcoal">
         <Link href={href} aria-label={product.name} className="absolute inset-0 z-10">
           {imageUrl ? (
             <Image
@@ -81,32 +87,34 @@ export default function ProductCard({
               alt={product.name}
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              className="object-cover transition-transform duration-[1100ms] ease-out group-hover:scale-[1.04]"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 text-gray-400 dark:from-gray-800 dark:to-gray-700 dark:text-gray-500">
-              <span className="text-xs font-medium">No image</span>
+            <div className="flex h-full w-full items-center justify-center bg-brand-surface-alt text-brand-muted dark:bg-brand-charcoal">
+              <span className="text-xs font-medium">{t(locale, "common.loading")}</span>
             </div>
           )}
         </Link>
 
+        {/* Top-left editorial metadata: sale flag (sharp, brand-sale) */}
+        {salePrice !== null && inStock && (
+          <span className="absolute left-0 top-0 z-20 bg-brand-sale px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-white">
+            {t(locale, "product.sale")}
+          </span>
+        )}
+
+        {/* Out of stock veil */}
         {!inStock && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/50 backdrop-blur-[2px]">
-            <span className="rounded-full bg-white px-4 py-1.5 text-xs font-semibold text-black">
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-brand-ink/55 backdrop-blur-[2px]">
+            <span className="border border-brand-ink-inverse/30 bg-brand-ink px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-brand-ink-inverse">
               {t(locale, "product.outOfStock")}
             </span>
           </div>
         )}
 
-        {salePrice !== null && inStock && (
-          <span className="absolute left-3 top-3 z-20 rounded-full bg-red-500 px-2.5 py-0.5 text-[11px] font-bold text-white">
-            {t(locale, "product.sale")}
-          </span>
-        )}
-
-        {/* Quick add — always visible on touch, reveal-on-hover on desktop.
-            Adds the EFFECTIVE price (sale when on sale) so the cart never
-            shows a price the customer isn't charged. */}
+        {/* Quick add — full-width bar sliding up on hover (fashion standard),
+            always visible on touch. Adds the EFFECTIVE price (sale when on
+            sale) so the cart never shows a price the customer isn't charged. */}
         <button
           type="button"
           onClick={() =>
@@ -114,35 +122,27 @@ export default function ProductCard({
             addItem(salePrice !== null ? { ...product, price: salePrice } : product)
           }
           disabled={!inStock}
-          className="absolute inset-x-3 bottom-3 z-20 rounded-xl bg-black/85 py-2.5 text-xs font-semibold text-white backdrop-blur transition-all duration-300 hover:bg-black focus:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-0 sm:translate-y-2 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100 sm:focus-visible:translate-y-0 sm:focus-visible:opacity-100"
+          className="absolute inset-x-0 bottom-0 z-20 bg-brand-ink py-3.5 text-xs font-semibold uppercase tracking-[0.18em] text-brand-ink-inverse transition-transform duration-[400ms] hover:bg-brand-ink-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-ink-inverse disabled:cursor-not-allowed disabled:opacity-0 sm:translate-y-full sm:group-hover:translate-y-0 dark:bg-brand-ink-inverse dark:text-brand-ink dark:hover:bg-white"
         >
           {t(locale, "product.addToCart")}
         </button>
       </div>
 
-      <div className="flex flex-1 flex-col gap-1 px-1 pt-3">
+      {/* Typographic detail — name + tabular price, no pill, no stock line
+          noise on the card (stock lives on the PDP). */}
+      <div className="flex flex-1 flex-col gap-1 pt-3">
         <Link
           href={href}
-          className="line-clamp-1 text-sm font-medium text-gray-900 transition-colors hover:text-black dark:text-gray-100 dark:hover:text-white"
+          className="line-clamp-1 text-sm font-medium text-brand-ink transition-colors hover:opacity-70 dark:text-brand-ink-inverse"
         >
           {product.name}
         </Link>
-        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+        <p className="text-price text-[15px] font-semibold text-brand-ink dark:text-brand-ink-inverse">
           {formatPrice(displayPrice)}
           {salePrice !== null && (
-            <span className="ml-1.5 text-xs font-medium text-gray-400 line-through dark:text-gray-500">
+            <span className="ml-2 text-xs font-medium text-brand-muted line-through">
               {formatPrice(product.price)}
             </span>
-          )}
-        </p>
-        <p className="text-xs">
-          {inStock ? (
-            <span className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              {t(locale, "product.inStock")}
-            </span>
-          ) : (
-            <span className="text-red-500">{t(locale, "product.outOfStock")}</span>
           )}
         </p>
       </div>

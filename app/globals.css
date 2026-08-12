@@ -7,6 +7,34 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* P19 — prefers-reduced-motion: kill pure-CSS animation loops (marquee,
+   ping, pulse, spin) for users who opt out. Framer-motion animations are
+   handled by <MotionConfig reducedMotion="user"> in app/layout.tsx. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-scroll,
+  .animate-ping,
+  .animate-pulse,
+  .animate-spin {
+    animation: none !important;
+  }
+}
+
+/* P20 — restrained materiality: a fixed, static film-grain overlay across
+   the whole site (the same SVG-noise technique the Hero uses, globalized).
+   4% opacity, mix-blend-overlay, pointer-events-none so it never blocks
+   interaction, z-index below modals (z-40+). Static — no animation, so
+   prefers-reduced-motion is inherently respected. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+}
+
 /* P3-22 — Urdu (RTL) typography: Nastaliq needs a taller line-height. */
 html[lang="ur"] body,
 html[lang="ur"] button,
@@ -15,6 +43,18 @@ html[lang="ur"] select,
 html[lang="ur"] textarea {
   font-family: "Noto Nastaliq Urdu", "Gulzar", Arial, sans-serif;
   line-height: 1.9;
+}
+
+/* P03 — Urdu safety: Nastaliq must win over the display face and must not
+   be broken by wide letter-spacing (cursive joining) or uppercase casing. */
+html[lang="ur"] .text-display,
+html[lang="ur"] .text-display-sm,
+html[lang="ur"] .text-eyebrow,
+html[lang="ur"] .text-nav {
+  font-family: "Noto Nastaliq Urdu", "Gulzar", Arial, sans-serif;
+  line-height: 1.9;
+  letter-spacing: 0;
+  text-transform: none;
 }
 @keyframes scroll {
   from {
@@ -258,8 +298,141 @@ html[lang="ur"] textarea {
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
+/* ════════════════════════════════════════════════════════════════════════
+   ANK'S BRAND TOKENS — Redesign P02 (see DESIGN_TOKENS.md)
+   Customer-facing storefront system. The TailAdmin token set below is
+   DEPRECATED for customer-facing use (admin-only from here on):
+     primary #3C50E0 · secondary #80CAEE · meta 1-10 · body #64748B
+     stroke · graydark · boxdark · success/danger/warning (old values)
+   The tenant accent is NOT a CSS var — it is applied via inline style
+   from the tenant context (see DESIGN_TOKENS.md §Tenant-accent).
+   ════════════════════════════════════════════════════════════════════════ */
+@layer base {
+  :root {
+    /* Foundations. NOTE: solid brand colors are stored as space-separated
+       RGB channel triplets so Tailwind's `rgb(var(--brand-x) /
+       <alpha-value>)` pattern (see tailwind.config.ts) can emit opacity
+       modifiers like /95. Hex strings here would silently drop every /NN. */
+    --brand-ink: 11 11 12;         /* primary text on light surfaces */
+    --brand-ink-soft: 20 20 22;    /* secondary dark surface / footer */
+    --brand-ink-inverse: 245 243 239; /* text on dark surfaces */
+    --brand-surface: 250 249 246;  /* warm off-white page surface */
+    --brand-surface-alt: 245 243 239; /* elevated / differentiated surface */
+    --brand-charcoal: 42 42 44;    /* desaturated charcoal midtone */
+    --brand-line: 232 228 220;     /* hairline borders / dividers */
+    --brand-line-strong: 207 202 192; /* stronger borders, active outlines */
+    --brand-muted: 110 106 99;     /* secondary text on light */
+    /* Functional — the ONLY non-neutral colors, fixed semantics */
+    --brand-ok: 47 125 79;
+    --brand-ok-soft: #e7f2eb;
+    --brand-bad: 179 57 46;
+    --brand-bad-soft: #f9eae8;
+    --brand-sale: 194 65 12;       /* sale / flash discount */
+    --brand-sale-soft: #fbeee2;
+    --brand-warn: 138 90 0;        /* validation / low stock */
+    --brand-warn-soft: #fbf0db;
+    --brand-heart: 224 72 62;      /* wishlist heart (decorative, fixed) */
+    /* Architectural radius (sharp, restrained) + flat elevation */
+    --brand-radius-sm: 2px;
+    --brand-radius: 4px;
+    --brand-radius-lg: 8px;
+    --brand-shadow-1: 0 1px 2px rgba(11, 11, 12, 0.05);
+    --brand-shadow-2: 0 1px 3px rgba(11, 11, 12, 0.06), 0 8px 24px -16px rgba(11, 11, 12, 0.14);
+    --brand-shadow-3: 0 24px 48px -12px rgba(11, 11, 12, 0.2);
+  }
+  .dark {
+    --brand-ink: 237 234 227;
+    --brand-ink-soft: 201 196 187;
+    --brand-ink-inverse: 11 11 12;
+    --brand-surface: 11 11 12;
+    --brand-surface-alt: 20 20 22;
+    --brand-charcoal: 42 42 44;
+    --brand-line: 35 35 39;
+    --brand-line-strong: 52 52 58;
+    --brand-muted: 151 146 138;
+    --brand-ok: 76 175 110;
+    --brand-ok-soft: rgba(76, 175, 110, 0.12);
+    --brand-bad: 226 104 95;
+    --brand-bad-soft: rgba(226, 104, 95, 0.12);
+    --brand-sale: 224 118 58;
+    --brand-sale-soft: rgba(224, 118, 58, 0.12);
+    --brand-warn: 217 164 65;
+    --brand-warn-soft: rgba(217, 164, 65, 0.12);
+    --brand-heart: 224 85 77;
+    --brand-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --brand-shadow-2: 0 1px 3px rgba(0, 0, 0, 0.5), 0 8px 24px -16px rgba(0, 0, 0, 0.6);
+    --brand-shadow-3: 0 24px 48px -12px rgba(0, 0, 0, 0.7);
+  }
+}
+
 .swiper-container {
   --swiper-navigation-color: #000;
   --swiper-pagination-color: #000;
 }
 
+/* ════════════════════════════════════════════════════════════════════════
+   ANK'S TYPE ROLES — Redesign P03 (see TYPE_SCALE.md)
+   Display (Fraunces) is reserved for hero/campaign moments only.
+   Urdu (Nastaliq) overrides are enforced above.
+   ════════════════════════════════════════════════════════════════════════ */
+@layer components {
+  .text-display {
+    font-family: var(--font-display), Georgia, serif;
+    font-size: clamp(2.5rem, 6vw, 5.5rem);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+  .text-display-sm {
+    font-family: var(--font-display), Georgia, serif;
+    font-size: clamp(2rem, 4.5vw, 3.5rem);
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+  }
+  .text-h1 {
+    font-size: 2.5rem;
+    line-height: 1.15;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .text-h2 {
+    font-size: 2rem;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+  }
+  .text-h3 {
+    font-size: 1.5rem;
+    line-height: 1.25;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .text-product-name {
+    font-size: 1.75rem;
+    line-height: 1.2;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .text-price {
+    font-size: 1.5rem;
+    line-height: 1.2;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+  .text-nav {
+    font-size: 0.8125rem;
+    line-height: 1;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .text-eyebrow {
+    font-size: 0.75rem;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+}

@@ -2,6 +2,8 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
+import { useLocale } from '@/lib/locale-provider';
+import { t } from '@/lib/i18n';
 
 export type CheckoutItem = {
   id: string;
@@ -33,6 +35,7 @@ export const SafepayPayment: React.FC<SafepayPaymentProps> = ({
   giftCardCode,
   creditAmount,
 }) => {
+  const { locale } = useLocale();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,11 +45,11 @@ export const SafepayPayment: React.FC<SafepayPaymentProps> = ({
     setError(null);
 
     if (!email || !EMAIL_RE.test(email)) {
-      setError('Please enter a valid email to receive your receipt.');
+      setError(t(locale, 'checkout.validEmail'));
       return;
     }
     if (items.length === 0) {
-      setError('Your cart is empty. Add items before checking out.');
+      setError(t(locale, 'cart.empty'));
       return;
     }
 
@@ -85,14 +88,14 @@ export const SafepayPayment: React.FC<SafepayPaymentProps> = ({
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 border rounded-lg shadow-sm bg-white dark:bg-gray-800">
+    <div className="mx-auto max-w-md border border-brand-line bg-brand-surface p-7 dark:bg-brand-surface-alt">
       <form onSubmit={handleSubmit}>
-        <div className="mb-4">
+        <div className="mb-5">
           <label
             htmlFor="safepay-email"
-            className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200"
+            className="mb-1.5 block text-sm font-medium text-brand-ink dark:text-brand-ink-inverse"
           >
-            Email for receipt
+            {t(locale, 'checkout.email')}
           </label>
           <input
             id="safepay-email"
@@ -101,25 +104,24 @@ export const SafepayPayment: React.FC<SafepayPaymentProps> = ({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+            className="w-full border border-brand-line bg-transparent px-3.5 py-2.5 text-sm text-brand-ink placeholder:text-brand-muted focus:border-brand-ink focus:outline-none dark:border-brand-line dark:text-brand-ink-inverse dark:focus:border-brand-ink-inverse"
           />
         </div>
 
-        <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-          You will be taken to Safepay&apos;s secure payment page to complete your
-          card payment. We never see your card details.
+        <p className="mb-5 text-sm leading-relaxed text-brand-muted">
+          {t(locale, 'checkout.cardSub')} — {t(locale, 'checkout.cardSafepay')}
         </p>
 
         <button
           type="submit"
           disabled={loading || items.length === 0}
-          className="w-full bg-gray-900 text-white py-2 px-4 rounded-md hover:bg-gray-700 disabled:bg-gray-400 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+          className="w-full bg-brand-ink py-3.5 text-sm font-semibold uppercase tracking-[0.15em] text-brand-ink-inverse transition-opacity hover:opacity-90 disabled:opacity-40 dark:bg-brand-ink-inverse dark:text-brand-ink"
         >
-          {loading ? 'Redirecting to Safepay...' : 'Pay with Card (Safepay)'}
+          {loading ? t(locale, 'checkout.placing') : t(locale, 'checkout.cardSafepay')}
         </button>
 
         {error && (
-          <p className="mt-3 p-3 rounded-md bg-red-100 text-red-700 text-sm" role="alert">
+          <p className="mt-4 border border-brand-bad/40 bg-brand-bad-soft p-3 text-sm text-brand-bad" role="alert">
             {error}
           </p>
         )}

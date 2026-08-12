@@ -10,9 +10,11 @@ const NAV: { id: AccountPage; label: string; href: string }[] = [
 
 export default function AccountSidebar({ active }: { active: AccountPage }) {
   return (
-    <aside className="hidden w-64 shrink-0 bg-white shadow-md md:block">
-      <div className="border-b p-6">
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">My Account</h2>
+    <aside className="hidden w-64 shrink-0 border-r border-brand-line bg-brand-surface md:block dark:bg-brand-surface-alt">
+      <div className="border-b border-brand-line p-6">
+        <h2 className="text-2xl font-bold tracking-tight text-brand-ink dark:text-brand-ink-inverse">
+          My Account
+        </h2>
       </div>
       <nav className="mt-2">
         {NAV.map((item) => (
@@ -21,8 +23,8 @@ export default function AccountSidebar({ active }: { active: AccountPage }) {
             href={item.href}
             className={`block px-6 py-3 transition-colors ${
               item.id === active
-                ? "border-l-4 border-black bg-gray-100 font-semibold text-gray-900 dark:bg-gray-800 dark:text-gray-100"
-                : "text-gray-600 hover:bg-gray-200 hover:text-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-gray-100"
+                ? "border-l-2 border-brand-ink bg-brand-surface-alt font-semibold text-brand-ink dark:border-brand-ink-inverse dark:bg-brand-charcoal dark:text-brand-ink-inverse"
+                : "text-brand-muted hover:bg-brand-surface-alt hover:text-brand-ink dark:hover:bg-brand-charcoal dark:hover:text-brand-ink-inverse"
             }`}
           >
             {item.label}
@@ -30,7 +32,7 @@ export default function AccountSidebar({ active }: { active: AccountPage }) {
         ))}
         <Link
           href="/"
-          className="block px-6 py-3 text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-gray-100"
+          className="block px-6 py-3 text-brand-muted transition-colors hover:bg-brand-surface-alt hover:text-brand-ink dark:hover:bg-brand-charcoal dark:hover:text-brand-ink-inverse"
         >
           ← Back to store
         </Link>

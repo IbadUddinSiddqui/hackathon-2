@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import "./globals.css";
 import { Provider } from "@/components/ui/provider"
 import { SessionProvider } from "next-auth/react";
+import { MotionConfig } from "framer-motion";
 import { SITE_NAME, SITE_DESCRIPTION, SITE_URL } from "@/lib/site";
 import { localeFromCookie, localeDir, LOCALE_COOKIE } from "@/lib/i18n";
 import { LocaleProvider } from "@/lib/locale-provider";
@@ -96,6 +97,14 @@ export default async function RootLayout({
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
+        {/* P03 — editorial display face (Fraunces). Reserved for hero/campaign
+            moments only via the .text-display type role; Urdu (Nastaliq)
+            overrides it when lang="ur" (see globals.css). */}
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&display=swap"
+          rel="stylesheet"
+        />
         {locale === "ur" && (
           /* eslint-disable-next-line @next/next/no-page-custom-font */
           <link
@@ -105,17 +114,23 @@ export default async function RootLayout({
         )}
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Provider>
-          <SessionProvider>
-            <LocaleProvider locale={locale}>
-              <TenantProvider tenant={tenantBranding}>
-                {children}
-                {/* P4-15 — storefront FAQ chat (tenant-branded WhatsApp/email). */}
-                <ChatWidget />
-              </TenantProvider>
-            </LocaleProvider>
-          </SessionProvider>
-        </Provider>
+        {/* P19 — one site-wide reduced-motion switch: framer-motion reads the
+            OS preference and disables transform/opacity animation for users
+            who ask for it (the CSS kill-switch for pure-CSS animations lives
+            in globals.css). No per-component useReducedMotion plumbing. */}
+        <MotionConfig reducedMotion="user">
+          <Provider>
+            <SessionProvider>
+              <LocaleProvider locale={locale}>
+                <TenantProvider tenant={tenantBranding}>
+                  {children}
+                  {/* P4-15 — storefront FAQ chat (tenant-branded WhatsApp/email). */}
+                  <ChatWidget />
+                </TenantProvider>
+              </LocaleProvider>
+            </SessionProvider>
+          </Provider>
+        </MotionConfig>
       </body>
     </html>
   );

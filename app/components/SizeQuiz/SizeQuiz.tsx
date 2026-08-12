@@ -33,20 +33,20 @@ export default function SizeQuiz({ availableSizes }: { availableSizes: string[] 
   };
 
   const inputCls =
-    "w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100";
+    "w-full border border-brand-line bg-transparent px-3 py-2 text-sm text-brand-ink placeholder:text-brand-muted focus:border-brand-ink focus:outline-none dark:border-brand-line dark:text-brand-ink-inverse dark:focus:border-brand-ink-inverse";
 
   return (
-    <div className="mt-4 rounded-lg border border-dashed border-gray-300 p-4 dark:border-gray-600">
+    <div className="mt-4 border border-dashed border-brand-line-strong p-5">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="text-sm font-semibold text-blue-700 hover:underline dark:text-blue-400"
+        className="text-sm font-semibold text-brand-ink underline underline-offset-4 transition-opacity hover:opacity-70 dark:text-brand-ink-inverse"
       >
         {open ? "Hide" : "📏"} {t(locale, "product.findMySize")}
       </button>
 
       {open && (
-        <form onSubmit={submit} className="mt-3 space-y-3">
+        <form onSubmit={submit} className="mt-4 space-y-4">
           <div className="grid grid-cols-2 gap-3">
             {(
               [
@@ -57,7 +57,7 @@ export default function SizeQuiz({ availableSizes }: { availableSizes: string[] 
               ] as [keyof BodyMeasurements, string][]
             ).map(([key, label]) => (
               <div key={key}>
-                <label className="block text-xs font-medium text-gray-600 mb-1 dark:text-gray-300">
+                <label className="mb-1 block text-xs font-medium text-brand-muted">
                   {label}
                 </label>
                 <input
@@ -68,7 +68,7 @@ export default function SizeQuiz({ availableSizes }: { availableSizes: string[] 
                   className={inputCls}
                 />
                 {errors[key] && (
-                  <p className="text-xs text-red-500 mt-1">{errors[key]}</p>
+                  <p className="mt-1 text-xs text-brand-bad">{errors[key]}</p>
                 )}
               </div>
             ))}
@@ -76,13 +76,13 @@ export default function SizeQuiz({ availableSizes }: { availableSizes: string[] 
 
           <button
             type="submit"
-            className="w-full bg-gray-900 text-white py-2 rounded-md hover:bg-gray-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+            className="w-full bg-brand-ink py-2.5 text-sm font-semibold text-brand-ink-inverse transition-opacity hover:opacity-90 dark:bg-brand-ink-inverse dark:text-brand-ink"
           >
             {t(locale, "product.recommendSize")}
           </button>
 
           {result && (
-            <p className="text-center text-sm font-semibold text-green-700 dark:text-green-400">
+            <p className="text-center text-sm font-semibold text-brand-ok">
               {t(locale, "product.weRecommend")}{" "}
               <span className="text-lg">{result}</span>
             </p>

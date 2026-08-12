@@ -9,7 +9,7 @@ import { useTenant } from "@/lib/tenant-provider";
 import { FaWhatsapp } from "react-icons/fa";
 
 const iconBtn =
-  "flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-gray-300 transition hover:bg-white/15 hover:text-white";
+  "flex h-9 w-9 items-center justify-center border border-brand-ink-inverse/15 text-brand-ink-inverse/70 transition hover:border-brand-ink-inverse hover:text-brand-ink-inverse";
 
 function Footer() {
   const { locale } = useLocale();
@@ -51,7 +51,8 @@ function Footer() {
   };
 
   const year = new Date().getFullYear();
-  const linkCls = "text-sm text-gray-400 transition-colors hover:text-white";
+  const linkCls =
+    "text-sm text-brand-ink-inverse/60 transition-colors hover:text-brand-ink-inverse";
 
   const columns = [
     {
@@ -82,10 +83,10 @@ function Footer() {
   ];
 
   return (
-    <footer className="mt-16 bg-gray-950 text-white">
+    <footer className="mt-16 bg-brand-ink-soft text-brand-ink-inverse">
       {/* Newsletter */}
       <div className="mx-auto max-w-7xl px-4 py-14 lg:px-8">
-        <div className="flex flex-col items-center justify-between gap-6 rounded-2xl bg-white/[0.04] p-8 ring-1 ring-white/10 md:flex-row">
+        <div className="flex flex-col items-center justify-between gap-6 border border-brand-ink-inverse/10 p-8 md:flex-row">
           <h3 className="max-w-md text-center text-2xl font-bold tracking-tight sm:text-3xl md:text-left">
             {t(locale, "footer.newsletterHead")}
           </h3>
@@ -101,23 +102,21 @@ function Footer() {
                 setError(null);
               }}
               placeholder={t(locale, "footer.emailPlaceholder")}
-              className="h-12 flex-1 rounded-full border border-white/15 bg-white/5 px-5 text-sm text-white placeholder-gray-400 outline-none transition focus:border-white/40 focus:ring-2 focus:ring-white/20 disabled:opacity-60"
+              className="h-12 flex-1 border border-brand-ink-inverse/15 bg-transparent px-5 text-sm text-brand-ink-inverse placeholder:text-brand-ink-inverse/40 outline-none transition focus:border-brand-ink-inverse disabled:opacity-60"
             />
             <button
               type="submit"
               disabled={submitting}
-              className="h-12 shrink-0 rounded-full bg-white px-7 text-sm font-semibold text-gray-900 transition-transform hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60"
+              className="h-12 shrink-0 bg-brand-ink-inverse px-7 text-sm font-semibold uppercase tracking-[0.12em] text-brand-ink transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {submitting ? t(locale, "footer.subscribing") : t(locale, "footer.subscribe")}
             </button>
           </form>
         </div>
         {subscribed ? (
-          <p className="mt-4 text-center text-sm text-emerald-400">
-            {t(locale, "footer.subscribed")}
-          </p>
+          <p className="mt-4 text-center text-sm text-brand-ok">{t(locale, "footer.subscribed")}</p>
         ) : error ? (
-          <p className="mt-4 text-center text-sm text-red-400" role="alert">
+          <p className="mt-4 text-center text-sm text-brand-bad" role="alert">
             {error}
           </p>
         ) : null}
@@ -125,7 +124,7 @@ function Footer() {
 
       {/* Links */}
       <div className="mx-auto max-w-7xl px-4 pb-10 lg:px-8">
-        <div className="grid grid-cols-2 gap-8 border-t border-white/10 pt-10 md:grid-cols-5">
+        <div className="grid grid-cols-2 gap-8 border-t border-brand-ink-inverse/10 pt-10 md:grid-cols-5">
           {/* Brand */}
           <div className="col-span-2">
             <Image
@@ -135,7 +134,7 @@ function Footer() {
               alt={tenant.name}
               className="invert"
             />
-            <p className="mt-3 max-w-xs text-sm text-gray-400">
+            <p className="mt-3 max-w-xs text-sm text-brand-ink-inverse/60">
               {tenant.tagline || t(locale, "footer.tagline")}
             </p>
             <div className="mt-4 flex gap-3">
@@ -154,7 +153,7 @@ function Footer() {
             {tenant.contactEmail && (
               <a
                 href={`mailto:${tenant.contactEmail}`}
-                className="mt-4 block text-sm text-gray-400 transition-colors hover:text-white"
+                className="mt-4 block text-sm text-brand-ink-inverse/60 transition-colors hover:text-brand-ink-inverse"
               >
                 {tenant.contactEmail}
               </a>
@@ -164,7 +163,7 @@ function Footer() {
           {/* Link columns */}
           {columns.map((col) => (
             <div key={col.title}>
-              <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-200">
+              <h4 className="mb-4 text-sm font-semibold uppercase tracking-[0.15em] text-brand-ink-inverse/90">
                 {col.title}
               </h4>
               <ul className="space-y-2.5">
@@ -182,18 +181,18 @@ function Footer() {
       </div>
 
       {/* Bottom bar */}
-      <div className="border-t border-white/10">
+      <div className="border-t border-brand-ink-inverse/10">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-5 sm:flex-row lg:px-8">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-brand-ink-inverse/50">
             © {year} {tenant.name}. {t(locale, "footer.rights")}
           </p>
           <div className="flex items-center gap-2">
             <Image width={44} height={28} alt="Visa" src="/visa.svg" className="rounded-sm" />
             <Image width={44} height={28} alt="Mastercard" src="/master.svg" className="rounded-sm" />
-            <span className="rounded-sm bg-white/10 px-2 py-1 text-[11px] font-semibold text-gray-300">
+            <span className="border border-brand-ink-inverse/15 px-2 py-1 text-[11px] font-semibold text-brand-ink-inverse/70">
               Safepay
             </span>
-            <span className="rounded-sm bg-white/10 px-2 py-1 text-[11px] font-semibold text-gray-300">
+            <span className="border border-brand-ink-inverse/15 px-2 py-1 text-[11px] font-semibold text-brand-ink-inverse/70">
               COD
             </span>
           </div>

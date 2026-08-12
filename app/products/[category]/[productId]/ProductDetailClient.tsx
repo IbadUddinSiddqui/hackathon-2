@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Badge } from "@/components/ui/badge";
 import ProductGallery from "@/app/components/ProductImages/ProductGallery";
 import AddToCartButton from "@/app/components/AddToCartButton/AddToCartButton";
 import Recommendations from "@/app/components/Recommendations/Recommendations";
@@ -20,7 +19,7 @@ import { isHexColor } from "@/lib/is-hex-color";
 import type { ColorSibling } from "@/lib/product-colors";
 import { displayPriceFor } from "@/lib/product-sale";
 
-// P3-13 — live countdown to the flash-sale end.
+// P3-13 — live countdown to the flash-sale end. P10: editorial bar styling.
 function FlashSaleCountdown({ endsAt }: { endsAt: string }) {
   const [now, setNow] = React.useState(() => Date.now());
   React.useEffect(() => {
@@ -33,7 +32,7 @@ function FlashSaleCountdown({ endsAt }: { endsAt: string }) {
   const s = Math.floor((ms % 60_000) / 1000);
   const pad = (n: number) => String(n).padStart(2, "0");
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 dark:bg-red-900/40 dark:text-red-400">
+    <span className="inline-flex items-center gap-2 border border-brand-sale/40 bg-brand-sale-soft px-3 py-1.5 text-xs font-semibold tabular-nums text-brand-sale">
       <Timer className="h-3.5 w-3.5" />
       Ends in {pad(h)}:{pad(m)}:{pad(s)}
     </span>
@@ -60,6 +59,16 @@ export type ProductDetail = {
   sale_price?: number | null;
 };
 
+// P10 — cinematic entrance register for the PDP (slow, quiet; per Brand Brief).
+const fadeIn = {
+  hidden: { opacity: 0, y: 16 },
+  visible: (i: number = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.1 + i * 0.08 },
+  }),
+};
+
 const ProductDetailClient = ({
   product,
   flashSale,
@@ -78,83 +87,96 @@ const ProductDetailClient = ({
   return (
     <>
       <Header />
-      <div className="min-h-screen dark:bg-[#212020]">
+      <div className="min-h-screen bg-brand-surface text-brand-ink dark:bg-brand-ink dark:text-brand-ink-inverse">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.5 }}
         >
-          <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8 max-w-7xl mx-auto">
-            <motion.div initial={{ x: -50 }} animate={{ x: 0 }} className="aspect-square">
+          <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-4 py-12 md:grid-cols-2 lg:px-8">
+            {/* Gallery — full-bleed editorial frame (P10) */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+            >
               <ProductGallery images={product.images} />
             </motion.div>
 
-            <motion.div initial={{ x: 50 }} animate={{ x: 0 }} className="space-y-6">
-              <motion.h1
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-4xl font-bold tracking-tight"
-              >
-                {product.name}
-              </motion.h1>
+            {/* Detail column — editorial type roles */}
+            <motion.div className="space-y-7 pt-2">
+              <motion.div custom={0} variants={fadeIn} initial="hidden" animate="visible">
+                {product.brand && (
+                  <p className="text-eyebrow mb-3 text-brand-muted">{product.brand}</p>
+                )}
+                <h1 className="text-product-name text-brand-ink dark:text-brand-ink-inverse">
+                  {product.name}
+                </h1>
+              </motion.div>
 
-              <div className="flex items-center gap-2">
+              <motion.div custom={1} variants={fadeIn} initial="hidden" animate="visible" className="flex items-center gap-2">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star
                     key={i}
-                    className={`w-6 h-6 ${i < product.ratings ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+                    className={`h-5 w-5 ${
+                      i < product.ratings ? "fill-brand-warn text-brand-warn" : "text-brand-line-strong"
+                    }`}
                   />
                 ))}
-                <span className="text-muted-foreground">
+                <span className="text-sm text-brand-muted">
                   ({(product?.ratings ?? 0).toFixed(1)})
                 </span>
-              </div>
+              </motion.div>
 
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-                <div className="flex flex-wrap items-center gap-4">
-                  <span className="text-4xl font-bold">Rs {displayPrice.toFixed(2)}</span>
-                  {flashSale ? (
+              <motion.div custom={2} variants={fadeIn} initial="hidden" animate="visible" className="space-y-5">
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-3 border-y border-brand-line py-5">
+                  <span className="text-price text-brand-ink dark:text-brand-ink-inverse">
+                    Rs {displayPrice.toFixed(2)}
+                  </span>
+                  {(flashSale || (product.on_sale && product.sale_price != null)) && (
                     <>
-                      <span className="text-xl text-gray-400 line-through">
+                      <span className="text-base text-brand-muted line-through">
                         Rs {(product?.price ?? 0).toFixed(2)}
                       </span>
-                      <Badge className="bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400">
+                      <span className="bg-brand-sale px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-white">
                         {t(locale, "product.sale")}
-                      </Badge>
-                      {/* Real discount % — never a hardcoded fake badge. */}
-                      <Badge variant="outline" className="text-sm py-1 px-2.5">
-                        {Math.round((1 - displayPrice / (product?.price || 1)) * 100)}% OFF
-                      </Badge>
-                      {/* Product-level sales have no end time — only flash sales
-                          render the countdown. */}
-                      {flashSale.endsAt && <FlashSaleCountdown endsAt={flashSale.endsAt} />}
+                      </span>
+                      {flashSale && (
+                        <span className="border border-brand-line-strong px-2.5 py-1 text-[11px] font-semibold tabular-nums">
+                          {Math.round((1 - displayPrice / (product?.price || 1)) * 100)}% OFF
+                        </span>
+                      )}
+                      {flashSale?.endsAt && <FlashSaleCountdown endsAt={flashSale.endsAt} />}
                     </>
-                  ) : null}
+                  )}
                 </div>
 
                 {product?.stock ? (
                   product.stock > 0 ? (
-                    <Badge className="bg-green-100 text-green-800">
+                    <span className="inline-flex items-center gap-2 text-sm font-medium text-brand-ok">
+                      <span className="h-1.5 w-1.5 bg-brand-ok" />
                       {t(locale, "product.inStock")} ({product.stock} {t(locale, "product.left")})
-                    </Badge>
+                    </span>
                   ) : (
-                    <Badge variant="destructive">{t(locale, "product.outOfStock")}</Badge>
+                    <span className="text-sm font-medium text-brand-bad">
+                      {t(locale, "product.outOfStock")}
+                    </span>
                   )
                 ) : null}
 
-                <p className="text-lg leading-relaxed text-gray-600">{product.description}</p>
+                <p className="text-base leading-relaxed text-brand-muted">{product.description}</p>
               </motion.div>
 
-              <motion.div className="space-y-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                {/* Color picker: the current product's color plus a swatch per
-                    sibling listing (same family, different color). Picking a
-                    color navigates to that listing, whose color is then recorded
-                    on the order (server-truth) — so the right color ships. When
-                    there are no siblings, just show the single read-only chip.
-                    Nothing renders when no color is set (flat-gallery products). */}
+              <motion.div custom={3} variants={fadeIn} initial="hidden" animate="visible" className="space-y-5">
+                {/* Color picker: current product color plus a swatch per sibling
+                    listing (same family, different color). Picking navigates to
+                    that listing (server-truth color on the order). No siblings →
+                    single read-only chip. Nothing when no color set. */}
                 {product?.color ? (
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-medium">{t(locale, "product.color")}</h3>
+                  <div className="space-y-3">
+                    <h3 className="text-eyebrow text-brand-ink dark:text-brand-ink-inverse">
+                      {t(locale, "product.color")}
+                    </h3>
                     {colorSiblings.length >= 1 ? (
                       <div className="flex flex-wrap items-center gap-2">
                         {[
@@ -171,7 +193,7 @@ const ProductDetailClient = ({
                               key={sw.id}
                               title={sw.color}
                               aria-current="page"
-                              className="inline-flex cursor-default items-center gap-1.5 rounded-full border-2 border-black px-3 py-1.5 text-sm font-semibold dark:border-white"
+                              className="inline-flex cursor-default items-center gap-2 border border-brand-ink px-3.5 py-2 text-sm font-medium text-brand-ink dark:border-brand-ink-inverse dark:text-brand-ink-inverse"
                             >
                               <SwatchDot color={sw.color} />
                               {sw.color}
@@ -182,7 +204,7 @@ const ProductDetailClient = ({
                               key={sw.id}
                               href={`/products/${sw.categorySlug}/${sw.id}`}
                               title={`${sw.color} — ${sw.name}`}
-                              className="inline-flex items-center gap-1.5 rounded-full border border-stroke px-3 py-1.5 text-sm text-gray-600 transition-colors hover:border-black hover:text-black dark:border-strokedark dark:text-bodydark2 dark:hover:border-white dark:hover:text-white"
+                              className="inline-flex items-center gap-2 border border-brand-line px-3.5 py-2 text-sm text-brand-muted transition-colors hover:border-brand-line-strong hover:text-brand-ink dark:hover:text-brand-ink-inverse"
                             >
                               <SwatchDot color={sw.color} />
                               {sw.color}
@@ -191,7 +213,7 @@ const ProductDetailClient = ({
                         )}
                       </div>
                     ) : (
-                      <span className="inline-flex items-center gap-2 rounded-full border border-stroke px-3 py-1 text-sm font-medium dark:border-strokedark">
+                      <span className="inline-flex items-center gap-2 border border-brand-line px-3.5 py-2 text-sm font-medium text-brand-ink dark:text-brand-ink-inverse">
                         <SwatchDot color={product.color} />
                         {product.color}
                       </span>
@@ -204,12 +226,14 @@ const ProductDetailClient = ({
               </motion.div>
 
               <motion.div
-                className="flex flex-col sm:flex-row gap-4 pt-6"
-                initial={{ y: 20 }}
-                animate={{ y: 0 }}
+                className="flex flex-col gap-4 pt-4 sm:flex-row sm:items-center"
+                custom={4}
+                variants={fadeIn}
+                initial="hidden"
+                animate="visible"
               >
                 <AddToCartButton product={product} />
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex">
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                   <Button
                     variant="outline"
                     onClick={() =>
@@ -220,9 +244,13 @@ const ProductDetailClient = ({
                       )
                     }
                     disabled={isInWishlist}
-                    className={isInWishlist ? "bg-red-400 text-red-700" : "hover:bg-red-400 hover:text-red-700"}
+                    className={
+                      isInWishlist
+                        ? "border-brand-bad bg-brand-bad-soft text-brand-bad hover:bg-brand-bad-soft"
+                        : "border-brand-line-strong text-brand-ink hover:border-brand-bad hover:text-brand-bad dark:text-brand-ink-inverse"
+                    }
                   >
-                    <HeartIcon className="w-5 h-5 hover:bg-red-600" />
+                    <HeartIcon className="h-5 w-5" />
                     {isInWishlist ? t(locale, "product.inWishlist") : t(locale, "product.addToWishlist")}
                   </Button>
                 </motion.div>
@@ -233,12 +261,9 @@ const ProductDetailClient = ({
 
         {/* P4-12 — AI/rule-based recommendations (co-purchase), with the old
             category grid as the automatic fallback. */}
-        <Recommendations
-          productId={product?._id}
-          categorySlug={product?.category_slug}
-        />
+        <Recommendations productId={product?._id} categorySlug={product?.category_slug} />
 
-        <div className="mx-auto max-w-7xl px-6 pb-16">
+        <div className="mx-auto max-w-7xl px-4 pb-16 lg:px-8">
           <ReviewSection productId={product?._id} />
         </div>
       </div>
@@ -251,7 +276,7 @@ const ProductDetailClient = ({
 function SwatchDot({ color }: { color: string }) {
   return isHexColor(color) ? (
     <span
-      className="inline-block h-3.5 w-3.5 shrink-0 rounded-full border border-black/10"
+      className="inline-block h-3.5 w-3.5 shrink-0 rounded-full border border-brand-ink/20"
       style={{ backgroundColor: color }}
     />
   ) : null;

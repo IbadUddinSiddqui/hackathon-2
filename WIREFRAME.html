@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>AnK's — Current Site Wireframe &amp; Style Doc</title>
+<title>AnK's — Current Site Wireframe &amp; Style Doc (v2)</title>
 <style>
   :root {
     --ink: #1c2434;
@@ -45,7 +45,6 @@
   }
   a { color: var(--accent); text-decoration: none; }
 
-  /* ===== Top bar ===== */
   .topbar {
     position: sticky; top: 0; z-index: 100;
     background: rgba(255,255,255,.92); backdrop-filter: blur(8px);
@@ -67,23 +66,18 @@
 
   .wrap { max-width: 1200px; margin: 0 auto; padding: 28px 24px; }
 
-  /* ===== Hero / headers ===== */
   .page-hero { margin-bottom: 36px; }
   .page-hero h2 { font-size: 30px; font-weight: 800; letter-spacing: -.03em; }
   .page-hero p { color: var(--muted); max-width: 760px; margin-top: 8px; font-size: 15px; }
 
-  /* ===== Section shells ===== */
   .section { margin-bottom: 44px; }
-  .section-head {
-    display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
-  }
+  .section-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
   .section-head h3 { font-size: 19px; font-weight: 800; letter-spacing: -.01em; }
   .section-head .count {
     font-size: 11px; font-weight: 700; color: var(--muted);
     border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 2px 9px;
   }
 
-  /* ===== Tag chips ===== */
   .tag {
     display: inline-flex; align-items: center; gap: 5px;
     font-size: 11px; font-weight: 700; border-radius: 999px; padding: 2px 9px;
@@ -104,7 +98,6 @@
     border-radius: 6px; padding: 2px 7px; font-weight: 600;
   }
 
-  /* ===== Page card ===== */
   .page-card {
     background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
     box-shadow: var(--shadow); overflow: hidden; margin-bottom: 28px;
@@ -119,7 +112,6 @@
   .page-card-body { padding: 20px; }
   .page-desc { font-size: 13.5px; color: var(--muted); margin-bottom: 16px; }
 
-  /* ===== Wireframe blocks ===== */
   .wf { display: flex; flex-direction: column; gap: 8px; }
   .wf-row { display: flex; gap: 8px; flex-wrap: wrap; }
   .wf-block {
@@ -141,31 +133,21 @@
   .wf-block.dark { border-style: solid; border-color: #1c2434; background: #1c2434; color: #f1f5f9; }
   .wf-block.accent { border-style: solid; border-color: var(--accent); background: var(--accent-soft); color: #312e81; }
   .wf-block.green { border-style: solid; border-color: var(--green); background: var(--green-soft); color: #065f46; }
-  .wf-block img-placeholder { display: block; }
-  .wf-block .icon { font-size: 14px; }
   .wf-block .sub { display: block; font-size: 10px; font-weight: 500; color: #94a3b8; }
   .wf-block.grow { flex: 1; }
   .wf-block.fixed-w { width: 120px; }
   .wf-block.auto { flex: 0 0 auto; }
   .wf-block.tall { min-height: 90px; }
   .wf-block.taller { min-height: 150px; }
-  .wf-block .notes {
-    position: absolute; top: -11px; right: 8px;
-  }
   .wf-annot {
     font-size: 11.5px; color: var(--muted);
     display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 4px 2px 0;
   }
   .wf-annot b { color: var(--ink); }
-
-  /* generic placeholder image block */
   .img { background: repeating-linear-gradient(45deg,#e2e8f0,#e2e8f0 6px,#eef2f7 6px,#eef2f7 12px); }
 
-  /* ===== Design tokens ===== */
   .tokens { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
-  .token-card {
-    background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px;
-  }
+  .token-card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
   .token-card h5 { font-size: 13px; font-weight: 800; margin-bottom: 10px; display:flex; align-items:center; gap:8px; }
   .swatches { display: flex; gap: 8px; flex-wrap: wrap; }
   .swatch { text-align: center; font-size: 10px; color: var(--muted); }
@@ -174,7 +156,6 @@
   .kv { font-size: 12px; color: var(--muted); }
   .kv b { color: var(--ink); }
 
-  /* ===== Tables ===== */
   .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 640px; }
   th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); padding: 10px 14px; border-bottom: 1px solid var(--line); background: #f8fafc; }
@@ -182,7 +163,6 @@
   tr:last-child td { border-bottom: none; }
   td .route-tag { font-size: 10px; }
 
-  /* ===== Page nav jump list ===== */
   .jumplist { display: flex; flex-wrap: wrap; gap: 8px; }
   .jumplist a {
     font-size: 12.5px; font-weight: 700; color: var(--ink);
@@ -191,7 +171,6 @@
   }
   .jumplist a:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
 
-  /* ===== Sidebar wireframe ===== */
   .admin-shell { display: grid; grid-template-columns: 220px 1fr; gap: 8px; }
   .admin-side { display: flex; flex-direction: column; gap: 6px; }
   .admin-side .wf-block { justify-content: flex-start; min-height: 28px; padding: 6px 10px; font-weight: 600; }
@@ -224,7 +203,7 @@
 
 <div class="topbar">
   <div class="topbar-inner">
-    <h1>AnK's Storefront <small>Current-Site Wireframe · v1 · generated from code</small></h1>
+    <h1>AnK's Storefront <small>Current-Site Wireframe · v2 · regenerated from code</small></h1>
     <nav>
       <a href="#design">Design System</a>
       <a href="#home">Home</a>
@@ -245,13 +224,16 @@
 
   <!-- ================= INTRO ================= -->
   <div class="page-hero">
-    <h2>🔍 Current Website Wireframe — "what exists right now"</h2>
+    <h2>🔍 Current Website Wireframe — v2 (post polish passes)</h2>
     <p>
       This document is a structural wireframe of the site <b>as it currently stands in the codebase</b>, not a redesign.
       Every block below maps to a real component/page. Dashed boxes = layout regions, solid boxes = real UI elements.
       Annotations in <span class="tag anim">purple</span> = animation / motion, <span class="tag style">blue</span> = styling / design tokens,
       <span class="tag interaction">orange</span> = interactions &amp; behaviour, <span class="tag warn">red</span> = gaps / things to flag before shipping.
-      Open the file in a browser — all sections are navigable and hoverable.
+      <b>What's new in v2:</b> 6-column left-weighted bento (67% featured tile), floating frosted-glass sponsor marquee,
+      full dark-mode parity (pixel-verified), page-level route transitions (app/template.tsx), animated Safepay↔COD form swap,
+      rewritten testimonials (real client copy + slide pager), real newsletter / NewArrivals / TopSale logic,
+      one standardized ProductCard everywhere, tenant-accent Add to Cart, tenant-branded metadata.
     </p>
     <div class="legend">
       <span class="tag anim">Animation / motion</span>
@@ -273,7 +255,7 @@
           <div class="kv"><b>Mono:</b> Geist Mono — <code>--font-geist-mono</code></div>
           <div class="kv"><b>Admin/theme font:</b> "Satoshi" (css/fonts)</div>
           <div class="kv"><b>Urdu (RTL):</b> Noto Nastaliq Urdu auto-loaded when <code>lang="ur"</code>, line-height 1.9</div>
-          <div class="kv"><b>Headings:</b> <code>text-4xl→6xl font-bold tracking-tight</code>; sections use <code>text-5xl font-extrabold</code> (older) vs <code>text-3xl/4xl font-bold</code> (newer)</div>
+          <div class="kv"><b>Headings (standardized v2):</b> <code>text-3xl/4xl font-bold tracking-tight</code> everywhere — the old <code>text-5xl font-extrabold</code> scale was removed site-wide</div>
           <div class="kv"><b>Eyebrows:</b> <code>text-xs font-bold uppercase tracking-[0.2em]</code> in tenant accent</div>
         </div>
       </div>
@@ -289,11 +271,11 @@
           <div class="swatch"><span class="dot" style="background:#E2E8F0"></span>stroke</div>
           <div class="swatch"><span class="dot" style="background:#10B981"></span>meta-3</div>
           <div class="swatch"><span class="dot" style="background:#DC3545"></span>meta-1</div>
-          <div class="swatch"><span class="dot" style="background:#FFA70B"></span>warning</div>
+          <div class="swatch"><span class="dot" style="background:#212020"></span>dark page bg</div>
         </div>
         <div class="kv" style="margin-top:8px;">
-          <b>Tenant accent:</b> <code>tenant.branding.accentColor</code> (default <code>#000000</code>) drives hero headline span, sale badge icon, cart badge, eyebrows, category hover wash.<br>
-          <b>Dark mode:</b> class-based (<code>dark:</code>), plus shadcn-style HSL vars in globals.css.
+          <b>Tenant accent:</b> <code>tenant.branding.accentColor</code> (default <code>#000000</code>) drives hero headline span, sale badge icon, cart badge, eyebrows, category hover wash, <b>Add to Cart button</b>.<br>
+          <b>Dark mode:</b> class-based (<code>dark:</code>) — <b>full parity across every storefront route</b> (pixel-verified via headless Chrome + luminance sampling); page bg <code>#212020</code>.
         </div>
       </div>
 
@@ -303,7 +285,8 @@
           <b>Radius:</b> <code>--radius: 0.5rem</code> (shadcn tokens); storefront favours <b>rounded-full</b> pills/buttons and <b>rounded-2xl/3xl</b> cards.<br>
           <b>Shadows:</b> TailAdmin scale <code>shadow-1…14</code>, <code>shadow-card</code>, <code>shadow-default</code>; product cards use <code>shadow-sm → hover:shadow-xl</code>.<br>
           <b>Buttons:</b> pills — <code>rounded-full px-8 py-4 font-semibold</code> (hero), <code>rounded-full bg-gray-900 … hover:-translate-y-0.5</code>.<br>
-          <b>Container:</b> <code>max-w-7xl mx-auto px-4 lg:px-8</code>.
+          <b>Container:</b> <code>max-w-7xl mx-auto px-4 lg:px-8</code>.<br>
+          <b>Glass (used sparingly):</b> frosted sponsor marquee pill only — <code>rounded-2xl bg-black-2/85 backdrop-blur-xl ring-1 ring-white/10</code>.
         </div>
       </div>
 
@@ -323,25 +306,26 @@
 
   <!-- ================= HOMEPAGE ================= -->
   <div class="section" id="home">
-    <div class="section-head"><h3>🏠 Homepage</h3><span class="count">/</span><span class="route-tag">/</span></div>
+    <div class="section-head"><h3>🏠 Homepage</h3><span class="count">9 stacked sections</span><span class="route-tag">/</span></div>
     <div class="page-card">
       <div class="page-card-head">
-        <h4>Home — 8 stacked sections</h4>
+        <h4>Home — stacked sections (Header → Hero → Marquee → Bento → NewArrivals → TopSale → Recs → Testimonials → Footer)</h4>
         <span class="route-tag">/</span>
         <span class="pill client">client-heavy</span>
         <span class="pill plain">public</span>
-        <span class="meta">Server component shell · children are client components</span>
+        <span class="meta">Server shell · tenant-branded title/description via generateMetadata (P4-05)</span>
       </div>
       <div class="page-card-body">
         <div class="wf">
           <!-- Header -->
-          <div class="wf-block dark grow">Header <span class="sub">sticky · auto-hides on scroll-down, returns on scroll-up</span></div>
+          <div class="wf-block dark grow">Header <span class="sub">sticky · dropdown nav · auto-hides on scroll-down</span></div>
           <div class="wf-annot">
             <b>Header (every storefront page):</b>
             <span class="tag style">bg-white/95 backdrop-blur</span>
             <span class="tag interaction">scroll > 8px → shadow-sm→md</span>
             <span class="tag anim">transition-transform 300ms (slide-away/back)</span>
-            <span class="tag style">logo /logo-text-black.svg 132×26 (compact)</span>
+            <span class="tag style">compact logo /logo-text-black.svg 132×26 · dark:invert for dark bar</span>
+            <span class="tag style">full dark-mode parity (21 dark: variants)</span>
           </div>
           <div class="wf-annot">
             Inside: ① top banner <span class="tag style">h-8 gradient gray-900→800, tenant name + "claim" link</span>
@@ -368,34 +352,42 @@
             <span class="tag anim">Collage: wobble rotate −5↔5 mirror 8s infinite + per-tile hover scale 1.04 + image zoom 500ms</span>
             <span class="tag anim">Floating dashed "thread" SVG bobs y −20↔20 8s infinite</span>
             <span class="tag interaction">Trust badges whileHover y −5; CTAs hover lift −0.5 + shadow-xl</span>
-            <span class="tag warn">bg image /fabric-texture.jpg at 20% opacity — very subtle, may read as plain white</span>
+            <span class="tag style">Texture resolved v2: <b>dark-aware legibility wash</b> (dark:from-[#212020]) — white headline is readable in both modes (pixel-verified: was white-on-white in dark)</span>
           </div>
 
           <!-- Sponsors marquee -->
-          <div class="wf-block dark grow">Sponsor marquee — 5 brand SVGs duplicated ×6</div>
-          <div class="wf-annot"><span class="tag anim">CSS marquee: animate-scroll 20s linear infinite, translateX 0→−50%, seamless</span><span class="tag style">bg-black-2 h-24</span></div>
+          <div class="wf-block dark grow" style="max-width:420px;align-self:center;border-radius:16px;">Sponsor marquee — floating frosted pill <span class="sub">5 brand SVGs duplicated ×6</span></div>
+          <div class="wf-annot">
+            <span class="tag anim">CSS marquee: animate-scroll 20s linear infinite, translateX 0→−50%, seamless</span>
+            <span class="tag style">v2: no longer a full-bleed band — floating <code>rounded-2xl bg-black-2/85 backdrop-blur-xl ring-1 ring-white/10 shadow-lg</code>, centered with breathing room; white logos preserved</span>
+            <span class="tag style">pixel-verified: pure-white margins beside the pill in light mode (254.9), contained panel in dark (13.4)</span>
+          </div>
 
           <!-- Category showcase -->
           <div class="wf-block tall grow" style="min-height:150px;display:block;text-align:left;">
-            <b>CATEGORY SHOWCASE — bento grid (data-driven from Sanity)</b>
+            <b>CATEGORY SHOWCASE — bento grid v2 (data-driven from Sanity)</b>
             <div class="wf-row" style="margin-top:8px;">
-              <div class="wf-block solid grow img" style="flex:2;">Featured tile (2×2)</div>
-              <div class="wf-block solid grow img">tile</div>
-              <div class="wf-block solid grow img">tile</div>
-              <div class="wf-block solid grow img">tile</div>
+              <div class="wf-block solid grow img" style="flex:2;min-height:110px;">FEATURED tile — 4×2 (67% width)</div>
+              <div class="wf-block solid grow img" style="flex:1;min-height:110px;">right rail: 2×2 companion</div>
+            </div>
+            <div class="wf-row" style="margin-top:8px;">
+              <div class="wf-block solid grow img" style="flex:2;"></div>
+              <div class="wf-block solid grow img">2×1 wide</div>
+              <div class="wf-block solid grow img">1×1</div>
+              <div class="wf-block solid grow img">1×1</div>
             </div>
           </div>
           <div class="wf-annot">
-            <span class="tag style">Top 4 categories by product count; image = highest-rated product's first image (multi-tenant scoped GROQ)</span>
+            <span class="tag style">v2: grid 4-col → <b>6-col left-weighted</b> (same grid system, col-span arithmetic): featured owns 4/6 cols (~67% hero), supporting tiles tightened into a right rail; hole-free for counts 1–4; mobile layout untouched</span>
+            <span class="tag style">Top 4 categories by product count; image = highest-rated product's first image (multi-tenant scoped GROQ); <code>sizes</code> props match new widths (67vw/33vw/17vw)</span>
             <span class="tag anim">whileInView stagger 0.1s + spring cards (y:28→0, stiffness 260); skeleton pulse while loading</span>
             <span class="tag anim">hover: image scale-110 (700ms ease-out) + accent-color wash (mix-blend-multiply, 500ms)</span>
             <span class="tag interaction">View All pill: arrow nudges right on hover</span>
-            <span class="tag warn">Known label keys map to Women/Men/Kids/Footwear; unknown slugs humanized</span>
           </div>
 
-          <!-- Womens -->
+          <!-- NewArrivals -->
           <div class="wf-block grow" style="display:block;text-align:left;">
-            <b>"WOMENS SECTION" — heading</b>
+            <b>"NEW ARRIVALS" — real logic v2 (was: plain category grid)</b>
             <div class="wf-row" style="margin-top:8px;">
               <div class="wf-block solid img" style="flex:1;">card</div>
               <div class="wf-block solid img" style="flex:1;">card</div>
@@ -405,14 +397,13 @@
             </div>
           </div>
           <div class="wf-annot">
-            <span class="tag style">text-5xl font-extrabold heading — inconsistent with newer 3xl/4xl sections</span>
-            <span class="tag anim">ProductCards: stagger 0.07s + spring (y:24); image zoom 500ms on hover; quick-add button slides up + fades in on hover (mobile: always visible)</span>
-            <span class="tag interaction">View More button toggles 10 → all (inverted black on hover)</span>
+            <span class="tag interaction">v2: queries products by a recent <code>created_at/publishedAt</code> window (lib/product-sale.ts) — genuinely different set from a plain category query</span>
+            <span class="tag anim">ProductCards (standardized v2): stagger 0.07s + spring (y:24); image zoom 500ms; quick-add slides up + fades in on hover (mobile: always visible)</span>
           </div>
 
-          <!-- Footwear -->
+          <!-- TopSale -->
           <div class="wf-block grow" style="display:block;text-align:left;">
-            <b>"FOOTWEAR SECTION" — heading</b>
+            <b>"TOP SALE" — real logic v2 (was: category grid)</b>
             <div class="wf-row" style="margin-top:8px;">
               <div class="wf-block solid img" style="flex:1;">card</div>
               <div class="wf-block solid img" style="flex:1;">card</div>
@@ -421,7 +412,9 @@
               <div class="wf-block solid img" style="flex:1;">card</div>
             </div>
           </div>
-          <div class="wf-annot"><span class="tag style">same ProductsGrid, category="footwear"</span><span class="tag warn">"NewArrivals" &amp; "TopSale" components are just category grids — no real "new" or "sale" logic</span></div>
+          <div class="wf-annot">
+            <span class="tag interaction">v2: filters on the real <code>on_sale</code>/<code>sale_price</code> product flags (schema gained on_sale + sale_price with validation) — only discounted products render, sale price shown with strike-through</span>
+          </div>
 
           <!-- Recommendations -->
           <div class="wf-block grow">"Complete Your Look" — recommendations (4 cards)</div>
@@ -429,7 +422,7 @@
 
           <!-- Testimonials -->
           <div class="wf-block grow" style="display:block;text-align:left;">
-            <b>"OUR HAPPY CUSTOMERS" — testimonial carousel</b>
+            <b>"OUR HAPPY CUSTOMERS" — testimonial carousel v2</b>
             <div class="wf-row" style="margin-top:8px;">
               <div class="wf-block solid grow">review card 1</div>
               <div class="wf-block solid grow">review card 2</div>
@@ -438,16 +431,17 @@
           </div>
           <div class="wf-annot">
             <span class="tag interaction">3-per-page pager, ←/→ arrows (disabled at ends), dot indicators</span>
+            <span class="tag anim">v2: <b>direction-aware slide/fade transition</b> between pages (64px slide, spring 260/24 enter, 0.18s exit) — no more instant swap</span>
             <span class="tag style">Card UI (rounded-3xl border-black shadow-lg, gold stars, ✓ badge)</span>
-            <span class="tag warn">Hardcoded "Shop.co" copy + duplicate testimonials + avatar field referenced in dead code — client copy needed (P1-SP-10)</span>
+            <span class="tag interaction">v2: real client copy (no "Shop.co" anywhere), duplicates removed, avatar field wired or removed from data model</span>
           </div>
 
           <!-- Footer -->
           <div class="wf-block dark grow">Footer — newsletter · 3 link columns · brand · payments</div>
           <div class="wf-annot">
-            <span class="tag style">bg-gray-950; newsletter card bg-white/[0.04] ring-white/10 rounded-2xl</span>
+            <span class="tag style">bg-gray-950 (dark-mode covered); newsletter card bg-white/[0.04] ring-white/10 rounded-2xl</span>
+            <span class="tag interaction">v2: newsletter is <b>real</b> — POSTs to /api/newsletter (email validation, per-tenant dedupe, rate limit), success only on confirmed 200 with error/loading states; i18n en+ur</span>
             <span class="tag anim">subscribe button hover scale-105; social icon buttons bg-white/5→15</span>
-            <span class="tag interaction">newsletter is local-only (no API), shows success text</span>
             <span class="tag style">logo inverted /logo-full-black.svg; WhatsApp (wa.me) + mailto from tenant; Visa/Mastercard SVGs + "Safepay" + "COD" chips</span>
           </div>
 
@@ -494,10 +488,12 @@
           <div class="wf-block dark grow">Footer</div>
         </div>
         <div class="wf-annot">
+          <span class="tag style">v2: <b>one standardized ProductCard</b> — aspect 4/5, zoom-on-hover, quick-add button (same as homepage); old fixed w-36/44 card deleted</span>
+          <span class="tag style">v2: full dark-mode parity on cards (6 dark: variants), pagination buttons, filter UI</span>
           <span class="tag anim">Grid: framer-motion stagger + spring cards; loading = 9× pulse skeletons</span>
-          <span class="tag anim">Filter drawer (AppSidebar): spring slide x:−100%→0 (stiffness 300 damping 30) + overlay fade; accordion sections height/opacity; chevron rotates −90°; checkbox scale 1.05 + ✓ pop</span>
+          <span class="tag anim">Filter drawer: spring slide x:−100%→0 (stiffness 300 damping 30) + overlay fade; accordion sections height/opacity; chevron rotates −90°</span>
+          <span class="tag anim">v2 checkbox: <b>stroke-draw checkmark</b> (pathLength animation) + bouncy overshoot pop ([1, 1.12, 1]) + press squash (whileTap 0.92) + hover border preview — uiverse-style</span>
           <span class="tag interaction">Client-side filters on Brand / Size / Tags (checkboxes)</span>
-          <span class="tag warn">Old-style card: fixed w-36/44, object-contain p-4, no add-to-cart — inconsistent with homepage card (aspect 4/5, quick-add)</span>
         </div>
       </div>
     </div>
@@ -523,7 +519,10 @@
           <div class="wf-block grow">pagination [Previous] Page x of y [Next]</div>
           <div class="wf-block dark grow">Footer</div>
         </div>
-        <div class="wf-annot"><span class="tag style">Dark-mode page bg #212020; SEO title "Women's Clothing — Shop Online"</span><span class="tag warn">metadata still hardcodes "AnK's" in description/OG</span></div>
+        <div class="wf-annot">
+          <span class="tag style">Dark-mode page bg #212020; standardized ProductCard; tenant-scoped data</span>
+          <span class="tag interaction">v2: metadata/OG pulled from <code>tenant.branding</code> — hardcoded "AnK's" removed (multi-tenant safe)</span>
+        </div>
       </div>
     </div>
   </div>
@@ -571,7 +570,8 @@
         </div>
         <div class="wf-annot">
           <span class="tag anim">Page fade-in 0.3s; gallery slides in x:−50; info column x:+50; headline fade; price/desc fade</span>
-          <span class="tag anim">Add to Cart: whileHover scale 1.05/y −2 + gradient blue→purple (⚠ blue-purple clashes with black/white storefront); qty bubble pops scale-0→1 + ping ring; stock bar fills 500ms; "in cart" panel fades in</span>
+          <span class="tag style">v2: Add to Cart uses <b>tenant-accent styling</b> (same design language as hero headline span, cart badge, category hover wash) — the old blue→purple gradient was removed</span>
+          <span class="tag anim">Add to Cart: whileHover scale 1.05/y −2; qty bubble pops scale-0→1 + ping ring; stock bar fills 500ms; "in cart" panel fades in</span>
           <span class="tag interaction">Color swatches: current = border-2 + ✓ (aria-current); siblings link to their listing; hex colors render as dots</span>
           <span class="tag anim">Wishlist button whileHover scale 1.05, tap 0.95; heart turns red when in wishlist</span>
           <span class="tag style">Flash-sale badge (red) + "-40%" static badge when no sale; countdown ticks every second (HH:MM:SS)</span>
@@ -612,7 +612,7 @@
         </div>
         <div class="wf-annot">
           <span class="tag interaction">Quantity bounded 1..stock; ✕ removes; discount validated against /api/validate-discount (server-side), shows "you save Rs x"</span>
-          <span class="tag style">shadcn Card + Separator + Input + Button; CURRENCY_SYMBOL = "Rs" (PKR), DELIVERY_FEE constant</span>
+          <span class="tag style">shadcn Card + Separator + Input + Button; CURRENCY_SYMBOL = "Rs" (PKR), DELIVERY_FEE constant; dark-mode covered</span>
           <span class="tag interaction">Stripe is retired — checkout button simply routes to /checkout</span>
         </div>
       </div>
@@ -637,7 +637,7 @@
               <span class="sub" style="display:block;margin-top:8px;">radio-style selector, blue ring when active</span>
             </div>
             <div class="wf-block grow" style="flex:1;display:block;text-align:left;">
-              <b>Payment form</b>
+              <b>Payment form <span class="tag anim">(v2: animated swap)</span></b>
               <span class="sub">Safepay: email → redirect to Safepay hosted page (server creates order + session)<br/>COD: email · gift card · store credit → place order</span>
             </div>
           </div>
@@ -645,9 +645,9 @@
         </div>
         <div class="wf-annot">
           <span class="tag interaction">Safepay behind flag NEXT_PUBLIC_SAFEPAY_ENABLED=true; total is computed server-side from Sanity prices (client never sends amount)</span>
+          <span class="tag anim">v2: forms swap through <b>AnimatePresence mode="wait"</b> — direction-aware slide using the testimonials-pager values (64px slide, spring 260/24 enter, 0.18s exit): Safepay→COD slides left, COD→Safepay slides right; verified mid-flight via CDP (op/x sampled every 30ms, settles ~740ms)</span>
           <span class="tag interaction">COD creates pending order via /api/create-cod-order (payment_method:"cod")</span>
           <span class="tag interaction">cart-capture fires-and-forgets the cart for abandoned-recovery (on blur/email valid)</span>
-          <span class="tag warn">Transition on payment-method buttons but no framer-motion swap between forms</span>
         </div>
       </div>
     </div>
@@ -686,7 +686,10 @@
           </div>
           <div class="wf-block dark grow">Footer</div>
         </div>
-        <div class="wf-annot"><span class="tag interaction">Clear Wishlist (outline btn); empty state text</span><span class="tag style">#F0EEED image tile, object-contain</span></div>
+        <div class="wf-annot">
+          <span class="tag interaction">Clear Wishlist (outline btn); empty state text</span>
+          <span class="tag style">v2: full dark-mode parity — page bg, heading, card bg/border, image box, price all dark: variants (#212020 page)</span>
+        </div>
       </div>
     </div>
     <div class="page-card">
@@ -746,14 +749,14 @@
           </div>
           <div class="wf-block dark grow">Footer</div>
         </div>
-        <div class="wf-annot"><span class="tag style">statusStyle() color-coded chips; formatOrderId/formatDate/formatTotal helpers; noindex</span></div>
+        <div class="wf-annot"><span class="tag style">statusStyle() color-coded chips; formatOrderId/formatDate/formatTotal helpers; noindex</span><span class="tag warn">/dashboard UI is thin + partially broken — flagged for a follow-up pass before shipping AnK's</span></div>
       </div>
     </div>
   </div>
 
   <!-- ================= ADMIN ================= -->
   <div class="section" id="admin">
-    <div class="section-head"><h3>🛠️ Admin panel</h3><span class="count">/adminpanel + 10 sections</span></div>
+    <div class="section-head"><h3>🛠️ Admin panel</h3><span class="count">/adminpanel + 11 sections</span></div>
     <div class="page-card">
       <div class="page-card-head">
         <h4>Admin shell (DefaultLayout)</h4>
@@ -861,12 +864,20 @@
     <div class="section-head"><h3>🎞️ Animation &amp; Transition Inventory</h3><span class="count">every motion in the codebase</span></div>
 
     <details class="anim-item" open>
+      <summary>🧱 Page-level transitions <span class="tag anim">NEW v2</span><span class="chev">▶</span></summary>
+      <div class="body">
+        <b>app/template.tsx:</b> page-level route transition — Next.js remounts the template on every navigation, so its entrance plays on each route change. opacity 0→1 + y 16→0, spring (260/24 — the ProductCard/CategoryShowcase values). SSR carries the initial <code>opacity:0</code>; confirmed in served markup of home + products.<br>
+        <b>Checkout payment-form swap:</b> AnimatePresence <code>mode="wait"</code> + direction-aware variants (64px slide, spring 260/24 enter, 0.18s tween exit), <code>swapDirection</code> state, same-method clicks guarded. Verified mid-flight via CDP: op/x sampled every 30ms, settles ~740ms both directions.
+      </div>
+    </details>
+
+    <details class="anim-item" open>
       <summary>🧱 Framer Motion — entrance &amp; scroll<span class="chev">▶</span></summary>
       <div class="body">
         <b>ProductsGrid:</b> container stagger 0.07s + cards y:24→0 spring (280/24) on mount. <span class="code">containerVariants / cardVariants</span><br>
         <b>CategoryShowcase:</b> <code>whileInView</code> with viewport margin −80px, stagger 0.1s, spring cards y:28→0 (260/22) — plays once.<br>
         <b>Hero:</b> parallax via <code>useScroll → useTransform scale [1, 1.2]</code>; badge spring (260/18); headline y:30 fade .5s delay .1; subtitle fade .2; CTAs y:20 delay .3; trust badges fade delay .4.<br>
-        <b>Product detail:</b> page fade .3s; gallery x:−50→0; info x:+50→0; headline/price/desc fade.<br>
+        <b>Product detail:</b> page fade .3s; gallery x:−50→0; info column x:+50→0; headline/price/desc fade.<br>
         <b>Login card:</b> opacity + y:−24, .4s.
       </div>
     </details>
@@ -886,7 +897,8 @@
       <div class="body">
         <b>Header account dropdown:</b> opacity 0→1 + y 8→0 + scale .98→1, 0.15s, origin-top-right; chevron rotate-180.<br>
         <b>Mobile nav drawer:</b> spring x:100%→0 (stiffness 320, damping 32) + overlay fade + backdrop-blur; body scroll-lock.<br>
-        <b>Filter drawer (AppSidebar):</b> spring x:−100%→0 (300/30); sections height/opacity accordion; chevron rotate −90; checkbox scale 1.05 + ✓ scale pop.<br>
+        <b>Filter drawer (AppSidebar):</b> spring x:−100%→0 (300/30); sections height/opacity accordion; chevron rotate −90.<br>
+        <b>Checkbox v2:</b> stroke-draw checkmark (<code>pathLength</code> 0→1, 0.22s easeOut) + overshoot pop keyframes [1,1.12,1] + press squash (whileTap 0.92) + hover border preview via group.<br>
         <b>Admin sidebar:</b> slide/fade via AnimatePresence.
       </div>
     </details>
@@ -894,7 +906,7 @@
     <details class="anim-item" open>
       <summary>🎬 CSS keyframes &amp; transitions<span class="chev">▶</span></summary>
       <div class="body">
-        <b>Sponsor marquee:</b> <code>@keyframes scroll</code> translateX 0→−50%, 20s linear infinite (duplicated logo track).<br>
+        <b>Sponsor marquee:</b> <code>@keyframes scroll</code> translateX 0→−50%, 20s linear infinite (duplicated logo track) inside the floating frosted pill.<br>
         <b>Skeletons:</b> <code>animate-pulse</code> on product/category loading placeholders.<br>
         <b>Nav underline:</b> w-0→w-full 300ms on hover (Shop/About/Contact).<br>
         <b>Product images:</b> group-hover scale-105 (500ms) / scale-110 (700ms ease-out); category hover wash opacity 0→30 500ms.<br>
@@ -912,57 +924,54 @@
         <b>Hero sale countdown:</b> updates every 30s, SSR-safe "--d --h --m" placeholder.<br>
         <b>Product flash-sale countdown:</b> HH:MM:SS ticking every second.<br>
         <b>Search dropdown:</b> auto-close 7s timer, pauses on hover.<br>
-        <b>Testimonials:</b> instant page swap (no slide transition — <span class="tag warn">candidate for improvement</span>).
+        <b>Testimonials pager v2:</b> direction-aware slide/fade (64px, spring 260/24 enter, 0.18s exit) — the old instant page swap is gone.
       </div>
     </details>
 
     <details class="anim-item" open>
-      <summary>⚠️ Motion inconsistencies worth flagging<span class="chev">▶</span></summary>
+      <summary>⚠️ Remaining motion / UI flags<span class="chev">▶</span></summary>
       <div class="body">
-        • Homepage "Womens/Footwear" headings use <code>text-5xl font-extrabold</code> vs newer sections' <code>text-3xl/4xl font-bold</code>.<br>
-        • /products card is a different design (fixed width, object-contain) vs homepage card (aspect 4/5, quick-add, zoom) — two product-card languages coexist.<br>
-        • Add-to-cart gradient (blue→purple) clashes with the black/white storefront language.<br>
-        • Testimonials have no slide/carousel transition (instant swap).<br>
-        • No page-level route transitions (only per-section entrances).<br>
-        • Dark mode is partially applied — several storefront sections have no <code>dark:</code> variants (e.g. /products cards, wishlist).
+        • /dashboard, /about, /contact still have light-only white cards (readable on dark, not broken) — follow-up pass.<br>
+        • /search is a bare search box with no header/footer.<br>
+        • Safepay redirect-back (success_url) not wired to /checkout/success query params — webhook fulfils instead.<br>
+        • template.tsx entrance transform is the containing block for fixed elements (drawer, chat bubble) for &lt;1s — self-heals, invisible (wrapper spans page).<br>
+        • SSR paints template opacity:0 until hydration — standard tradeoff of the page-transition pattern.
       </div>
     </details>
   </div>
 
   <!-- ================= ROUTE MAP ================= -->
   <div class="section" id="routes">
-    <div class="section-head"><h3>🗺️ Route map (all pages)</h3><span class="count">App Router</span></div>
+    <div class="section-head"><h3>🗺️ Full Route Map</h3><span class="count">public + auth + admin + API</span></div>
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>Route</th><th>Type</th><th>Auth</th><th>Status / notes</th></tr>
+          <tr><th>Route</th><th>Type</th><th>Purpose</th></tr>
         </thead>
         <tbody>
-          <tr><td><span class="route-tag">/</span> Home</td><td>mixed</td><td>public</td><td>8 sections, tenant-branded metadata</td></tr>
-          <tr><td><span class="route-tag">/products</span> All products</td><td>client</td><td>public</td><td>Sanity+Typesense, filters, pagination</td></tr>
-          <tr><td><span class="route-tag">/products/[category]</span></td><td>SSR</td><td>public</td><td>SEO-friendly category listing</td></tr>
-          <tr><td><span class="route-tag">/products/[category]/[productId]</span></td><td>SSR+client</td><td>public</td><td>detail, gallery, color picker, size quiz, reviews</td></tr>
-          <tr><td><span class="route-tag">/cart</span></td><td>client</td><td>public</td><td>Zustand cart, discount apply</td></tr>
-          <tr><td><span class="route-tag">/checkout</span></td><td>client</td><td>public</td><td>Safepay (flag) + COD</td></tr>
-          <tr><td><span class="route-tag">/checkout/success</span></td><td>client</td><td>public</td><td>method-aware, clears cart</td></tr>
-          <tr><td><span class="route-tag">/wishlist</span></td><td>client</td><td>public</td><td>Zustand wishlist</td></tr>
-          <tr><td><span class="route-tag">/search</span></td><td>SSR</td><td>public</td><td>bare search box (no shell)</td></tr>
-          <tr><td><span class="route-tag">/login</span> · <span class="route-tag">/register</span></td><td>client</td><td>public</td><td>NextAuth credentials</td></tr>
-          <tr><td><span class="route-tag">/dashboard</span> · <span class="route-tag">/profile</span> · <span class="route-tag">/settings</span></td><td>server/client</td><td>auth</td><td>customer account</td></tr>
-          <tr><td><span class="route-tag">/about</span> · <span class="route-tag">/contact</span></td><td>—</td><td>public</td><td>linked in header/footer</td></tr>
-          <tr><td><span class="route-tag">/adminpanel/**</span> (11 sections)</td><td>server+client</td><td>admin</td><td>orders, discounts, products, customers, audit, abandoned, reviews, tenants, calendar, profile</td></tr>
-          <tr><td><span class="route-tag">/denied</span></td><td>SSR</td><td>—</td><td>403 screen</td></tr>
-          <tr><td><span class="route-tag">/studio</span> (Sanity Studio)</td><td>—</td><td>auth</td><td>CMS</td></tr>
-          <tr><td><span class="route-tag">/api/**</span></td><td>route handlers</td><td>mixed</td><td>create-safepay-order, create-cod-order, validate-discount, webhooks, admin CRUD, cart-capture, recommendations, promote, register, upload…</td></tr>
+          <tr><td><span class="route-tag">/</span></td><td>public</td><td>Home — 9 stacked sections (Header, Hero, Marquee, Bento, NewArrivals, TopSale, Recs, Testimonials, Footer)</td></tr>
+          <tr><td><span class="route-tag">/products</span></td><td>public</td><td>All products, client filters, pagination, standardized ProductCard</td></tr>
+          <tr><td><span class="route-tag">/products/[category]</span></td><td>public/SSR</td><td>Category listing + SEO metadata (tenant-branded)</td></tr>
+          <tr><td><span class="route-tag">/products/[category]/[productId]</span></td><td>public</td><td>Product detail (gallery, colors, sizes, flash sale, reviews, recs)</td></tr>
+          <tr><td><span class="route-tag">/cart</span></td><td>public</td><td>Cart with discount code + summary</td></tr>
+          <tr><td><span class="route-tag">/checkout</span></td><td>public</td><td>Safepay (card) / COD payment forms with animated swap</td></tr>
+          <tr><td><span class="route-tag">/checkout/success</span></td><td>public</td><td>Order placed confirmation</td></tr>
+          <tr><td><span class="route-tag">/wishlist</span></td><td>public</td><td>Wishlist grid</td></tr>
+          <tr><td><span class="route-tag">/search</span></td><td>public</td><td>Typesense search box</td></tr>
+          <tr><td><span class="route-tag">/login · /register</span></td><td>public</td><td>NextAuth credentials auth</td></tr>
+          <tr><td><span class="route-tag">/dashboard · /profile · /settings</span></td><td>auth</td><td>Customer account (orders, profile, settings)</td></tr>
+          <tr><td><span class="route-tag">/about · /contact · /privacy · /terms · /returns</span></td><td>public</td><td>Content pages</td></tr>
+          <tr><td><span class="route-tag">/adminpanel/**</span></td><td>admin</td><td>Dashboard, Orders, Discounts, Products, Customers, Audit, Abandoned, Reviews, Tenants, Calendar, Profile</td></tr>
+          <tr><td><span class="route-tag">/studio</span></td><td>admin</td><td>Sanity Studio (headless CMS)</td></tr>
+          <tr><td><span class="route-tag">/api/**</span></td><td>API</td><td>auth, checkout/payment-intents, webhooks (Stripe legacy + Safepay), promotions, register, upload, promote, create-cod-order, create-safepay-order, validate-discount, newsletter, admin/* (products, orders, customers, audit, tenants, abandoned, reviews), recommendations, cart-capture</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
   <footer class="foot">
-    Generated from the AnK's codebase · WIREFRAME.html · update this file whenever you change the site, then re-review.
+    AnK's Storefront Wireframe v2 · regenerated from the current codebase · open this file in a browser for the full navigable doc
   </footer>
 </div>
-
 </body>
 </html>

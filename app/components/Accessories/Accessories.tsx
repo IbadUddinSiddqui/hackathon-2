@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import ProductsGrid from "../ProductsGrid/ProductsGrid";
+import SectionHead from "../SectionHead/SectionHead";
 import { useLocale } from "@/lib/locale-provider";
 import { t } from "@/lib/i18n";
 
@@ -9,16 +10,13 @@ import { t } from "@/lib/i18n";
 const TopSale = () => {
   const { locale } = useLocale();
   return (
-    <>
-      <div id="on-sale" className="text-center mb-10">
-        <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
-          {t(locale, "home.topSale")}
-        </h2>
-      </div>
-      <div>
-        <ProductsGrid mode="sale" hideWhenEmpty />
-      </div>
-    </>
+    <section id="on-sale" className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <SectionHead
+        eyebrow={t(locale, "home.topSaleEyebrow")}
+        title={t(locale, "home.topSale")}
+      />
+      <ProductsGrid mode="sale" hideWhenEmpty />
+    </section>
   );
 };
 

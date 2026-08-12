@@ -65,7 +65,7 @@ export default function ChatWidget() {
       <button
         onClick={() => setOpen((o) => !o)}
         aria-label="Chat with us"
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700 transition-transform hover:scale-110"
+        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-brand-ink text-brand-ink-inverse shadow-brand-2 transition-transform hover:scale-105 dark:bg-brand-ink-inverse dark:text-brand-ink"
       >
         {open ? (
           <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -82,12 +82,12 @@ export default function ChatWidget() {
       {open && (
         <div className="fixed bottom-24 right-6 z-50 flex w-[92vw] max-w-sm flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-800">
           {/* Header */}
-          <div className="flex items-center justify-between bg-green-600 px-4 py-3 text-white">
+          <div className="flex items-center justify-between bg-brand-ink px-4 py-3 text-brand-ink-inverse dark:bg-brand-ink-inverse dark:text-brand-ink">
             <div>
               <p className="font-bold">{tenant.name} Support</p>
               <p className="text-xs opacity-90">Usually replies instantly</p>
             </div>
-            <span className="rounded-full bg-green-500 px-2 py-0.5 text-xs font-semibold">● Online</span>
+            <span className="px-2 py-0.5 text-xs font-semibold uppercase tracking-[0.15em] text-brand-ok">● Online</span>
           </div>
 
           {/* Messages */}
@@ -97,8 +97,8 @@ export default function ChatWidget() {
                 <div
                   className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm shadow-sm ${
                     m.from === "user"
-                      ? "bg-green-600 text-white"
-                      : "bg-white text-gray-800 dark:bg-gray-700 dark:text-gray-100"
+                      ? "bg-brand-ink text-brand-ink-inverse dark:bg-brand-ink-inverse dark:text-brand-ink"
+                      : "border border-brand-line bg-brand-surface text-brand-ink dark:bg-brand-surface-alt dark:text-brand-ink-inverse"
                   }`}
                 >
                   {m.text}
@@ -134,12 +134,12 @@ export default function ChatWidget() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && send(input)}
               placeholder="Type your question…"
-              className="flex-1 rounded-full border border-gray-300 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+              className="flex-1 border border-brand-line bg-transparent px-4 py-2 text-sm text-brand-ink placeholder:text-brand-muted focus:border-brand-ink focus:outline-none dark:border-brand-line dark:text-brand-ink-inverse dark:focus:border-brand-ink-inverse"
             />
             <button
               onClick={() => send(input)}
               disabled={typing || !input.trim()}
-              className="rounded-full bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700 disabled:opacity-40"
+              className="bg-brand-ink px-4 py-2 text-sm font-semibold text-brand-ink-inverse transition-opacity hover:opacity-90 disabled:opacity-40 dark:bg-brand-ink-inverse dark:text-brand-ink"
             >
               Send
             </button>
@@ -153,13 +153,13 @@ export default function ChatWidget() {
                 href={`https://wa.me/${whatsapp}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 text-sm font-semibold text-green-600 hover:underline"
+                className="flex items-center gap-1 text-sm font-semibold text-brand-ok underline underline-offset-4 hover:opacity-70"
               >
                 <FaWhatsapp className="h-4 w-4" /> WhatsApp
               </a>
             )}
             {email && (
-              <a href={`mailto:${email}`} className="text-sm font-semibold text-blue-600 hover:underline">
+              <a href={`mailto:${email}`} className="text-sm font-semibold text-brand-ink underline underline-offset-4 hover:opacity-70 dark:text-brand-ink-inverse">
                 Email
               </a>
             )}

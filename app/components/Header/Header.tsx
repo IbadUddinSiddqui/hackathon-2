@@ -2,7 +2,7 @@
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { PiShoppingCartSimpleBold } from "react-icons/pi";
 import { RiAccountCircleLine } from "react-icons/ri";
@@ -26,6 +26,7 @@ const NAV_LINKS = [
 
 const Header = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const { items } = useCartStore();
   const wishlist = useWishlistStore();
   const cartItemCount = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -41,8 +42,14 @@ const Header = () => {
   const { data: session, status } = useSession();
   const loggedIn = status === "authenticated";
 
-  // Subtle shadow once the page scrolls, and auto-hide: the bar slides away
-  // when scrolling down and drops back in the moment you scroll up.
+  // P04 — transparent-over-hero: only on the homepage while the page is at
+  // the very top (y <= 8). Any scroll past that switches to the solid bar;
+  // the transition is 300ms ease, matching the auto-hide timing.
+  const isHome = pathname === "/";
+  const transparent = isHome && !scrolled;
+
+  // Subtle elevation once the page scrolls, and auto-hide: the bar slides
+  // away when scrolling down and drops back in the moment you scroll up.
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY;
@@ -83,6 +90,12 @@ const Header = () => {
         { href: "/register", key: "account.register" },
       ];
 
+  // Shared treatment for icon buttons — white-on-dark when transparent,
+  // brand ink on brand surface otherwise.
+  const actionBtn = transparent
+    ? "text-white hover:bg-white/10"
+    : "text-brand-ink hover:bg-brand-surface-alt dark:text-brand-ink-soft dark:hover:bg-brand-charcoal";
+
   return (
     <>
     <div
@@ -90,13 +103,34 @@ const Header = () => {
         hidden && !isMenuOpen ? "-translate-y-full" : "translate-y-0"
       }`}
     >
+      {/* P04 — contrast-safety scrim: a near-solid gradient behind the nav
+          bar itself (not full-bar opacity). It must stay strong across the
+          whole bar height so white nav text passes AA over ANY campaign
+          imagery — a weak gradient leaves the nav row over ~230 luminance
+          on light pages (measured). Strengthened: 95→90→80%. NOTE: uses
+          the literal brand-ink value, NOT `black` — this project's config
+          overrides black.DEFAULT to TailAdmin's #1C2434 navy, which would
+          tint the scrim blue. #0b0b0c stays dark in BOTH modes so white
+          nav text keeps contrast on the light hero in light mode and the
+          dark hero in dark mode. */}
+      {transparent && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-[#0b0b0c]/95 via-[#0b0b0c]/90 to-[#0b0b0c]/80"
+        />
+      )}
+
       {/* Top banner */}
-      <div className="flex h-8 items-center justify-center bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 px-4">
+      <div
+        className={`flex h-8 items-center justify-center px-4 transition-colors duration-300 ${
+          transparent ? "bg-transparent" : "bg-brand-charcoal"
+        }`}
+      >
         <p className="truncate text-center text-xs font-medium text-white sm:text-sm" dir="auto">
           {tenant.name} — {t(locale, "header.banner")}{" "}
           <Link
             href="/register"
-            className="ml-1 underline decoration-yellow-400 decoration-2 underline-offset-2 hover:text-yellow-300"
+            className="ml-1 underline decoration-white/60 decoration-1 underline-offset-4 transition-colors hover:decoration-white"
           >
             {t(locale, "header.claim")}
           </Link>
@@ -105,15 +139,17 @@ const Header = () => {
 
       {/* Main header */}
       <header
-        className={`border-b border-gray-100 bg-white/95 backdrop-blur transition-shadow dark:border-gray-800 dark:bg-gray-900/95 ${
-          scrolled ? "shadow-md" : "shadow-sm"
-        }`}
+        className={`border-b transition-[background-color,border-color,box-shadow] duration-300 ${
+          transparent
+            ? "border-transparent bg-transparent"
+            : "border-brand-line bg-brand-surface/95 backdrop-blur dark:border-brand-line dark:bg-brand-surface-alt/95"
+        } ${scrolled && !transparent ? "shadow-brand-2" : ""}`}
       >
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 lg:px-8">
           {/* Hamburger (mobile) */}
           <button
             onClick={() => setIsMenuOpen(true)}
-            className="rounded-full p-2 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 lg:hidden"
+            className={`rounded-full p-2 transition-colors ${actionBtn} lg:hidden`}
             aria-label="Open menu"
           >
             <IoMenu size={24} />
@@ -126,20 +162,30 @@ const Header = () => {
               width={132}
               height={26}
               alt={tenant.name}
-              className="h-auto w-auto transition-opacity hover:opacity-75 dark:invert"
+              className={`h-auto w-auto transition-opacity hover:opacity-75 ${
+                transparent ? "invert" : ""
+              } dark:invert`}
             />
           </Link>
 
-          {/* Desktop nav */}
-          <nav className="hidden items-center gap-7 lg:flex">
+          {/* Desktop nav — Nav-type typography (small, wide-tracked, uppercase) */}
+          <nav className="hidden items-center gap-8 lg:flex">
             {NAV_LINKS.map(({ href, key }) => (
               <Link
                 key={href}
                 href={href}
-                className="group relative text-[15px] font-medium text-gray-700 transition-colors hover:text-black dark:text-gray-300 dark:hover:text-white"
+                className={`group relative text-nav transition-colors ${
+                  transparent
+                    ? "text-white/90 hover:text-white"
+                    : "text-brand-muted hover:text-brand-ink dark:text-brand-muted dark:hover:text-brand-ink-soft"
+                }`}
               >
                 {t(locale, key)}
-                <span className="absolute -bottom-1.5 left-0 h-0.5 w-0 bg-black transition-all duration-300 group-hover:w-full dark:bg-white" />
+                <span
+                  className={`absolute -bottom-1.5 left-0 h-px w-0 transition-all duration-300 group-hover:w-full ${
+                    transparent ? "bg-white" : "bg-brand-ink dark:bg-brand-ink-soft"
+                  }`}
+                />
               </Link>
             ))}
           </nav>
@@ -157,17 +203,17 @@ const Header = () => {
 
             <Link
               href="/wishlist"
-              className="relative rounded-full p-2 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+              className={`relative rounded-full p-2 transition-colors ${actionBtn}`}
               aria-label="Wishlist"
             >
-              <FaHeart className="h-[21px] w-[21px] text-red-400 transition-colors hover:text-red-600" />
+              <FaHeart className="h-[21px] w-[21px] text-brand-heart transition-opacity hover:opacity-80" />
               <AnimatePresence>
                 {wishItemCount > 0 && (
                   <motion.span
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}
-                    className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[11px] font-bold text-white"
+                    className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-brand-bad text-[11px] font-bold text-white"
                   >
                     {wishItemCount}
                   </motion.span>
@@ -177,7 +223,7 @@ const Header = () => {
 
             <Link
               href="/cart"
-              className="relative rounded-full p-2 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+              className={`relative rounded-full p-2 transition-colors ${actionBtn}`}
               aria-label="Cart"
             >
               <PiShoppingCartSimpleBold className="h-6 w-6" />
@@ -200,7 +246,11 @@ const Header = () => {
             {!loggedIn && status !== "loading" && (
               <Link
                 href="/login"
-                className="ml-1 hidden items-center rounded-full bg-gray-900 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-black md:inline-flex"
+                className={`ml-1 hidden items-center rounded-full px-4 py-2 text-sm font-semibold transition-opacity hover:opacity-90 md:inline-flex ${
+                  transparent
+                    ? "bg-white text-brand-ink"
+                    : "bg-brand-ink text-brand-ink-inverse dark:bg-brand-ink-soft dark:text-brand-ink"
+                }`}
               >
                 {t(locale, "header.login")}
               </Link>
@@ -210,7 +260,7 @@ const Header = () => {
             <ClickOutside onClick={() => setAccountOpen(false)} className="relative">
               <button
                 onClick={() => setAccountOpen((o) => !o)}
-                className="flex items-center gap-0.5 rounded-full p-2 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                className={`flex items-center gap-0.5 rounded-full p-2 transition-colors ${actionBtn}`}
                 aria-label={t(locale, "account.menu")}
                 aria-expanded={accountOpen}
               >
@@ -229,14 +279,14 @@ const Header = () => {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 8, scale: 0.98 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute right-0 top-[calc(100%+10px)] w-56 origin-top-right rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl dark:border-gray-700 dark:bg-gray-800"
+                    className="absolute right-0 top-[calc(100%+10px)] w-56 origin-top-right rounded-brand-lg border border-brand-line bg-brand-surface p-1.5 shadow-brand-3 dark:border-brand-line dark:bg-brand-surface-alt"
                   >
                     {loggedIn && session?.user?.email && (
-                      <div className="border-b border-gray-100 px-3 pb-2 pt-1.5 dark:border-gray-700">
-                        <p className="text-[11px] uppercase tracking-wide text-gray-400">
+                      <div className="border-b border-brand-line px-3 pb-2 pt-1.5">
+                        <p className="text-[11px] uppercase tracking-wide text-brand-muted">
                           {t(locale, "account.signedInAs")}
                         </p>
-                        <p className="truncate text-sm font-medium text-gray-800 dark:text-gray-100">
+                        <p className="truncate text-sm font-medium text-brand-ink dark:text-brand-ink-soft">
                           {session.user.email}
                         </p>
                       </div>
@@ -246,17 +296,17 @@ const Header = () => {
                         key={item.href}
                         href={item.href}
                         onClick={() => setAccountOpen(false)}
-                        className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
+                        className="flex items-center gap-2.5 rounded-brand px-3 py-2 text-sm font-medium text-brand-ink transition-colors hover:bg-brand-surface-alt hover:text-brand-ink dark:text-brand-ink-soft dark:hover:bg-brand-charcoal"
                       >
                         {t(locale, item.key)}
                       </Link>
                     ))}
                     {loggedIn && (
                       <>
-                        <div className="my-1 border-t border-gray-100 dark:border-gray-700" />
+                        <div className="my-1 border-t border-brand-line dark:border-brand-line" />
                         <button
                           onClick={handleLogout}
-                          className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:hover:bg-red-950"
+                          className="flex w-full items-center gap-2.5 rounded-brand px-3 py-2 text-left text-sm font-medium text-brand-bad transition-colors hover:bg-brand-bad-soft dark:hover:bg-brand-bad-soft"
                         >
                           {t(locale, "account.logout")}
                         </button>
@@ -288,40 +338,42 @@ const Header = () => {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", stiffness: 320, damping: 32 }}
-              className="fixed inset-y-0 right-0 z-50 flex w-[86%] max-w-sm flex-col bg-white shadow-2xl lg:hidden dark:bg-gray-900"
+              className="fixed inset-y-0 right-0 z-50 flex w-[86%] max-w-sm flex-col bg-brand-surface shadow-2xl lg:hidden dark:bg-brand-surface-alt"
             >
-              <div className="flex items-center justify-between border-b border-gray-100 p-4 dark:border-gray-700">
+              <div className="flex items-center justify-between border-b border-brand-line p-4">
                 <Image src="/logo-text-black.svg" width={120} height={24} alt={tenant.name} className="dark:invert" />
                 <button
                   onClick={() => setIsMenuOpen(false)}
-                  className="rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                  className="rounded-full p-2 text-brand-muted transition-colors hover:bg-brand-surface-alt dark:text-brand-muted dark:hover:bg-brand-charcoal"
                   aria-label="Close menu"
                 >
                   <IoClose size={26} />
                 </button>
               </div>
               <div className="flex-1 overflow-y-auto p-5">
+                {/* Priority 1: search */}
                 <div className="mb-6">
                   <ProductSearch />
                 </div>
+                {/* Priority 2: navigation */}
                 <nav className="flex flex-col">
                   {NAV_LINKS.map(({ href, key }) => (
                     <Link
                       key={href}
                       href={href}
                       onClick={() => setIsMenuOpen(false)}
-                      className="border-b border-gray-50 py-3.5 text-base font-medium text-gray-800 transition-colors hover:text-black dark:border-gray-800 dark:text-gray-100 dark:hover:text-white"
+                      className="border-b border-brand-line py-3.5 text-base font-medium text-brand-ink transition-colors hover:text-brand-ink-soft dark:text-brand-ink-soft dark:hover:text-white"
                     >
                       {t(locale, key)}
                     </Link>
                   ))}
                 </nav>
 
-                {/* Account block */}
+                {/* Priority 3: account */}
                 <div className="mt-6 space-y-3">
                   {loggedIn ? (
                     <>
-                      <p className="truncate px-1 text-xs text-gray-400">
+                      <p className="truncate px-1 text-xs text-brand-muted">
                         {t(locale, "account.signedInAs")} {session?.user?.email}
                       </p>
                       {accountItems.map((item) => (
@@ -329,14 +381,14 @@ const Header = () => {
                           key={item.href}
                           href={item.href}
                           onClick={() => setIsMenuOpen(false)}
-                          className="flex items-center justify-between rounded-full border border-gray-200 px-4 py-3 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-100 dark:hover:bg-gray-800"
+                          className="flex items-center justify-between rounded-full border border-brand-line-strong px-4 py-3 text-sm font-medium text-brand-ink transition-colors hover:bg-brand-surface-alt dark:text-brand-ink-soft dark:hover:bg-brand-charcoal"
                         >
                           {t(locale, item.key)}
                         </Link>
                       ))}
                       <button
                         onClick={handleLogout}
-                        className="w-full rounded-full border border-red-200 px-4 py-3 text-center text-sm font-semibold text-red-600 transition-colors hover:bg-red-50"
+                        className="w-full rounded-full border border-brand-bad-soft px-4 py-3 text-center text-sm font-semibold text-brand-bad transition-colors hover:bg-brand-bad-soft"
                       >
                         {t(locale, "account.logout")}
                       </button>
@@ -346,14 +398,14 @@ const Header = () => {
                       <Link
                         href="/login"
                         onClick={() => setIsMenuOpen(false)}
-                        className="block rounded-full bg-gray-900 px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-black"
+                        className="block rounded-full bg-brand-ink px-4 py-3 text-center text-sm font-semibold text-brand-ink-inverse transition-opacity hover:opacity-90 dark:bg-brand-ink-soft dark:text-brand-ink"
                       >
                         {t(locale, "header.login")}
                       </Link>
                       <Link
                         href="/register"
                         onClick={() => setIsMenuOpen(false)}
-                        className="block rounded-full border border-gray-300 px-4 py-3 text-center text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-800"
+                        className="block rounded-full border border-brand-line-strong px-4 py-3 text-center text-sm font-semibold text-brand-ink transition-colors hover:bg-brand-surface-alt dark:text-brand-ink-soft dark:hover:bg-brand-charcoal"
                       >
                         {t(locale, "account.register")}
                       </Link>
@@ -361,6 +413,7 @@ const Header = () => {
                   )}
                 </div>
 
+                {/* Priority 4: language */}
                 <div className="mt-6">
                   <LanguageSwitcher />
                 </div>

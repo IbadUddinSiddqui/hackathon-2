@@ -75,10 +75,10 @@ const AppSidebar = ({
   // squash, and hover previews the border. Same colors — no new tokens.
   const renderCheckbox = (checked: boolean) => (
     <motion.div
-      className={`flex h-5 w-5 items-center justify-center rounded-md border-2 transition-colors duration-200 ${
+      className={`flex h-5 w-5 items-center justify-center border-2 transition-colors duration-200 ${
         checked
-          ? 'border-green-500 bg-green-500'
-          : 'border-gray-300 dark:border-gray-600 group-hover:border-gray-400 dark:group-hover:border-gray-500'
+          ? 'border-brand-ink bg-brand-ink dark:border-brand-ink-inverse dark:bg-brand-ink-inverse'
+          : 'border-brand-line-strong group-hover:border-brand-ink dark:group-hover:border-brand-ink-inverse'
       }`}
       initial={false}
       animate={{ scale: checked ? [1, 1.12, 1] : 1 }}
@@ -86,7 +86,7 @@ const AppSidebar = ({
       whileTap={{ scale: 0.92, transition: { duration: 0.12 } }}
     >
       <motion.svg
-        className="h-3 w-3 text-white"
+        className={`h-3 w-3 ${checked ? 'text-white dark:text-brand-ink' : 'text-transparent'}`}
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -106,12 +106,16 @@ const AppSidebar = ({
 
   return (
     <>
-      {/* Trigger Button for All Screens */}
+      {/* Trigger Button — an inline, on-theme filter bar (no floating green
+          FAB: the old pill FAB is a TailAdmin leftover that doesn't belong on
+          the storefront). Rendered by the page above the grid. */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 z-30 p-4 bg-green-500 text-white rounded-full shadow-xl hover:bg-green-600 transition-all"
+        className="group flex items-center gap-3 border-b border-brand-line pb-2 text-sm font-medium tracking-wide text-brand-ink transition-colors hover:border-brand-ink dark:text-brand-ink-inverse dark:hover:border-brand-ink-inverse"
       >
-        <FiFilter className="w-6 h-6" />
+        <FiFilter className="h-4 w-4" />
+        Filters
+        <span aria-hidden className="h-px w-8 bg-brand-line-strong transition-all duration-300 group-hover:w-12" />
       </button>
 
       {/* Overlay for All Screens */}
@@ -121,7 +125,7 @@ const AppSidebar = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-black/50"
+            className="fixed inset-0 z-40 bg-brand-ink/50 backdrop-blur-sm"
             onClick={() => setIsOpen(false)}
           />
         )}
@@ -129,7 +133,7 @@ const AppSidebar = ({
 
       {/* Sidebar Content for All Screens */}
       <motion.div
-        className="fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-gray-800 shadow-xl overflow-y-auto transform transition-transform duration-300 ease-in-out"
+        className="fixed inset-y-0 left-0 z-50 w-80 overflow-y-auto border-r border-brand-line bg-brand-surface dark:border-brand-line dark:bg-brand-surface-alt"
         variants={mobileVariants}
         initial="closed"
         animate={isOpen ? 'open' : 'closed'}
@@ -137,30 +141,33 @@ const AppSidebar = ({
       >
         <div className="p-6">
           {/* Header for All Screens */}
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold dark:text-white">Filters</h2>
+          <div className="mb-8 flex items-center justify-between border-b border-brand-line pb-4">
+            <h2 className="text-xl font-bold tracking-tight text-brand-ink dark:text-brand-ink-inverse">
+              Filters
+            </h2>
             <button
               onClick={() => setIsOpen(false)}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+              className="p-2 text-brand-muted transition-colors hover:bg-brand-surface-alt dark:hover:bg-brand-charcoal"
+              aria-label="Close filters"
             >
-              <FiX className="w-6 h-6 dark:text-white" />
+              <FiX className="h-5 w-5" />
             </button>
           </div>
 
           {/* Brands Section */}
-          <div className="mb-6">
+          <div className="mb-7">
             <button
               onClick={() => toggleSection('brands')}
-              className="flex items-center justify-between w-full mb-2"
+              className="mb-3 flex w-full items-center justify-between"
             >
-              <h3 className="text-lg font-bold text-gray-800 dark:text-white">
+              <h3 className="text-eyebrow text-brand-ink dark:text-brand-ink-inverse">
                 Brands
               </h3>
               <motion.div
                 animate={{ rotate: openSections.brands ? 0 : -90 }}
                 transition={{ duration: 0.2 }}
               >
-                <FiChevronDown className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                <FiChevronDown className="h-4 w-4 text-brand-muted" />
               </motion.div>
             </button>
             <AnimatePresence>
@@ -170,7 +177,7 @@ const AppSidebar = ({
                   initial="closed"
                   animate="open"
                   exit="closed"
-                  className="space-y-2 pl-2"
+                  className="space-y-2.5 pl-1"
                 >
                   {brands.map((brand: any) => (
                     <label
@@ -185,7 +192,7 @@ const AppSidebar = ({
                         className="hidden"
                       />
                       {renderCheckbox(selectedBrands.includes(brand))}
-                      <span className="text-gray-700 dark:text-gray-200">
+                      <span className="text-sm text-brand-muted transition-colors group-hover:text-brand-ink dark:text-brand-muted dark:group-hover:text-brand-ink-inverse">
                         {brand}
                       </span>
                     </label>
@@ -196,19 +203,19 @@ const AppSidebar = ({
           </div>
 
           {/* Sizes Section */}
-          <div className="mb-6">
+          <div className="mb-7">
             <button
               onClick={() => toggleSection('sizes')}
-              className="flex items-center justify-between w-full mb-2"
+              className="mb-3 flex w-full items-center justify-between"
             >
-              <h3 className="text-lg font-bold text-gray-800 dark:text-white">
+              <h3 className="text-eyebrow text-brand-ink dark:text-brand-ink-inverse">
                 Sizes
               </h3>
               <motion.div
                 animate={{ rotate: openSections.sizes ? 0 : -90 }}
                 transition={{ duration: 0.2 }}
               >
-                <FiChevronDown className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                <FiChevronDown className="h-4 w-4 text-brand-muted" />
               </motion.div>
             </button>
             <AnimatePresence>
@@ -218,7 +225,7 @@ const AppSidebar = ({
                   initial="closed"
                   animate="open"
                   exit="closed"
-                  className="space-y-2 pl-2"
+                  className="space-y-2.5 pl-1"
                 >
                   {sizes.map((size) => (
                     <label
@@ -233,7 +240,7 @@ const AppSidebar = ({
                         className="hidden"
                       />
                       {renderCheckbox(selectedSizes.includes(size))}
-                      <span className="text-gray-700 dark:text-gray-200">
+                      <span className="text-sm text-brand-muted transition-colors group-hover:text-brand-ink dark:text-brand-muted dark:group-hover:text-brand-ink-inverse">
                         {size}
                       </span>
                     </label>
@@ -247,16 +254,16 @@ const AppSidebar = ({
           <div className="mb-6">
             <button
               onClick={() => toggleSection('tags')}
-              className="flex items-center justify-between w-full mb-2"
+              className="mb-3 flex w-full items-center justify-between"
             >
-              <h3 className="text-lg font-bold text-gray-800 dark:text-white">
+              <h3 className="text-eyebrow text-brand-ink dark:text-brand-ink-inverse">
                 Tags
               </h3>
               <motion.div
                 animate={{ rotate: openSections.tags ? 0 : -90 }}
                 transition={{ duration: 0.2 }}
               >
-                <FiChevronDown className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                <FiChevronDown className="h-4 w-4 text-brand-muted" />
               </motion.div>
             </button>
             <AnimatePresence>
@@ -266,7 +273,7 @@ const AppSidebar = ({
                   initial="closed"
                   animate="open"
                   exit="closed"
-                  className="space-y-2 pl-2"
+                  className="space-y-2.5 pl-1"
                 >
                   {tags.map((tag) => (
                     <label
@@ -281,7 +288,7 @@ const AppSidebar = ({
                         className="hidden"
                       />
                       {renderCheckbox(selectedTags.includes(tag))}
-                      <span className="text-gray-700 dark:text-gray-200">
+                      <span className="text-sm text-brand-muted transition-colors group-hover:text-brand-ink dark:text-brand-muted dark:group-hover:text-brand-ink-inverse">
                         {tag}
                       </span>
                     </label>

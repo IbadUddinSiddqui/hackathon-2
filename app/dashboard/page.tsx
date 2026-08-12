@@ -75,15 +75,15 @@ export default async function Dashboard() {
   return (
     <>
       <Header />
-      <div className="flex min-h-screen bg-gray-100 dark:bg-gray-950">
+      <div className="flex min-h-screen bg-brand-surface text-brand-ink dark:bg-brand-ink dark:text-brand-ink-inverse">
         {/* Sidebar */}
         <AccountSidebar active="dashboard" />
 
         {/* Main */}
         <div className="flex flex-1 flex-col">
-          <header className="bg-white shadow">
-            <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-              <h1 className="text-2xl font-bold text-gray-900">
+          <header className="border-b border-brand-line bg-brand-surface dark:bg-brand-surface-alt">
+            <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5 sm:px-6 lg:px-8">
+              <h1 className="text-2xl font-bold tracking-tight text-brand-ink dark:text-brand-ink-inverse">
                 Welcome{user.name ? `, ${user.name}` : ""}
               </h1>
               <LogoutButton />
@@ -100,20 +100,20 @@ export default async function Dashboard() {
                   { label: "Paid", value: String(stats.paid) },
                   { label: "Total Spent (paid)", value: `Rs ${stats.spent.toFixed(2)}` },
                 ].map((s) => (
-                  <div key={s.label} className="rounded-lg bg-white p-5 shadow">
-                    <div className="text-sm font-medium text-gray-500">{s.label}</div>
-                    <div className="mt-1 text-2xl font-bold text-gray-900">{s.value}</div>
+                  <div key={s.label} className="border border-brand-line bg-brand-surface p-5 dark:bg-brand-surface-alt">
+                    <div className="text-sm font-medium text-brand-muted">{s.label}</div>
+                    <div className="mt-1 text-2xl font-bold tabular-nums">{s.value}</div>
                   </div>
                 ))}
               </div>
 
               {/* Orders */}
-              <div className="rounded-lg bg-white p-6 shadow">
-                <h2 className="mb-4 text-xl font-semibold text-gray-800">Your Orders</h2>
+              <div className="border border-brand-line bg-brand-surface p-6 dark:bg-brand-surface-alt">
+                <h2 className="mb-4 text-xl font-semibold tracking-tight">Your Orders</h2>
                 {orders.length === 0 ? (
-                  <p className="text-gray-500">
+                  <p className="text-brand-muted">
                     You haven&apos;t placed any orders yet.{" "}
-                    <Link href="/" className="font-medium text-blue-700 underline">
+                    <Link href="/" className="font-medium underline underline-offset-4 hover:opacity-80">
                       Start shopping →
                     </Link>
                   </p>
@@ -121,7 +121,7 @@ export default async function Dashboard() {
                   <div className="overflow-x-auto">
                     <table className="w-full table-auto text-left text-sm">
                       <thead>
-                        <tr className="border-b border-gray-200 text-gray-500">
+                        <tr className="border-b border-brand-line text-brand-muted">
                           <th className="px-4 py-3 font-medium">Order</th>
                           <th className="px-4 py-3 font-medium">Date</th>
                           <th className="px-4 py-3 font-medium">Items</th>
@@ -136,27 +136,27 @@ export default async function Dashboard() {
                             0
                           );
                           return (
-                            <tr key={order._id} className="border-b border-gray-100 last:border-0">
-                              <td className="px-4 py-3 font-mono text-xs text-gray-700">
+                            <tr key={order._id} className="border-b border-brand-line last:border-0">
+                              <td className="px-4 py-3 font-mono text-xs text-brand-muted">
                                 {formatOrderId(order.order_id)}
                               </td>
-                              <td className="px-4 py-3 text-gray-600">
+                              <td className="px-4 py-3 text-brand-muted">
                                 {formatDate(order.created_at)}
                               </td>
-                              <td className="px-4 py-3 text-gray-600">
+                              <td className="px-4 py-3 text-brand-muted">
                                 {itemCount > 0 ? `${itemCount} item${itemCount > 1 ? "s" : ""}` : "—"}
                               </td>
-                              <td className="px-4 py-3 font-semibold text-gray-900">
+                              <td className="px-4 py-3 font-semibold tabular-nums">
                                 {formatTotal(order.total)}
                                 {order.currency && order.total != null && (
-                                  <span className="ml-1 text-xs font-normal uppercase text-gray-400">
+                                  <span className="ml-1 text-xs font-normal uppercase text-brand-muted">
                                     {order.currency}
                                   </span>
                                 )}
                               </td>
                               <td className="px-4 py-3">
                                 <span
-                                  className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold capitalize ${statusStyle(order.status)}`}
+                                  className={`inline-flex px-2.5 py-1 text-xs font-semibold capitalize ${statusStyle(order.status)}`}
                                 >
                                   {order.status || "unknown"}
                                 </span>
@@ -171,8 +171,8 @@ export default async function Dashboard() {
               </div>
 
               {/* Profile photo */}
-              <div className="rounded-lg bg-white p-6 shadow">
-                <h2 className="mb-4 text-xl font-semibold text-gray-800">Profile Photo</h2>
+              <div className="border border-brand-line bg-brand-surface p-6 dark:bg-brand-surface-alt">
+                <h2 className="mb-4 text-xl font-semibold tracking-tight">Profile Photo</h2>
                 <AvatarUpload userId={user._id} />
               </div>
             </div>

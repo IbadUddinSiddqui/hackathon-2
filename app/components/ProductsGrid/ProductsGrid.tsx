@@ -98,9 +98,15 @@ const ProductsGrid = ({
           <button
             type="button"
             onClick={() => setShowAll((v) => !v)}
-            className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-8 py-3 text-sm font-semibold text-gray-900 transition-all hover:border-black hover:bg-black hover:text-white dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:border-white dark:hover:bg-white dark:hover:text-gray-900"
+            className="group inline-flex items-center gap-3 border-b border-brand-line-strong pb-1 text-sm font-medium tracking-wide text-brand-ink transition-colors hover:border-brand-ink dark:text-brand-ink-inverse dark:hover:border-brand-ink-inverse"
           >
             {showAll ? t(locale, "product.viewLess") : t(locale, "product.viewMore")}
+            <span
+              aria-hidden
+              className={`h-px w-8 bg-brand-line-strong transition-all duration-300 group-hover:w-12 ${
+                showAll ? "rotate-180" : ""
+              }`}
+            />
           </button>
         </div>
       )}

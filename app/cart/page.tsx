@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/lib/stores/cartStore';
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import Header from '../components/Header/Header';
@@ -68,145 +67,130 @@ const CartPage = () => {
     router.push('/checkout');
   };
 
+  const fmt = (n: number) => n.toLocaleString('en-US', { maximumFractionDigits: 2 });
+
   return (
     <>
-      <Header></Header>
-      <div className="flex justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="w-full max-w-screen-xl grid grid-cols-1 md:grid-cols-3 gap-6 p-4">
-          {/* Cart Section */}
-          <section className="col-span-2 w-full">
-            <h3 className="text-left text-3xl font-bold tracking-tight sm:text-4xl mb-4 text-gray-900 dark:text-gray-100">
-              {t(locale, 'cart.title')}
-            </h3>
-            <div className="mx-auto max-w-3xl">
-              <div className="mt-8 shadow-lg rounded-xl bg-white dark:bg-gray-800">
-                {items.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    {t(locale, 'cart.empty')}
-                  </div>
-                ) : (
-                  <ul className="space-y-4">
-                    {items.map(item => (
-                      <li
-                        key={item._id}
-                        className="flex items-center gap-4 border p-4 rounded-lg shadow-sm bg-white dark:bg-gray-800 dark:border-gray-700"
-                      >
-                        <div className="relative">
-                          <Image
-                            src={item.imageUrl}
-                            alt={item.name}
-                            width={64}
-                            height={64}
-                            className="h-16 w-16 rounded object-cover"
-                          />
-                        </div>
-                        <div>
-                          <h3 className="text-sm text-gray-900 dark:text-gray-100">
-                            {item.name}
-                          </h3>
-                          <dl className="mt-0.5 space-y-px text-xs text-gray-600 dark:text-gray-400">
-                            <div>
-                              <dt className="inline">{t(locale, 'cart.price')}</dt>
-                              <dd className="inline">
-                                {CURRENCY_SYMBOL} {item.price.toLocaleString('en-US', { maximumFractionDigits: 2 })}
-                              </dd>
-                            </div>
-                            <div>
-                              <dt className="inline">{t(locale, 'cart.stock')}</dt>
-                              <dd className="inline">{item.stock} {t(locale, 'cart.available')}</dd>
-                            </div>
-                            {item.color && (
-                              <div>
-                                <dt className="inline">{t(locale, 'cart.color')}: </dt>
-                                <dd className="inline font-medium">{item.color}</dd>
-                              </div>
-                            )}
-                          </dl>
-                        </div>
-                        <div className="flex flex-1 items-center justify-end gap-2">
-                          <button
-                            onClick={() => removeItem(item._id)}
-                            className="bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                            aria-label="Remove item"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              strokeWidth="1.5"
-                              stroke="currentColor"
-                              className="w-5 h-5"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M6 18L18 6M6 6l12 12"
-                              />
-                            </svg>
-                          </button>
-                          <label htmlFor={`qty-${item._id}`} className="sr-only">Quantity</label>
-                          <input
-                            id={`qty-${item._id}`}
-                            type="number"
-                            min="1"
-                            max={item.stock ?? undefined}
-                            value={item.quantity}
-                            onChange={(e) => {
-                              let value = Number(e.target.value);
-                              value = Math.max(1, Math.min(value, item.stock ?? value));
-                              updateQuantity(item._id, value);
-                            }}
-                            className="w-20 px-3 py-2 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-                          />
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </div>
-          </section>
+      <Header />
+      <div className="min-h-screen bg-brand-surface text-brand-ink dark:bg-brand-ink dark:text-brand-ink-inverse">
+        <div className="mx-auto w-full max-w-7xl px-4 py-12 lg:px-8">
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
+            {/* Cart Section */}
+            <section className="lg:col-span-2">
+              <p className="text-eyebrow mb-3 text-brand-muted">Bag</p>
+              <h1 className="mb-10 text-3xl font-bold tracking-tight sm:text-4xl">
+                {t(locale, 'cart.title')}
+              </h1>
 
-          {/* Order Summary Section */}
-          <section className="w-full md:w-full">
-            <Card className="overflow-hidden bg-white dark:bg-gray-800">
-              <CardHeader className="bg-muted/50 p-4 dark:bg-gray-700">
-                <CardTitle className="text-lg font-semibold dark:text-gray-100">
+              {items.length === 0 ? (
+                <div className="border-y border-brand-line py-20 text-center">
+                  <p className="text-xl text-brand-muted">{t(locale, 'cart.empty')}</p>
+                </div>
+              ) : (
+                <ul className="divide-y divide-brand-line border-y border-brand-line">
+                  {items.map(item => (
+                    <li key={item._id} className="flex flex-wrap items-center gap-5 py-6 sm:flex-nowrap">
+                      <div className="relative h-28 w-24 shrink-0 overflow-hidden bg-brand-surface-alt dark:bg-brand-charcoal">
+                        <Image
+                          src={item.imageUrl}
+                          alt={item.name}
+                          width={96}
+                          height={112}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-sm font-semibold text-brand-ink dark:text-brand-ink-inverse">
+                          {item.name}
+                        </h3>
+                        <dl className="mt-1.5 space-y-px text-xs text-brand-muted">
+                          <div>
+                            <dt className="inline">{t(locale, 'cart.price')}</dt>{' '}
+                            <dd className="inline font-medium tabular-nums">
+                              {CURRENCY_SYMBOL} {fmt(item.price)}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="inline">{t(locale, 'cart.stock')}</dt>{' '}
+                            <dd className="inline">{item.stock} {t(locale, 'cart.available')}</dd>
+                          </div>
+                          {item.color && (
+                            <div>
+                              <dt className="inline">{t(locale, 'cart.color')}: </dt>
+                              <dd className="inline font-medium">{item.color}</dd>
+                            </div>
+                          )}
+                        </dl>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <label htmlFor={`qty-${item._id}`} className="sr-only">Quantity</label>
+                        <input
+                          id={`qty-${item._id}`}
+                          type="number"
+                          min="1"
+                          max={item.stock ?? undefined}
+                          value={item.quantity}
+                          onChange={(e) => {
+                            let value = Number(e.target.value);
+                            value = Math.max(1, Math.min(value, item.stock ?? value));
+                            updateQuantity(item._id, value);
+                          }}
+                          className="w-18 border border-brand-line bg-transparent px-3 py-2 text-sm tabular-nums focus:border-brand-ink focus:outline-none dark:border-brand-line dark:focus:border-brand-ink-inverse"
+                        />
+                        <button
+                          onClick={() => removeItem(item._id)}
+                          className="p-2 text-brand-muted transition-colors hover:text-brand-bad"
+                          aria-label={t(locale, 'cart.remove')}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth="1.5"
+                            stroke="currentColor"
+                            className="h-5 w-5"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
+            {/* Order Summary Section */}
+            <section>
+              <div className="border border-brand-line p-7">
+                <h2 className="mb-6 text-lg font-semibold tracking-tight">
                   {t(locale, 'cart.orderSummary')}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="grid gap-4">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground dark:text-gray-400">{t(locale, 'cart.subtotal')}</span>
-                    <span className="text-xl font-extrabold dark:text-gray-100">
-                      {CURRENCY_SYMBOL} {subtotal.toLocaleString('en-US', { maximumFractionDigits: 2 })}
-                    </span>
+                </h2>
+                <div className="space-y-4">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-brand-muted">{t(locale, 'cart.subtotal')}</span>
+                    <span className="font-semibold tabular-nums">{CURRENCY_SYMBOL} {fmt(subtotal)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground dark:text-gray-400">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-brand-muted">
                       {t(locale, 'cart.discount')}{discountCode ? ` (${discountCode})` : ''}
                     </span>
-                    <span className="text-red-500 text-xl font-extrabold">
-                      {discount > 0
-                        ? `-${CURRENCY_SYMBOL} ${discount.toFixed(2)}`
-                        : `${CURRENCY_SYMBOL} 0.00`}
+                    <span className={`font-semibold tabular-nums ${discount > 0 ? 'text-brand-sale' : ''}`}>
+                      {discount > 0 ? `-${CURRENCY_SYMBOL} ${discount.toFixed(2)}` : `${CURRENCY_SYMBOL} 0.00`}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground dark:text-gray-400">{t(locale, 'cart.delivery')}</span>
-                    <span className="text-xl font-extrabold dark:text-gray-100">
-                      {CURRENCY_SYMBOL} {deliveryFee.toFixed(2)}
-                    </span>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-brand-muted">{t(locale, 'cart.delivery')}</span>
+                    <span className="font-semibold tabular-nums">{CURRENCY_SYMBOL} {deliveryFee.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between font-semibold">
-                    <span className="text-muted-foreground dark:text-gray-400">{t(locale, 'cart.total')}</span>
-                    <span className="text-xl font-extrabold dark:text-gray-100">
-                      {CURRENCY_SYMBOL} {total.toLocaleString('en-US', { maximumFractionDigits: 2 })}
-                    </span>
+                  <Separator className="bg-brand-line" />
+                  <div className="flex justify-between text-base font-semibold">
+                    <span>{t(locale, 'cart.total')}</span>
+                    <span className="tabular-nums">{CURRENCY_SYMBOL} {fmt(total)}</span>
                   </div>
-                  <Separator className="my-4 dark:bg-gray-700" />
-                  <div className="flex flex-col gap-2">
+
+                  {/* Discount code */}
+                  <div className="flex flex-col gap-2 pt-2">
                     <div className="flex items-center gap-2">
                       <Input
                         placeholder={t(locale, 'cart.enterCode')}
@@ -215,13 +199,13 @@ const CartPage = () => {
                           setCodeInput(e.target.value);
                           setCodeError(null);
                         }}
-                        className="w-full bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+                        className="h-10 rounded-none border-brand-line bg-transparent focus:border-brand-ink focus:ring-0 dark:focus:border-brand-ink-inverse"
                       />
                       {discountCode ? (
                         <Button
                           variant="outline"
                           onClick={removeDiscountCode}
-                          className="h-8 dark:bg-gray-700 dark:text-gray-100"
+                          className="h-10 shrink-0 rounded-none border-brand-line-strong text-brand-muted hover:border-brand-ink hover:text-brand-ink"
                         >
                           {t(locale, 'cart.remove')}
                         </Button>
@@ -230,40 +214,39 @@ const CartPage = () => {
                           variant="outline"
                           onClick={applyDiscountCode}
                           disabled={applyingCode}
-                          className="h-8 dark:bg-gray-700 dark:text-gray-100"
+                          className="h-10 shrink-0 rounded-none border-brand-line-strong text-brand-muted hover:border-brand-ink hover:text-brand-ink"
                         >
                           {applyingCode ? '...' : t(locale, 'cart.apply')}
                         </Button>
                       )}
                     </div>
                     {codeError && (
-                      <p className="text-xs text-red-500" role="alert">
+                      <p className="text-xs text-brand-bad" role="alert">
                         {codeError}
                       </p>
                     )}
                     {discountCode && !codeError && (
-                      <p className="text-xs text-green-600 dark:text-green-400">
+                      <p className="text-xs text-brand-ok">
                         {discountCode} {t(locale, 'cart.appliedSave')} {CURRENCY_SYMBOL} {discount.toFixed(2)}
                       </p>
                     )}
                   </div>
                 </div>
-              </CardContent>
-              <CardFooter className="flex justify-center p-4">
-        <Button 
-          onClick={handleCheckout}
-          className="w-full md:w-auto dark:bg-gray-700 dark:text-gray-100"
-          disabled={items.length === 0}
-        >
-          {t(locale, 'cart.proceed')}
-        </Button>
-      </CardFooter>
-            </Card>
-          </section>
+
+                <Button
+                  onClick={handleCheckout}
+                  disabled={items.length === 0}
+                  className="mt-8 w-full rounded-none bg-brand-ink py-4 text-sm font-semibold uppercase tracking-[0.15em] text-brand-ink-inverse hover:bg-brand-ink-soft dark:bg-brand-ink-inverse dark:text-brand-ink dark:hover:bg-white"
+                >
+                  {t(locale, 'cart.proceed')}
+                </Button>
+              </div>
+            </section>
+          </div>
         </div>
+        <CartRecommendations />
       </div>
-      <CartRecommendations />
-      <Footer></Footer>
+      <Footer />
     </>
   );
 };
