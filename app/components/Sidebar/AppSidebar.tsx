@@ -69,33 +69,38 @@ const AppSidebar = ({
     closed: { opacity: 0, height: 0 },
   };
 
+  // Refined checkbox (uiverse.io-style): the checkmark draws itself via
+  // stroke pathLength instead of popping, the box overshoots with the site's
+  // motion language (framer-motion keyframes, not a bare scale flip), presses
+  // squash, and hover previews the border. Same colors — no new tokens.
   const renderCheckbox = (checked: boolean) => (
     <motion.div
-      className={`w-5 h-5 flex items-center justify-center rounded-md border-2 ${
+      className={`flex h-5 w-5 items-center justify-center rounded-md border-2 transition-colors duration-200 ${
         checked
           ? 'border-green-500 bg-green-500'
-          : 'border-gray-300 dark:border-gray-600'
+          : 'border-gray-300 dark:border-gray-600 group-hover:border-gray-400 dark:group-hover:border-gray-500'
       }`}
-      animate={{ scale: checked ? 1.05 : 1 }}
-      transition={{ type: 'spring', stiffness: 300 }}
+      initial={false}
+      animate={{ scale: checked ? [1, 1.12, 1] : 1 }}
+      transition={{ duration: 0.35, times: [0, 0.5, 1], ease: 'easeOut' }}
+      whileTap={{ scale: 0.92, transition: { duration: 0.12 } }}
     >
-      {checked && (
-        <motion.svg
-          className="w-3 h-3 text-white"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M5 13l4 4L19 7"
-          />
-        </motion.svg>
-      )}
+      <motion.svg
+        className="h-3 w-3 text-white"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={3}
+      >
+        <motion.path
+          d="M5 13l4 4L19 7"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: checked ? 1 : 0 }}
+          transition={{ duration: 0.22, ease: 'easeOut' }}
+        />
+      </motion.svg>
     </motion.div>
   );
 

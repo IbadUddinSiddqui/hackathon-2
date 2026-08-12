@@ -41,24 +41,32 @@ function humanizeSlug(slug: string): string {
     .join(" ");
 }
 
-/** Bento spans that adapt to however many categories exist. */
+/** Bento spans that adapt to however many categories exist.
+ *
+ * Left-weighted cinematic pattern (21st.dev-style): the featured tile owns
+ * 4 of the 6 columns (a ~67% hero) and the supporting tiles stack a tight
+ * 2-column rail beside it — more dramatic than a 50/50 split, still on the
+ * same grid system (just col-span arithmetic, no new tokens). */
 function tileLayout(index: number, count: number): { span: string; sizes: string } {
   // A single category spans the full grid on every breakpoint.
   if (count === 1) {
-    return { span: "col-span-2 lg:col-span-4 lg:row-span-2", sizes: "(max-width: 1024px) 100vw, 100vw" };
+    return { span: "col-span-2 lg:col-span-6 lg:row-span-2", sizes: "(max-width: 1024px) 100vw, 100vw" };
+  }
+  // Featured tile — the dominant hero.
+  if (index === 0) {
+    return { span: "lg:col-span-4 lg:row-span-2", sizes: "(max-width: 1024px) 50vw, 67vw" };
   }
   if (count === 2) {
-    return { span: "lg:col-span-2 lg:row-span-2", sizes: "(max-width: 1024px) 50vw, 50vw" };
-  }
-  if (index === 0) {
-    return { span: "lg:col-span-2 lg:row-span-2", sizes: "(max-width: 1024px) 50vw, 50vw" };
+    // Companion tile fills the whole right rail.
+    return { span: "lg:col-span-2 lg:row-span-2", sizes: "(max-width: 1024px) 50vw, 33vw" };
   }
   if (index === 1 || (count === 3 && index === 2)) {
-    // Row 1 fills with the featured (2) + wide (2) tiles; with exactly 3
-    // categories the last tile goes wide too so row 2 has no hole.
-    return { span: "lg:col-span-2 lg:row-span-1", sizes: "(max-width: 1024px) 50vw, 50vw" };
+    // Wide tile on the rail's first row; with exactly 3 categories the last
+    // tile goes wide too so row 2 has no hole.
+    return { span: "lg:col-span-2 lg:row-span-1", sizes: "(max-width: 1024px) 50vw, 33vw" };
   }
-  return { span: "lg:col-span-1 lg:row-span-1", sizes: "(max-width: 1024px) 50vw, 25vw" };
+  // Two compact tiles share the rail's second row.
+  return { span: "lg:col-span-1 lg:row-span-1", sizes: "(max-width: 1024px) 50vw, 17vw" };
 }
 
 async function fetchCategoryGroups(): Promise<CategoryGroup[]> {
@@ -176,7 +184,7 @@ export default function CategoryShowcase() {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-80px" }}
-        className="grid grid-cols-2 gap-3 sm:gap-4 lg:h-[520px] lg:grid-flow-dense lg:grid-cols-4 lg:grid-rows-2"
+        className="grid grid-cols-2 gap-3 sm:gap-4 lg:h-[520px] lg:grid-flow-dense lg:grid-cols-6 lg:grid-rows-2"
       >
         {tiles.length === 0
           ? // Loading skeleton (matches the 4-tile layout) so the section
